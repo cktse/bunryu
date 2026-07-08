@@ -244,3 +244,31 @@ reflects on how consideration (いたわり) enriches society across generations
 was created as a single combined grammar page (inline `[[というものではない]]`
 aliases to it). Inflected surface forms linked via `[[dict-form|surface]]`
 aliases. No OCR fixes needed (clean source).
+
+## 2026-07-08 16:00 HKT — Ingest `raw/第一課 しる.md` → article 「初めての雪」
+
+Article title from the `##` heading (初めての雪); differs from the raw filename
+(第一課 しる). 33 new pages, 0 updated. No `references` frontmatter (§6.4); 本文
+wrapped at word boundaries (§6.5.2). Vault lints clean afterward (181 files,
+0 errors, 0 warnings).
+
+**Article (new):** `llm-wiki/articles/初めての雪.md` — essay: someone raised in a
+warm climate sees snow for the first time, moves from wonder at its beauty to
+awareness of its harshness/danger, and reflects that knowledge gained online is
+only partial next to lived experience.
+
+**Vocabulary (new, 26):** やれやれ, 伸びをする, ひらひら, そこそこ, 飛び出す,
+かけら, めがける, 手のひら, 何とも, 思いにとらわれる, みるみる, 増す, 立ち尽くす,
+飽きる, きらきら, すがすがしい, まるっきり, きゅっきゅっ, そっと, ヒューヒュー,
+後を絶たない, 押しつぶす, 身を潜める, つくづく, 思い知る, 一面的.
+
+**Grammar (new, 6):** ～ことなく, ～たところで, ～限り, ～ことはあっても (from the
+新しい文法 list); ～かのようだ (from inline `[[かのような]]`); ～を通して (from
+inline `[[通して]]`).
+
+**Notes:** classified `[[通して]]`→grammar ～を通して and `[[かのような]]`→grammar
+～かのようだ (functional patterns); `[[限り]]`→grammar ～限り (in the 新しい文法
+list). Lint caught one title-rule slip during finalize — `～ことはあっても.md`
+title was `# ～ことはあっても（～ない）`; corrected to `# ～ことはあっても` per
+§6.5.1 (no-kanji headword → no parenthetical). No OCR fixes (clean source; only
+within-line spacing normalized on reflow).

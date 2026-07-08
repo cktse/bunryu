@@ -1,7 +1,7 @@
 # JLPT N1 Exam Prep Assistant — Specification
 
-> Status: **Draft v0.2** · Last updated: 2026-07-06
-> See [CLAUDE.md](./CLAUDE.md) for the high-level overview and ground rules.
+> Status: **Draft v0.3** · Last updated: 2026-07-08
+> See [CLAUDE.md](bunryu/CLAUDE.md) for the high-level overview and ground rules.
 
 ## 1. Purpose
 
@@ -47,15 +47,17 @@ This policy applies to all generated/ingested content bodies (`## 意味`,
      by Claude Code over hand-curated source articles in `raw/`.
    - **Web scraper** — automated seeding from an external N1 site (§9).
 3. **Content linting** (§7).
-4. **Progress tracker** (presentation count, pass/fail, focus flag) — §10.1.
+4. **Progress tracker & scheduling** (§10.1).
+5. **Learning aids** — deterministic vocabulary flashcards + CLI trainer (§10).
 
 ### Deferred (do not build yet)
-- Daily email / quiz **generator** (§10.2).
-- Any **GUI**.
+- Daily email / quiz **generator** (§10.4).
+- **AI-enriched ingest** for non-deterministic card material (§10.6).
+- Any **GUI** / web dashboard (§10.6).
 
-These are specified at a high level (§10) so the schema accommodates them, but no
-code is written for them yet. Per CLAUDE.md, first focus on the **schema** and
-its **initial seeding**.
+The learning-aids plan is detailed in §10 (near-term deterministic cards + a
+future roadmap); the items listed as deferred above are not yet built. Per
+CLAUDE.md, the schema and its initial seeding come first.
 
 ## 4. System Overview
 
@@ -104,12 +106,17 @@ nihongo/
 │   └── articles/             # one markdown file per ingested essay (named after title)
 │       └── 裁判員のもやもや.md
 ├── progress/
-│   └── progress.json         # per-user progress records (see §10.1)
+│   └── progress.json         # per-user review state: stats + SM-2 schedule (§10.1)
+├── cards.json                # generated flashcard build artifact (§10.3; rebuildable)
 ├── scraper/                  # Python package (linter + web scraper + ingest helpers)
 │   ├── __init__.py
 │   ├── lint.py               # stdlib-only content linter (§7)
 │   ├── sources/              # one module per external web source
 │   └── cli.py                # command-line entry point
+├── study/                    # learning-aids code (§10): card gen + scheduler + trainer
+│   ├── cards.py              # deterministic card generator → cards.json (§10.2–10.3)
+│   ├── schedule.py           # SM-2 scheduler, swappable (§10.1)
+│   └── cli.py                # CLI flashcard trainer (§10.4)
 ├── tests/                    # run_tests.py + test-llm-wiki/ fixture vault (§7.1)
 └── requirements.txt
 ```
@@ -564,52 +571,163 @@ complements the manual `ingest article` path for bulk seeding.
   criteria: comprehensive N1 coverage, example sentences, permissive terms of
   use / robots policy, stable HTML structure.
 
-## 10. Deferred Components (high-level only)
+## 10. Learning Aids (Gamification)
 
-These shape the schema but are **not** implemented now.
+The goal is to turn the LLM-wiki from a reference into **active-recall practice** —
+flashcards, quizzes, a daily push — with light gamification to sustain a solo
+learner. **Start with vocabulary**; grammar and article cards come later (§10.6).
 
-### 10.1 Progress Tracker
+Two design decisions are settled:
 
-- Stored in `progress/progress.json`, keyed by content `id`:
-  ```json
-  {
-    "grammar-wo-monotomosezu": {
-      "presented": 3,
-      "passed": 2,
-      "failed": 1,
-      "last_seen": "2026-06-20",
-      "focus": false
-    }
+- **Card generation is 100% deterministic.** Cards are *derived* from existing
+  note fields by plain code — no AI, no per-card authoring. The content page is
+  the single source of truth; `cards.json` is a rebuildable build artifact, so it
+  works automatically for every future ingest. (AI-authored, *non-deterministic*
+  card material is a **future** enhancement captured **inside the note at ingest
+  time**, which keeps generation deterministic — see §10.6.)
+- **Cards and scheduling live in sidecar artifacts, never inside content pages.**
+  This preserves the raw → llm-wiki → progress separation, keeps pages lint-clean
+  and freely regeneratable, and avoids coupling to any one flashcard tool.
+
+Principles: stdlib-first (a generator shaped like `lint.py`), markdown stays the
+source of truth, reuse a simple well-known SRS algorithm.
+
+### 10.1 Progress Tracker & scheduling
+
+Per-user review state lives in `progress/progress.json`, keyed by content `id`:
+
+```json
+{
+  "vocab-kaizan": {
+    "presented": 3,
+    "passed": 2,
+    "failed": 1,
+    "last_seen": "2026-07-08",
+    "due": "2026-07-11",
+    "interval": 3,
+    "ease": 2.5,
+    "reps": 2,
+    "focus": false
   }
-  ```
-- `focus` is mirrored from / written back to the content file frontmatter; the
-  content file remains the source of truth for focus, progress.json for stats.
-- Operations: increment presentation, record pass/fail, set/clear focus, query
-  items due for review (e.g. low pass rate or marked focus).
+}
+```
 
-### 10.2 Daily Email / Quiz Generator
+- Scheduling uses **SM-2** (simple, ~40 lines): `interval`/`ease`/`reps`/`due`
+  update on each pass/fail. The scheduler is a small **swappable** module so
+  **FSRS** can replace it later (§10.6) without touching callers.
+- `focus` is mirrored from / written back to the content file frontmatter (the
+  content file stays the source of truth for `focus`; `progress.json` for stats).
+  Focus items form a priority / leech deck.
+- Operations: build the **due queue**, record pass/fail, update the schedule,
+  set/clear focus.
+- MVP keys by content `id` (one schedule per word); per-card-type scheduling is a
+  possible later refinement.
 
-- Selects 1–2 vocabulary and 1–2 grammar items, biased toward `focus` items and
-  low pass-rate items.
-- Renders a quiz email (Japanese-first per §2.1); records results back into the
-  progress tracker.
-- Delivery mechanism TBD (SMTP / local mail / API). User email on file:
-  cktse_jp@yahoo.co.jp.
+### 10.2 Card types (vocabulary, deterministic)
+
+All four are derivable from existing fields **because the schema was designed for
+it** — the `（粵）` line, `part_of_speech`, and the article `[[dict|surface]]`
+convention each double as card metadata:
+
+| Card | Prompt → answer | Derived from |
+|---|---|---|
+| **Reading** | headword (kanji) → reading | `headword` + `reading` (skip pure-kana headwords) |
+| **粵→JP production** | Cantonese gloss → the Japanese word | the `（粵）` line in `## 意味` (heritage-language recall) |
+| **Meaning (MC)** | word → its meaning, 4 choices | `## 意味` as the answer; distractors sampled by matching `part_of_speech` + nearby `level` |
+| **Context cloze** | sentence with the word blanked → the word | article `## 本文`: blank a `[[dict\|surface]]` span — the alias gives both the exact span to hide **and** the answer (`dict-form`). Also `例文` where the surface equals the headword verbatim. |
+
+### 10.3 Storage & data flow
+
+```
+llm-wiki/**                 (content — never modified)
+   │   study/cards.py        (stdlib; deterministic)
+   ▼
+cards.json                  (build artifact: derived cards; delete & rebuild anytime)
+   │   + progress/progress.json  (§10.1 scheduling/stats)
+   ▼
+delivery engine → CLI / email / …  (§10.4)
+```
+
+- `study/cards.py` walks `llm-wiki/` and emits `cards.json`; content pages are
+  never touched.
+- **Why not store cards inline via an Obsidian SR plugin** (considered and
+  rejected for now): the popular *Spaced Repetition* plugin writes scheduling
+  comments (`<!--SR:…-->`) into the notes and needs `::` / `==` markup inline.
+  That would re-mix the raw/llm-wiki/progress layers, clutter the reflowed
+  layout, cap card types at the plugin's model, and — given how often we
+  regenerate the vault (renames, title lines, `（粵）` backfill, reflows) — risk
+  **colliding with or wiping review history**. Since the content page already *is*
+  the single source (cards are derived), inline storage buys little; Obsidian as a
+  channel is instead a future *export* target (§10.6).
+
+### 10.4 Delivery channels
+
+- **MVP — CLI trainer** (stdlib): validates the card types and SRS with real
+  reps; fastest feedback. Reads `cards.json` + `progress.json`.
+- **Daily email / quiz** (next): the *same engine* selects due items (biased to
+  `focus` + low pass-rate), renders a Japanese-first (§2.1) quiz email, and
+  records results back to `progress.json`. Delivery mechanism TBD (SMTP / API);
+  user email on file: cktse_jp@yahoo.co.jp.
+- **Obsidian-SR / web** (future, §10.6).
+
+### 10.5 Gamification mechanics (design intent)
+
+- **Mastery ladder** per word: New → Seen → Reading-OK → Producing →
+  Nuance-solid → 🏆 Mastered; harder card types unlock as the SM-2 interval grows.
+- **Streaks + daily goal** (e.g. 10 reviews + 3 new); **XP** weighted by card
+  difficulty (production / nuance > recognition).
+- **Focus / leech deck** from the `focus` flag.
+- **Thematic constellations**: the article-theme `tags` let a mastered set
+  "light up" its source article — per-article progress bars and achievements that
+  tie vocabulary back to reading.
+- **Weekly boss / reading-boss** quiz: re-read the source article, cloze-quizzed
+  in situ.
+
+### 10.6 Future roadmap (not near-term)
+
+Explicitly deferred:
+
+- **AI-enriched ingest.** Extend `ingest article` (§8) to author *non-deterministic*
+  card material **into the note** as structured fields — nuance-duel cards (which
+  `関連` near-synonym fits a crafted sentence), higher-quality MC distractors,
+  error-spot items from `間違いやすい点`. The AI value is captured once, at ingest,
+  and stored in the page; **card generation stays 100% deterministic**.
+- **Grammar & article card types** (vocabulary first).
+- **FSRS** scheduler swap (§10.1).
+- **Obsidian-SR export**: generate a separate `review/` folder from `cards.json`
+  using the *SR-Recall* fork (scheduling kept in its own JSON), so Obsidian
+  becomes a channel **without** touching content pages.
+- **Web dashboard** with the constellation view; **audio / TTS** listening cards
+  (see the audio open question, §11).
+- **Any GUI** remains deferred.
 
 ## 11. Open Questions
 
-1. Which external site(s) to scrape for seeding? (instructor role to research)
-2. `id` scheme — human-readable slug vs. opaque hash? (draft uses readable slug)
-3. How aggressively should re-ingestion/re-scraping preserve hand-edited body text?
-4. Pitch-accent and audio: in scope for N1 prep, or out?
+1. Which external site(s) to scrape for seeding? (instructor role to research) <- postponed
+2. `id` scheme — human-readable slug vs. opaque hash? (draft uses readable slug) <- prefer human-readable slug instead of opaque hash which can be excessively long and hence ugly
+3. How aggressively should re-ingestion/re-scraping preserve hand-edited body text? <- should flag if a llm-wiki note was manually edited before overwriting content -- this should be rare as llm-wiki is owned by AI, e.g. manual correction of typos in cantonese which is AI's weaker languages
+4. Pitch-accent and audio: in scope for N1 prep, or out? <- in scope for N1 prep, deferred to later implementation phase for now
 5. When a `[[marked]]` item is ambiguous (vocab vs. grammar, or reading unknown),
-   should ingestion guess and flag, or pause for human confirmation?
+   should ingestion guess and flag, or pause for human confirmation? <- evaluate to the best of AI's knowledge and flag (suggest to leave decision as footnote for future reference)
+6. `cards.json` — committed (diffable, portable) or gitignored (pure build
+   artifact)? Draft treats it as rebuildable, leaning gitignored <- gitignored for now
+7. Scheduling granularity — one schedule per word, or per (word, card-type)?
+   Draft starts per-word (§10.1). <- per word for now
 
 ## 12. Next Steps
 
-1. Review & sign off this spec / schema.
-2. Implement `scraper/lint.py` + `lint-all` (§7).
-3. Implement the `ingest article` workflow (§8) and run it on
-   `raw/裁判員のもやもや.md` to produce the first real wiki pages.
-4. Select and document the web seeding source (§9); implement the first source.
-5. Then revisit the progress tracker.
+**Done so far:** schema (§6); `lint.py` + `lint-all` + fixture tests (§7, §7.1);
+the `ingest article` workflow (§8) with 5 articles seeded; the learning-aids plan
+(§10).
+
+**Near-term — learning aids, vocabulary-first (§10):**
+1. `study/cards.py` — deterministic card generator → `cards.json` (§10.2–10.3).
+2. `study/schedule.py` — SM-2 scheduler over `progress/progress.json` (§10.1).
+3. `study/cli.py` — CLI flashcard trainer to validate the card types with real
+   reps (§10.4).
+
+**After that:**
+4. Daily email / quiz on the same engine (§10.4).
+5. Select and document the web seeding source (§9); implement the first source.
+6. Roadmap items (§10.6): AI-enriched ingest, Obsidian-SR export, FSRS, grammar
+   cards, web dashboard.

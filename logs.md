@@ -272,3 +272,23 @@ list). Lint caught one title-rule slip during finalize — `～ことはあっ�
 title was `# ～ことはあっても（～ない）`; corrected to `# ～ことはあっても` per
 §6.5.1 (no-kanji headword → no parenthetical). No OCR fixes (clean source; only
 within-line spacing normalized on reflow).
+
+## 2026-07-08 22:20 HKT — Re-ingest `raw/裁判員のもやもや.md` → repair only (Obsidian link mangling)
+
+Re-ingestion requested. §8.3 git check: target files committed/clean (no
+hand-edits to clobber). Content was **idempotent** — all 23 inline markers + 6
+新しい文法 items already have pages; nothing new to create.
+- Only substantive diff: **3 wikilinks in `llm-wiki/articles/裁判員のもやもや.md`
+  had been auto-rewritten by Obsidian to full vault paths** after the
+  `nihongo`→`bunryu` rename — `[[bunryu/llm-wiki/vocabulary/やがて]]` (×2) and
+  `[[bunryu/llm-wiki/grammar/～に際して]]` (×1). Restored to `[[やがて]]` /
+  `[[～に際して]]`. Only non-aliased links were affected; `[[dict|surface]]`
+  links were untouched.
+- Impact: the mangled `[[やがて]]` link had been **silently dropping やがて's
+  cloze card** from the generated deck (link_target no longer matched a
+  headword); fixing it restored the card.
+- Lint before fix: 181 files, 0 errors, **3 warnings** (linter caught the
+  unresolved links); after fix: **0 errors, 0 warnings**.
+- Mitigation recommended: set Obsidian *New link format = Shortest path* and
+  *Automatically update internal links = Off*; the linter's unresolved-link
+  warning is the safety net if it recurs.

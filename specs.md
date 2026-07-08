@@ -91,7 +91,7 @@ CLAUDE.md, the schema and its initial seeding come first.
 ## 5. Repository Layout
 
 ```
-nihongo/
+bunryu/
 ├── CLAUDE.md                 # project overview & rules
 ├── specs.md                  # this document
 ├── logs.md                   # append-only ingestion/change audit trail (§8.2 step 6)
@@ -165,7 +165,7 @@ level, focus, tags). The body is for the learner.
 | Field         | Type         | Req | Description |
 |---------------|--------------|-----|-------------|
 | `part_of_speech` | enum      | ✓   | e.g. `noun`, `na-adjective`, `i-adjective`, `godan-verb`, `ichidan-verb`, `suru-verb`, `adverb`, `expression`. |
-| `accent`      | string       | ·   | Pitch-accent notation if available. |
+| `accent`      | string       | ·   | Pitch-accent notation if available. In scope for N1 (§11); may be captured now even though accent/audio drills are deferred (§10.6). |
 
 ### 6.3 Grammar-specific frontmatter
 
@@ -543,10 +543,20 @@ A curated source file in `raw/`:
 ### 8.3 Rules
 
 - **Idempotent.** Re-ingesting the same article updates existing pages rather
-  than duplicating; never silently clobber hand-edited bodies without a `--force`
-  equivalent (or an explicit heads-up when run interactively).
+  than duplicating.
+- **Flag hand-edits before overwriting (git).** The vault is a git repo. Before
+  overwriting an existing `llm-wiki/` page, ingest checks git for **uncommitted
+  changes to that file**; if found, it **warns and asks to confirm** rather than
+  clobbering — hand-edits are rare (llm-wiki is AI-owned; e.g. a manual Cantonese
+  fix) and worth preserving. Only tracked files with local modifications trigger
+  the prompt; new/untracked pages are created freely. The warning also serves as
+  a reminder to commit before re-ingesting.
 - **Preserve the source.** The `raw/` file is the human-owned input and
   is not modified by ingestion.
+- **Record ambiguous classifications.** When a `[[marked]]` item's type or
+  reading is ambiguous, classify to the best of current knowledge, flag it in the
+  step-7 report, and record the decision in `logs.md` as a durable footnote for
+  future revision.
 - **Use dictionary form.** Grammar/vocabulary pages created should be in dictionary form, even though actual usages linked from source articles may be in one of its variations.
 
 ## 9. Content Scraper (web seeding)
@@ -701,18 +711,31 @@ Explicitly deferred:
   (see the audio open question, §11).
 - **Any GUI** remains deferred.
 
-## 11. Open Questions
+## 11. Decisions & Open Questions
 
-1. Which external site(s) to scrape for seeding? (instructor role to research) <- postponed
-2. `id` scheme — human-readable slug vs. opaque hash? (draft uses readable slug) <- prefer human-readable slug instead of opaque hash which can be excessively long and hence ugly
-3. How aggressively should re-ingestion/re-scraping preserve hand-edited body text? <- should flag if a llm-wiki note was manually edited before overwriting content -- this should be rare as llm-wiki is owned by AI, e.g. manual correction of typos in cantonese which is AI's weaker languages
-4. Pitch-accent and audio: in scope for N1 prep, or out? <- in scope for N1 prep, deferred to later implementation phase for now
-5. When a `[[marked]]` item is ambiguous (vocab vs. grammar, or reading unknown),
-   should ingestion guess and flag, or pause for human confirmation? <- evaluate to the best of AI's knowledge and flag (suggest to leave decision as footnote for future reference)
-6. `cards.json` — committed (diffable, portable) or gitignored (pure build
-   artifact)? Draft treats it as rebuildable, leaning gitignored <- gitignored for now
-7. Scheduling granularity — one schedule per word, or per (word, card-type)?
-   Draft starts per-word (§10.1). <- per word for now
+**Resolved:**
+
+- **`id` scheme** — human-readable slug (not opaque hash), which stays short and
+  clean. Lint enforces uniqueness; disambiguate homophone collisions with a short
+  qualifier (e.g. `vocab-au` for 遭う vs. `vocab-au-meet` for 会う).
+- **Re-ingestion vs. hand-edits** — before overwriting an existing `llm-wiki/`
+  page, ingest checks git for uncommitted changes to that file and **warns /
+  asks to confirm** before clobbering (§8.3). Hand-edits are rare (llm-wiki is
+  AI-owned; e.g. a manual Cantonese correction). The warning doubles as a nudge
+  to commit before re-ingesting.
+- **Pitch-accent & audio** — in scope for N1. Pitch-accent can be captured now via
+  the optional `accent` field (§6.2); audio/TTS drills are deferred (§10.6).
+- **Ambiguous `[[marked]]` items** — ingest classifies to the best of current
+  knowledge and **flags** the call in the step-7 report, recording it in
+  `logs.md` as the durable footnote for future revision (§8).
+- **`cards.json`** — gitignored (rebuildable build artifact). `progress.json`
+  stays **tracked** — it is precious, non-regenerable review history.
+- **Scheduling granularity** — one schedule per word for now (§10.1).
+
+**Open:**
+
+1. Which external site(s) to scrape for seeding (§9)? — postponed (instructor
+   role to research).
 
 ## 12. Next Steps
 

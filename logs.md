@@ -292,3 +292,39 @@ hand-edits to clobber). Content was **idempotent** — all 23 inline markers + 6
 - Mitigation recommended: set Obsidian *New link format = Shortest path* and
   *Automatically update internal links = Off*; the linter's unresolved-link
   warning is the safety net if it recurs.
+
+## 2026-07-09 13:11 HKT — Obsidian flashcard channel (§10.4): `study/obsidian_cards.py` + `flashcards/`
+
+Not an ingest / not an llm-wiki change. Implemented the near-term delivery
+channel per specs §10.4.
+- `study/obsidian_cards.py` (new) — renders `cards.json` → one Obsidian SR note
+  per vocab at `flashcards/card-{headword}.md` (deck tag `#flashcards/vocab/{level}`,
+  `Source: [[headword]]` backlink, SR-syntax lines: reading/canto/meaning `::`
+  recall + `==surface==` cloze). **Append-only** (never rewrites an existing note,
+  so the plugin's inline `<!--SR:…-->` schedule is safe); `--check` audits drift,
+  `--force [id/headword…]` regenerates deliberately.
+- Generated **138 flashcard notes** (untracked; to be committed — review history
+  is precious). `lint-all` unaffected (181 files, 0/0; `flashcards/` is outside
+  `llm-wiki/`).
+- Bug fixed at the root in `study/cards.py`: the `（粵：…）` gloss could wrap across
+  lines, leaving a newline inside the `canto` card (split the SR line and tripped
+  `--check`). `parse_imi` now strips newlines from the gloss; `cards.json`
+  regenerated (0 canto newlines), flashcards regenerated, `--check` clean.
+
+## 2026-07-10 14:09 HKT — Flashcard format overhaul (§10.4 feedback)
+
+Not an ingest / not an llm-wiki change. Reworked the Obsidian flashcard format per
+user feedback in specs §10.4; overwrote all 138 notes (no meaningful schedules yet).
+- **Answer-opaque filenames**: `card-{headword}.md` → `card-vocab-{NNNN}.md` with a
+  stable `vocab_id → NNNN` manifest at `flashcards/.card-index.json`. The plugin
+  shows the note name during review, so it must not reveal the word.
+- **No heading / no `Source:` backlink** (they'd reveal the answer). The llm-wiki
+  link is embedded in each card's **answer** via `[[headword|display]]` instead.
+- **Card layouts** (SR syntax): canto `（粵）gloss::[[hw|hw（reading）]]`; cloze
+  `…==[[hw|surface]]==…`; **meaning MC** as a cloze block (`hw（reading）` + 4
+  numbered choices + `<br>==correct = [[hw]]==`); reading `hw::[[hw|reading]]`
+  (kanji only). Leading sense-marker `①` stripped from definitions (`cards.py`).
+- `study/obsidian_cards.py` rewritten: manifest-based sequence filenames, new
+  `note_text`/`card_block`, full-text drift `--check`; append-only preserved.
+- Regenerated: 138 notes, `--check` clean, lint unaffected (181, 0/0). specs §5,
+  §10.4, §11 reconciled to the new naming/format.

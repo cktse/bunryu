@@ -1,6 +1,6 @@
 # JLPT N1 Exam Prep Assistant — Specification
 
-> Status: **Draft v0.3** · Last updated: 2026-07-08
+> Status: **Draft v0.5** · Last updated: 2026-07-10
 > See [CLAUDE.md](bunryu/CLAUDE.md) for the high-level overview and ground rules.
 
 ## 1. Purpose
@@ -48,7 +48,8 @@ This policy applies to all generated/ingested content bodies (`## 意味`,
    - **Web scraper** — automated seeding from an external N1 site (§9).
 3. **Content linting** (§7).
 4. **Progress tracker & scheduling** (§10.1).
-5. **Learning aids** — deterministic vocabulary flashcards + CLI trainer (§10).
+5. **Learning aids** — deterministic vocabulary flashcards reviewed via the
+   Obsidian SR plugin (FSRS); CLI trainer/email deferred (§10).
 
 ### Deferred (do not build yet)
 - Daily email / quiz **generator** (§10.4).
@@ -105,18 +106,20 @@ bunryu/
 │   │   └── 改ざん.md
 │   └── articles/             # one markdown file per ingested essay (named after title)
 │       └── 裁判員のもやもや.md
+├── flashcards/               # generated Obsidian SR notes: card-vocab-NNNN.md + .card-index.json (§10.4; committed)
 ├── progress/
-│   └── progress.json         # per-user review state: stats + SM-2 schedule (§10.1)
-├── cards.json                # generated flashcard build artifact (§10.3; rebuildable)
+│   └── progress.json         # per-user review state for the deferred CLI/email channel (§10.1)
+├── cards.json                # generated flashcard build artifact (§10.3; gitignored, rebuildable)
 ├── scraper/                  # Python package (linter + web scraper + ingest helpers)
 │   ├── __init__.py
 │   ├── lint.py               # stdlib-only content linter (§7)
 │   ├── sources/              # one module per external web source
 │   └── cli.py                # command-line entry point
-├── study/                    # learning-aids code (§10): card gen + scheduler + trainer
+├── study/                    # learning-aids code (§10)
 │   ├── cards.py              # deterministic card generator → cards.json (§10.2–10.3)
-│   ├── schedule.py           # SM-2 scheduler, swappable (§10.1)
-│   └── cli.py                # CLI flashcard trainer (§10.4)
+│   ├── obsidian_cards.py     # render cards.json → flashcards/ Obsidian SR notes (§10.4)
+│   ├── cli.py                # card viewer (MVP); interactive trainer deferred (§10.4)
+│   └── schedule.py           # SM-2 scheduler for the deferred CLI/email channel (§10.1)
 ├── tests/                    # run_tests.py + test-llm-wiki/ fixture vault (§7.1)
 └── requirements.txt
 ```
@@ -595,14 +598,20 @@ Two design decisions are settled:
   works automatically for every future ingest. (AI-authored, *non-deterministic*
   card material is a **future** enhancement captured **inside the note at ingest
   time**, which keeps generation deterministic — see §10.6.)
-- **Cards and scheduling live in sidecar artifacts, never inside content pages.**
-  This preserves the raw → llm-wiki → progress separation, keeps pages lint-clean
-  and freely regeneratable, and avoids coupling to any one flashcard tool.
+- **Cards live in a separate `flashcards/` folder, never inside content pages.**
+  This preserves the raw → llm-wiki → progress separation and keeps content pages
+  lint-clean and freely regeneratable. The **near-term review channel is the
+  Obsidian *Spaced Repetition* plugin (FSRS)** reading those flashcard notes
+  (§10.4); a CLI/email channel over `progress.json` is deferred (§10.6).
 
 Principles: stdlib-first (a generator shaped like `lint.py`), markdown stays the
-source of truth, reuse a simple well-known SRS algorithm.
+source of truth, reuse existing tools (the Obsidian SR plugin) rather than
+building a scheduler now.
 
 ### 10.1 Progress Tracker & scheduling
+
+> **Deferred.** Near-term, the Obsidian SR plugin owns scheduling (§10.4). The
+> `progress.json` / SM-2 tracker below powers the *later* CLI and email channels.
 
 Per-user review state lives in `progress/progress.json`, keyed by content `id`:
 
@@ -652,33 +661,124 @@ convention each double as card metadata:
 llm-wiki/**                 (content — never modified)
    │   study/cards.py        (stdlib; deterministic)
    ▼
-cards.json                  (build artifact: derived cards; delete & rebuild anytime)
-   │   + progress/progress.json  (§10.1 scheduling/stats)
-   ▼
-delivery engine → CLI / email / …  (§10.4)
+cards.json                  (build artifact: derived cards; rebuildable)
+   │
+   ├── study/obsidian_cards.py ─▶ flashcards/card-*.md   (Obsidian SR channel; §10.4)
+   └── (deferred) CLI / email over cards.json + progress.json  (§10.1, §10.6)
 ```
 
 - `study/cards.py` walks `llm-wiki/` and emits `cards.json`; content pages are
   never touched.
-- **Why not store cards inline via an Obsidian SR plugin** (considered and
-  rejected for now): the popular *Spaced Repetition* plugin writes scheduling
-  comments (`<!--SR:…-->`) into the notes and needs `::` / `==` markup inline.
-  That would re-mix the raw/llm-wiki/progress layers, clutter the reflowed
-  layout, cap card types at the plugin's model, and — given how often we
-  regenerate the vault (renames, title lines, `（粵）` backfill, reflows) — risk
-  **colliding with or wiping review history**. Since the content page already *is*
-  the single source (cards are derived), inline storage buys little; Obsidian as a
-  channel is instead a future *export* target (§10.6).
+- **Cards go into a separate `flashcards/` folder — not inline in content pages.**
+  The Obsidian SR plugin reviews them there (§10.4). We deliberately do **not**
+  embed cards/scheduling inline in `llm-wiki/` pages: that would re-mix the
+  raw/llm-wiki/progress layers, clutter the reflowed layout, and — given how often
+  we regenerate the vault (renames, title lines, `（粵）` backfill, reflows) — risk
+  **wiping review history**. A separate folder gives Obsidian-as-a-channel while
+  content stays clean and `lint-all` (which walks only `llm-wiki/`) ignores it.
 
 ### 10.4 Delivery channels
 
-- **MVP — CLI trainer** (stdlib): validates the card types and SRS with real
-  reps; fastest feedback. Reads `cards.json` + `progress.json`.
-- **Daily email / quiz** (next): the *same engine* selects due items (biased to
-  `focus` + low pass-rate), renders a Japanese-first (§2.1) quiz email, and
-  records results back to `progress.json`. Delivery mechanism TBD (SMTP / API);
-  user email on file: cktse_jp@yahoo.co.jp.
-- **Obsidian-SR / web** (future, §10.6).
+**Near-term — Obsidian Spaced Repetition (FSRS).** Cards are exported as separate
+notes the mainstream Obsidian *Spaced Repetition* plugin reviews (FSRS enabled in
+its settings). Design:
+
+- `study/obsidian_cards.py` reads `cards.json` and writes **one note per vocab**
+  into a top-level **`flashcards/`** folder — a sibling of `llm-wiki/` inside the
+  same vault (`bunryu/` is the vault root). Content pages are never touched.
+
+For example, study/cli.py generates the following quizzes for the vocab 挟む:
+```
+bunryu % python ./study/cli.py --vocab vocab-hasamu
+[canto  ] vocab-hasamu::canto  (N2)
+  Q: この意味の言葉は何ですか？
+     夾住、夾喺中間、插入
+  A: 挟む（はさむ）
+
+[cloze  ] vocab-hasamu::cloze::article-haru-no-ichinichi::2  (N2)
+  Q: 空欄に入る語は？
+     ドアの脇に立って、書類カバンを器用に両足で＿＿、書類に熱心に目を通している。
+  A: 挟む（はさむ）   ［surface: 挟み］
+
+[meaning] vocab-hasamu::meaning  (N2)
+  Q: 意味は？
+     挟む（はさむ）
+       1. ある状態を変えずに維持し続ける
+       2. 数量・程度が多くなる・強くなる
+      ＊3. ①二つのものの間に物を入れて押さえる
+       3. 感動・驚き・呆然などで、その場にずっと立ったまま動けないでいる
+  A: ①二つのものの間に物を入れて押さえる
+
+[reading] vocab-hasamu::reading  (N2)
+  Q: 読みは？
+     挟む
+  A: はさむ
+
+— shown 4 of 4 matching card(s)
+```
+
+These quizzes will go into flashcards/card-vocab-NNNN.md per the format below using SR plugin syntax, where NNNN is a sequence number assigned to the given vocab -- the file name cannot be contain the vocab as the SRS plugin insists on showing the file name as part of the deck. Similarly, heading tags  containing the vocab, backlinks to vocab etc. also should not be used.
+
+```
+\#flashcards/vocab/<level>
+
+canton:
+（粵）<sentence>::[[<dict wikilinks>|<headword> (<reading>)]]
+
+article:
+<sentence contains cloze ==[[<dict wikilinks>|surface]]== rest of sentence>
+ドアの脇に立って、書類カバンを器用に両足で==[[挟む|挟み]]==、書類に熱心に目を通している。
+
+MC:
+<headword> (<reading>)
+1. <choice 1>
+2. <choice 2>
+3. <choice 3>
+4. <choice 4>
+<br>==<correct choice> = [[<dict wikilinks>]]==
+
+Yomi:
+<headword>::[[<dict wikilinks>|<reading>]]
+```
+
+Using the same example vocab from above, the corresponding flashcard is:
+```
+\#flashcards/vocab/N2
+（粵）夾住、夾喺中間、插入::[[挟む|挟む（はさむ）]]
+
+ドアの脇に立って、書類カバンを器用に両足で==[[挟む|挟み]]==、書類に熱心に目を通している。
+
+挟む（はさむ）
+1. ある状態を変えずに維持し続ける
+2. 数量・程度が多くなる・強くなる
+3. 二つのものの間に物を入れて押さえる
+4. 感動・驚き・呆然などで、その場にずっと立ったまま動けないでいる
+<br>==二つのものの間に物を入れて押さえる = [[挟む]]==
+
+挟む::[[挟む|はさむ]]
+```
+
+- Filename **`card-vocab-{NNNN}.md`** — an **answer-opaque** sequence number
+  (stable `vocab_id → NNNN` mapping in `flashcards/.card-index.json`), because the
+  SR plugin shows the note name during review. For the same reason the note has
+  **no heading and no `Source:` backlink** — those would reveal the word. The link
+  to the llm-wiki page is embedded in each card's **answer** (`[[headword|display]]`),
+  so context is one click away only *after* the card is flipped.
+- **Append-only / idempotent generation** protects review history: a note is
+  written only if it does not already exist; existing notes (carrying the
+  plugin's inline `<!--SR:…-->` schedule) are never rewritten. Future ingests add
+  only new notes. `--check` reports content drift without overwriting; `--force
+  <vocab>` regenerates one note deliberately (resets that note's schedule, with a
+  warning) — same philosophy as the ingest git-flag (§8.3).
+- The plugin owns scheduling (FSRS, stored inline in `flashcards/` notes); those
+  notes are **committed** — review history is precious. Chose the mainstream
+  plugin over the SR-Recall fork for maintenance; can switch later.
+
+**Deferred — CLI trainer & daily email (§10.6).** A stdlib CLI and a daily-email
+channel over `cards.json` + `progress.json` (SM-2, §10.1) remain planned; they
+would add multiple-choice and push delivery. Running both later means two
+schedulers (Obsidian-SR + `progress.json`) — reconcile then. `study/cli.py` today
+is a read-only card *viewer* for content review, not yet a review session.
 
 ### 10.5 Gamification mechanics (design intent)
 
@@ -703,10 +803,10 @@ Explicitly deferred:
   error-spot items from `間違いやすい点`. The AI value is captured once, at ingest,
   and stored in the page; **card generation stays 100% deterministic**.
 - **Grammar & article card types** (vocabulary first).
-- **FSRS** scheduler swap (§10.1).
-- **Obsidian-SR export**: generate a separate `review/` folder from `cards.json`
-  using the *SR-Recall* fork (scheduling kept in its own JSON), so Obsidian
-  becomes a channel **without** touching content pages.
+- **CLI trainer + daily email** over `cards.json` + `progress.json` (SM-2,
+  §10.1): a second channel adding multiple-choice and push delivery. Adds a second
+  scheduler alongside Obsidian-SR — reconcile then. FSRS could later replace the
+  CLI's SM-2 (Obsidian already uses FSRS).
 - **Web dashboard** with the constellation view; **audio / TTS** listening cards
   (see the audio open question, §11).
 - **Any GUI** remains deferred.
@@ -731,6 +831,16 @@ Explicitly deferred:
 - **`cards.json`** — gitignored (rebuildable build artifact). `progress.json`
   stays **tracked** — it is precious, non-regenerable review history.
 - **Scheduling granularity** — one schedule per word for now (§10.1).
+- **Flashcard delivery** — near-term channel is the **mainstream Obsidian
+  *Spaced Repetition* plugin (FSRS)**, reviewing generated notes in a separate
+  top-level `flashcards/` folder (never inside content pages). Chosen over the
+  SR-Recall fork for maintenance; can switch later. CLI trainer / email deferred
+  (§10.4, §10.6).
+- **Flashcard notes** — one per vocab, filename `card-vocab-{NNNN}.md`
+  (answer-opaque sequence; the plugin shows the note name during review, so no
+  headword / heading / backlink). The llm-wiki link is embedded in each card's
+  **answer**. **Committed** (review history is precious); generation is
+  **append-only** to preserve the plugin's inline schedule.
 
 **Open:**
 
@@ -741,16 +851,14 @@ Explicitly deferred:
 
 **Done so far:** schema (§6); `lint.py` + `lint-all` + fixture tests (§7, §7.1);
 the `ingest article` workflow (§8) with 5 articles seeded; the learning-aids plan
-(§10).
+(§10); `study/cards.py` → `cards.json` + `study/cli.py` card viewer (§10.2–10.3).
 
-**Near-term — learning aids, vocabulary-first (§10):**
-1. `study/cards.py` — deterministic card generator → `cards.json` (§10.2–10.3).
-2. `study/schedule.py` — SM-2 scheduler over `progress/progress.json` (§10.1).
-3. `study/cli.py` — CLI flashcard trainer to validate the card types with real
-   reps (§10.4).
+**Near-term — Obsidian flashcards, vocabulary-first (§10.4):**
+1. `study/obsidian_cards.py` — render `cards.json` → `flashcards/card-*.md`
+   (Obsidian SR notes, backlinks, append-only).
+2. Review in Obsidian with the Spaced Repetition plugin (FSRS enabled).
 
 **After that:**
-4. Daily email / quiz on the same engine (§10.4).
-5. Select and document the web seeding source (§9); implement the first source.
-6. Roadmap items (§10.6): AI-enriched ingest, Obsidian-SR export, FSRS, grammar
-   cards, web dashboard.
+3. Deferred CLI trainer + daily email over `progress.json` (§10.1, §10.6).
+4. Select and document the web seeding source (§9); implement the first source.
+5. Roadmap items (§10.6): AI-enriched ingest, grammar cards, web dashboard, TTS.

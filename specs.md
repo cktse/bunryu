@@ -1,6 +1,6 @@
 # JLPT N1 Exam Prep Assistant — Specification
 
-> Status: **Draft v0.5** · Last updated: 2026-07-10
+> Status: **Draft v0.7** · Last updated: 2026-07-15
 > See [CLAUDE.md](bunryu/CLAUDE.md) for the high-level overview and ground rules.
 
 ## 1. Purpose
@@ -48,8 +48,8 @@ This policy applies to all generated/ingested content bodies (`## 意味`,
    - **Web scraper** — automated seeding from an external N1 site (§9).
 3. **Content linting** (§7).
 4. **Progress tracker & scheduling** (§10.1).
-5. **Learning aids** — deterministic vocabulary flashcards reviewed via the
-   Obsidian SR plugin (FSRS); CLI trainer/email deferred (§10).
+5. **Learning aids** — deterministic vocabulary & grammar flashcards reviewed via
+   the Obsidian SR plugin (FSRS); CLI trainer/email deferred (§10).
 
 ### Deferred (do not build yet)
 - Daily email / quiz **generator** (§10.4).
@@ -106,7 +106,7 @@ bunryu/
 │   │   └── 改ざん.md
 │   └── articles/             # one markdown file per ingested essay (named after title)
 │       └── 裁判員のもやもや.md
-├── flashcards/               # generated Obsidian SR notes: card-vocab-NNNN.md + .card-index.json (§10.4; committed)
+├── flashcards/               # generated Obsidian SR notes: card-{vocab,grammar}-NNNN.md + .card-index.json (§10.4; committed)
 ├── progress/
 │   └── progress.json         # per-user review state for the deferred CLI/email channel (§10.1)
 ├── cards.json                # generated flashcard build artifact (§10.3; gitignored, rebuildable)
@@ -120,7 +120,8 @@ bunryu/
 │   ├── obsidian_cards.py     # render cards.json → flashcards/ Obsidian SR notes (§10.4)
 │   ├── cli.py                # card viewer (MVP); interactive trainer deferred (§10.4)
 │   └── schedule.py           # SM-2 scheduler for the deferred CLI/email channel (§10.1)
-├── tests/                    # run_tests.py + test-llm-wiki/ fixture vault (§7.1)
+├── tests/                    # run_lint_tests.py + test-llm-wiki/ (§7.1);
+│                             #   run_cards_tests.py + cards-wiki/ + cards-baseline.json (§10.7)
 └── requirements.txt
 ```
 
@@ -481,7 +482,7 @@ exactly as in production, just pointed at a different root.
   - `id`-uniqueness (a cross-file rule) needs a **pair** of fixtures sharing an
     `id`. Positive article fixtures must link only to other fixtures that exist
     in `tests/test-llm-wiki/`, or the resolution check will (correctly) warn.
-- **Runner: `tests/run_tests.py`** (top-level, run from the repo root). It runs
+- **Runner: `tests/run_lint_tests.py`** (top-level, run from the repo root). It runs
   the linter over the fixture vault, captures the `path: [severity] message`
   output, and compares it against an **expected-results table** — a mapping of
   each fixture file to its expected finding (severity + a reason substring) or
@@ -642,11 +643,13 @@ Per-user review state lives in `progress/progress.json`, keyed by content `id`:
 - MVP keys by content `id` (one schedule per word); per-card-type scheduling is a
   possible later refinement.
 
-### 10.2 Card types (vocabulary, deterministic)
+### 10.2 Card types (deterministic)
 
-All four are derivable from existing fields **because the schema was designed for
-it** — the `（粵）` line, `part_of_speech`, and the article `[[dict|surface]]`
-convention each double as card metadata:
+Cards are derived from existing fields — no AI. The schema doubles as card
+metadata: the `（粵）` line, `part_of_speech`, the article `[[dict|surface]]`
+convention, `## 関連`, and `## 間違いやすい点` each feed a card type.
+
+**Vocabulary** (implemented):
 
 | Card | Prompt → answer | Derived from |
 |---|---|---|
@@ -654,6 +657,30 @@ convention each double as card metadata:
 | **粵→JP production** | Cantonese gloss → the Japanese word | the `（粵）` line in `## 意味` (heritage-language recall) |
 | **Meaning (MC)** | word → its meaning, 4 choices | `## 意味` as the answer; distractors sampled by matching `part_of_speech` + nearby `level` |
 | **Context cloze** | sentence with the word blanked → the word | article `## 本文`: blank a `[[dict\|surface]]` span — the alias gives both the exact span to hide **and** the answer (`dict-form`). Also `例文` where the surface equals the headword verbatim. |
+
+**Grammar** (near-term — full-context, JLPT-shaped; build these three first):
+
+| Card | Prompt → answer | Derived from |
+|---|---|---|
+| **Pattern MC (in context)** | a blanked sentence + 4 choices → the pattern | a `例文`/`本文` sentence with the pattern blanked; distractors from `## 関連` (near-synonym patterns) topped up by same-`level` patterns — mirrors the JLPT 文法 question |
+| **Cloze (production)** | blanked sentence → produce the pattern | page `## 例文` (curated) and article `## 本文` (`[[pattern\|surface]]` = exact span) |
+| **Error correction** | the ✗ sentence → the ✓ fix (+ why) | `## 間違いやすい点` ✗/✓ pairs |
+
+Locating the pattern span to blank:
+
+- **Article `## 本文`** — the `[[pattern|surface]]` alias gives the **exact span**
+  (fully reliable, as for vocab cloze).
+- **Page `## 例文`** — the pattern is plain text; find its contiguous **core**
+  (headword minus `～`). Reliable for *contiguous* patterns (~32/38). For split /
+  呼応 patterns (`必ずしも～ない`, `～とも～ともつかない`, `～といい～といい`,
+  `到底～ない`, `～ことはあっても`, `～からといって～というものではない`) blank the
+  distinctive fragment(s); where detection is unreliable, skip that pattern's
+  `例文`-cloze (it still gets MC / error-correction where those apply).
+
+Deferred grammar cards (§10.6): meaning-recognition, `formation` (attachment
+rules), and reading (kanji-bearing patterns only). **No 粵→pattern card** —
+grammar meanings are abstract and often shared, so producing the exact pattern
+from a Cantonese gloss is ambiguous.
 
 ### 10.3 Storage & data flow
 
@@ -683,9 +710,13 @@ cards.json                  (build artifact: derived cards; rebuildable)
 notes the mainstream Obsidian *Spaced Repetition* plugin reviews (FSRS enabled in
 its settings). Design:
 
-- `study/obsidian_cards.py` reads `cards.json` and writes **one note per vocab**
+- `study/obsidian_cards.py` reads `cards.json` and writes **one note per item**
   into a top-level **`flashcards/`** folder — a sibling of `llm-wiki/` inside the
   same vault (`bunryu/` is the vault root). Content pages are never touched.
+  Vocabulary → `card-vocab-{NNNN}.md`, deck `#flashcards/vocab/{level}`; grammar →
+  `card-grammar-{NNNN}.md`, deck `#flashcards/grammar/{level}`. Same rules for
+  both: answer-opaque filename, no heading/backlink, the `[[item]]` context link
+  embedded in each card's answer, append-only generation.
 
 For example, study/cli.py generates the following quizzes for the vocab 挟む:
 ```
@@ -802,7 +833,9 @@ Explicitly deferred:
   `関連` near-synonym fits a crafted sentence), higher-quality MC distractors,
   error-spot items from `間違いやすい点`. The AI value is captured once, at ingest,
   and stored in the page; **card generation stays 100% deterministic**.
-- **Grammar & article card types** (vocabulary first).
+- **Remaining grammar cards** — meaning-recognition, `formation`, reading (the
+  full-context MC / cloze / error-correction set is near-term, §10.2) — and
+  **article card types**.
 - **CLI trainer + daily email** over `cards.json` + `progress.json` (SM-2,
   §10.1): a second channel adding multiple-choice and push delivery. Adds a second
   scheduler alongside Obsidian-SR — reconcile then. FSRS could later replace the
@@ -810,6 +843,47 @@ Explicitly deferred:
 - **Web dashboard** with the constellation view; **audio / TTS** listening cards
   (see the audio open question, §11).
 - **Any GUI** remains deferred.
+
+### 10.7 Tests for the card generator
+
+`study/cards.py` is deterministic (sorted output, seeded distractors), so it is
+tested by **snapshot**: build cards over a small fixture wiki and assert they
+match a saved baseline. Standard library only (like §7.1) — no `pytest`.
+
+- **Fixture wiki: `tests/cards-wiki/`** — a **separate** directory from
+  `tests/test-llm-wiki/` (which holds deliberately-malformed pages for lint's
+  negative tests and is unusable here). It mirrors the real layout
+  (`vocabulary/`, `grammar/`, `articles/`) and holds a **representative subset of
+  real, well-formed pages** copied from `llm-wiki/`, **plus one article whose
+  `[[wikilinks]]` resolve to the included items** (this is what drives cloze /
+  gcloze). Chosen to exercise every card type and the tricky cases:
+  - *vocab* — a kanji headword (reading), a pure-kana one (no reading), a
+    nested-paren `（粵：（風）…）` gloss (canto balanced-paren, §cards `_balanced_paren`),
+    a `①`-sense definition (marker stripping), and enough items for the meaning-MC
+    distractor pool;
+  - *grammar* — a contiguous pattern (gcloze + gmc + gerror), a split/呼応 pattern
+    (例文-cloze via the leading fragment, no MC), a bracketing pattern with a ✗/✓
+    pair (gerror only), an inline `✗ … ✓ …` mistake, and the 0-card
+    `～といい～といい` gap.
+- **`cards.py` change (input/output decoupled):** two independent flags —
+  `--wiki` (input root, default `llm-wiki/`) and `--out` (output path, default
+  `cards.json`); the program always writes to `--out`. Guard: **`--wiki` requires
+  `--out`**, so reading a test wiki can't silently overwrite the real
+  `cards.json`. `build()` still accepts a wiki argument for internal use; other
+  callers are unaffected.
+- **Baseline: `tests/cards-baseline.json`** — the expected cards JSON, committed,
+  produced by `cards.py` itself. Regenerated deliberately with `--update` when a
+  `cards.py` change is intended.
+- **Runner: `tests/run_cards_tests.py`** (top-level, run from the repo root):
+  invokes `cards.py --wiki tests/cards-wiki --out <tmp>` as a **subprocess**, then
+  JSON-loads that temp file and compares to the baseline — exercising the whole
+  program (arg parsing → build → serialization → file output), not just `build()`.
+  **Passes iff identical**, else prints which card ids are NEW / MISSING / CHANGED
+  and exits non-zero. `python tests/run_cards_tests.py --update` rewrites the
+  baseline (via the same CLI path).
+
+`cards.py` stays otherwise unchanged; the fixture + baseline are the test surface,
+so adding or altering a card type means re-running `--update` and eyeballing the diff.
 
 ## 11. Decisions & Open Questions
 
@@ -836,11 +910,15 @@ Explicitly deferred:
   top-level `flashcards/` folder (never inside content pages). Chosen over the
   SR-Recall fork for maintenance; can switch later. CLI trainer / email deferred
   (§10.4, §10.6).
-- **Flashcard notes** — one per vocab, filename `card-vocab-{NNNN}.md`
-  (answer-opaque sequence; the plugin shows the note name during review, so no
-  headword / heading / backlink). The llm-wiki link is embedded in each card's
-  **answer**. **Committed** (review history is precious); generation is
-  **append-only** to preserve the plugin's inline schedule.
+- **Flashcard notes** — one per item, `card-vocab-{NNNN}.md` /
+  `card-grammar-{NNNN}.md` (answer-opaque sequence; the plugin shows the note name
+  during review, so no headword / heading / backlink). The llm-wiki link is
+  embedded in each card's **answer**. **Committed** (review history is precious);
+  generation is **append-only** to preserve the plugin's inline schedule.
+- **Grammar card set** — build the **full-context, JLPT-shaped** three first
+  (§10.2): pattern MC-in-context (distractors from `## 関連`), cloze production
+  (`例文` + article), and error-correction (`## 間違いやすい点`). Meaning /
+  formation / reading cards deferred; no 粵→pattern card.
 
 **Open:**
 
@@ -851,14 +929,17 @@ Explicitly deferred:
 
 **Done so far:** schema (§6); `lint.py` + `lint-all` + fixture tests (§7, §7.1);
 the `ingest article` workflow (§8) with 5 articles seeded; the learning-aids plan
-(§10); `study/cards.py` → `cards.json` + `study/cli.py` card viewer (§10.2–10.3).
+(§10); `study/cards.py` → `cards.json`, `study/cli.py` viewer, and
+`study/obsidian_cards.py` → 138 **vocabulary** flashcards in `flashcards/`.
 
-**Near-term — Obsidian flashcards, vocabulary-first (§10.4):**
-1. `study/obsidian_cards.py` — render `cards.json` → `flashcards/card-*.md`
-   (Obsidian SR notes, backlinks, append-only).
-2. Review in Obsidian with the Spaced Repetition plugin (FSRS enabled).
+**Near-term — grammar flashcards (§10.2, §10.4):**
+1. Extend `study/cards.py` to derive the three grammar card types — pattern
+   MC-in-context, cloze (production), error-correction — into `cards.json`.
+2. Extend `study/obsidian_cards.py` to render `card-grammar-{NNNN}.md`
+   (deck `#flashcards/grammar/{level}`), append-only.
 
 **After that:**
 3. Deferred CLI trainer + daily email over `progress.json` (§10.1, §10.6).
 4. Select and document the web seeding source (§9); implement the first source.
-5. Roadmap items (§10.6): AI-enriched ingest, grammar cards, web dashboard, TTS.
+5. Roadmap items (§10.6): AI-enriched ingest, remaining grammar/article cards,
+   web dashboard, TTS.

@@ -1,0 +1,1082 @@
+[
+  {
+    "item_id": "vocab-dounyuu",
+    "kind": "vocab",
+    "headword": "導入",
+    "reading": "どうにゅう",
+    "level": "N2",
+    "tags": [
+      "system",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-dounyuu::canto",
+    "type": "canto",
+    "prompt": "この意味の言葉は何ですか？",
+    "front": "引入、引進",
+    "back": "導入（どうにゅう）"
+  },
+  {
+    "item_id": "vocab-hasamu",
+    "kind": "vocab",
+    "headword": "挟む",
+    "reading": "はさむ",
+    "level": "N2",
+    "tags": [
+      "action",
+      "春の一日"
+    ],
+    "id": "vocab-hasamu::canto",
+    "type": "canto",
+    "prompt": "この意味の言葉は何ですか？",
+    "front": "夾住、夾喺中間、插入",
+    "back": "挟む（はさむ）"
+  },
+  {
+    "item_id": "vocab-hyuhyu",
+    "kind": "vocab",
+    "headword": "ヒューヒュー",
+    "reading": "ヒューヒュー",
+    "level": "N1",
+    "tags": [
+      "onomatopoeia",
+      "sound",
+      "初めての雪"
+    ],
+    "id": "vocab-hyuhyu::canto",
+    "type": "canto",
+    "prompt": "この意味の言葉は何ですか？",
+    "front": "（風）呼呼聲、咻咻咁吹",
+    "back": "ヒューヒュー"
+  },
+  {
+    "item_id": "vocab-itoteki",
+    "kind": "vocab",
+    "headword": "意図的",
+    "reading": "いとてき",
+    "level": "N1",
+    "tags": [
+      "intention",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-itoteki::canto",
+    "type": "canto",
+    "prompt": "この意味の言葉は何ですか？",
+    "front": "故意、有心",
+    "back": "意図的（いとてき）"
+  },
+  {
+    "item_id": "vocab-moyamoya",
+    "kind": "vocab",
+    "headword": "もやもや",
+    "reading": "もやもや",
+    "level": "N1",
+    "tags": [
+      "feeling",
+      "onomatopoeia",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-moyamoya::canto",
+    "type": "canto",
+    "prompt": "この意味の言葉は何ですか？",
+    "front": "心煩、鬱結、諗唔通",
+    "back": "もやもや"
+  },
+  {
+    "item_id": "vocab-saiban",
+    "kind": "vocab",
+    "headword": "裁判",
+    "reading": "さいばん",
+    "level": "N2",
+    "tags": [
+      "law",
+      "society",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-saiban::canto",
+    "type": "canto",
+    "prompt": "この意味の言葉は何ですか？",
+    "front": "審判、打官司",
+    "back": "裁判（さいばん）"
+  },
+  {
+    "item_id": "vocab-sayuu-suru",
+    "kind": "vocab",
+    "headword": "左右する",
+    "reading": "さゆうする",
+    "level": "N1",
+    "tags": [
+      "influence",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-sayuu-suru::canto",
+    "type": "canto",
+    "prompt": "この意味の言葉は何ですか？",
+    "front": "左右、支配、影響大局",
+    "back": "左右する（さゆうする）"
+  },
+  {
+    "item_id": "vocab-yagate",
+    "kind": "vocab",
+    "headword": "やがて",
+    "reading": "やがて",
+    "level": "N2",
+    "tags": [
+      "time",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-yagate::canto",
+    "type": "canto",
+    "prompt": "この意味の言葉は何ですか？",
+    "front": "不久之後、漸漸",
+    "back": "やがて"
+  },
+  {
+    "item_id": "vocab-yugameru",
+    "kind": "vocab",
+    "headword": "ゆがめる",
+    "reading": "ゆがめる",
+    "level": "N1",
+    "tags": [
+      "distortion",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-yugameru::canto",
+    "type": "canto",
+    "prompt": "この意味の言葉は何ですか？",
+    "front": "扭曲、歪曲",
+    "back": "ゆがめる"
+  },
+  {
+    "item_id": "vocab-dounyuu",
+    "kind": "vocab",
+    "headword": "導入",
+    "reading": "どうにゅう",
+    "level": "N2",
+    "tags": [
+      "system",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-dounyuu::cloze::article-saibanin-moyamoya::1",
+    "type": "cloze",
+    "prompt": "空欄に入る語は？",
+    "front": "「裁判員制度」の＿＿が決まり、一体裁判員とはどんな人が選ばれるのかと、その資格を見ると、「誰でも」とある。",
+    "back": "導入（どうにゅう）",
+    "surface": "導入",
+    "article": "article-saibanin-moyamoya"
+  },
+  {
+    "item_id": "vocab-hyuhyu",
+    "kind": "vocab",
+    "headword": "ヒューヒュー",
+    "reading": "ヒューヒュー",
+    "level": "N1",
+    "tags": [
+      "onomatopoeia",
+      "sound",
+      "初めての雪"
+    ],
+    "id": "vocab-hyuhyu::cloze::article-hajimete-no-yuki::0",
+    "type": "cloze",
+    "prompt": "空欄に入る語は？",
+    "front": "しばらくたって、何日間か太陽が顔を見せず、＿＿空が泣いてでもいるかのような日が続き、休むことなく雪が降った。",
+    "back": "ヒューヒュー",
+    "surface": "ヒューヒューと",
+    "article": "article-hajimete-no-yuki"
+  },
+  {
+    "item_id": "vocab-itoteki",
+    "kind": "vocab",
+    "headword": "意図的",
+    "reading": "いとてき",
+    "level": "N1",
+    "tags": [
+      "intention",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-itoteki::cloze::article-saibanin-moyamoya::0",
+    "type": "cloze",
+    "prompt": "空欄に入る語は？",
+    "front": "自分たちの利益を優先するために＿＿に、また、時代の勢いに押され、無意識のうちに「日常感覚と常識」がゆがめられるときもあった。",
+    "back": "意図的（いとてき）",
+    "surface": "意図的",
+    "article": "article-saibanin-moyamoya"
+  },
+  {
+    "item_id": "vocab-moyamoya",
+    "kind": "vocab",
+    "headword": "もやもや",
+    "reading": "もやもや",
+    "level": "N1",
+    "tags": [
+      "feeling",
+      "onomatopoeia",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-moyamoya::cloze::article-saibanin-moyamoya::0",
+    "type": "cloze",
+    "prompt": "空欄に入る語は？",
+    "front": "裁判員制度が始まるに際して、「人が人を裁く」ことを求められた一般の人たちが感じた＿＿は、そんな思いに根差していたのに違いない。",
+    "back": "もやもや",
+    "surface": "もやもや",
+    "article": "article-saibanin-moyamoya"
+  },
+  {
+    "item_id": "vocab-saiban",
+    "kind": "vocab",
+    "headword": "裁判",
+    "reading": "さいばん",
+    "level": "N2",
+    "tags": [
+      "law",
+      "society",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-saiban::cloze::article-saibanin-moyamoya::0",
+    "type": "cloze",
+    "prompt": "空欄に入る語は？",
+    "front": "「＿＿員制度」の導入が決まり、一体裁判員とはどんな人が選ばれるのかと、その資格を見ると、「誰でも」とある。",
+    "back": "裁判（さいばん）",
+    "surface": "裁判",
+    "article": "article-saibanin-moyamoya"
+  },
+  {
+    "item_id": "vocab-saiban",
+    "kind": "vocab",
+    "headword": "裁判",
+    "reading": "さいばん",
+    "level": "N2",
+    "tags": [
+      "law",
+      "society",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-saiban::cloze::article-saibanin-moyamoya::2",
+    "type": "cloze",
+    "prompt": "空欄に入る語は？",
+    "front": "「裁判員制度」の導入が決まり、一体＿＿員とはどんな人が選ばれるのかと、その資格を見ると、「誰でも」とある。",
+    "back": "裁判（さいばん）",
+    "surface": "裁判",
+    "article": "article-saibanin-moyamoya"
+  },
+  {
+    "item_id": "vocab-sayuu-suru",
+    "kind": "vocab",
+    "headword": "左右する",
+    "reading": "さゆうする",
+    "level": "N1",
+    "tags": [
+      "influence",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-sayuu-suru::cloze::article-saibanin-moyamoya::1",
+    "type": "cloze",
+    "prompt": "空欄に入る語は？",
+    "front": "一般人の「日常感覚と常識を裁判に反映させる」というが、そもそも自分は、他人の一生を＿＿「日常感覚と常識」を持ち合わせているのかと考え、さらには、「人が人を裁く」ことなどできるのか、そんな権利があるのかと裁判制度そのものを問い直した。",
+    "back": "左右する（さゆうする）",
+    "surface": "左右する",
+    "article": "article-saibanin-moyamoya"
+  },
+  {
+    "item_id": "vocab-yagate",
+    "kind": "vocab",
+    "headword": "やがて",
+    "reading": "やがて",
+    "level": "N2",
+    "tags": [
+      "time",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-yagate::cloze::article-saibanin-moyamoya::1",
+    "type": "cloze",
+    "prompt": "空欄に入る語は？",
+    "front": "人々はそれをまじまじと見直し、＿＿眉を曇らせた。",
+    "back": "やがて",
+    "surface": "やがて",
+    "article": "article-saibanin-moyamoya"
+  },
+  {
+    "item_id": "vocab-yugameru",
+    "kind": "vocab",
+    "headword": "ゆがめる",
+    "reading": "ゆがめる",
+    "level": "N1",
+    "tags": [
+      "distortion",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-yugameru::cloze::article-saibanin-moyamoya::2",
+    "type": "cloze",
+    "prompt": "空欄に入る語は？",
+    "front": "自分たちの利益を優先するために意図的に、また、時代の勢いに押され、無意識のうちに「日常感覚と常識」が＿＿ときもあった。",
+    "back": "ゆがめる",
+    "surface": "ゆがめられる",
+    "article": "article-saibanin-moyamoya"
+  },
+  {
+    "item_id": "grammar-kanarazushimo-nai",
+    "kind": "grammar",
+    "headword": "必ずしも～ない",
+    "reading": "かならずしも～ない",
+    "level": "N2",
+    "tags": [
+      "partial-negation",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-kanarazushimo-nai::gcloze::例文::0",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "地域の人たちの常識が、＿＿正しいとは言えない場合もある。",
+    "surface": "必ずしも",
+    "back": "必ずしも～ない（かならずしも～ない）"
+  },
+  {
+    "item_id": "grammar-kanarazushimo-nai",
+    "kind": "grammar",
+    "headword": "必ずしも～ない",
+    "reading": "かならずしも～ない",
+    "level": "N2",
+    "tags": [
+      "partial-negation",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-kanarazushimo-nai::gcloze::例文::1",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "値段が高い品が、＿＿良いものだとは限らない。",
+    "surface": "必ずしも",
+    "back": "必ずしも～ない（かならずしも～ない）"
+  },
+  {
+    "item_id": "grammar-monono",
+    "kind": "grammar",
+    "headword": "～ものの",
+    "reading": "～ものの",
+    "level": "N2",
+    "tags": [
+      "concession",
+      "contrast",
+      "そば屋の先生"
+    ],
+    "id": "grammar-monono::gcloze::例文::0",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "「すみません」と頭を下げた＿＿、内心は納得がいかなかった。",
+    "surface": "ものの",
+    "back": "～ものの"
+  },
+  {
+    "item_id": "grammar-monono",
+    "kind": "grammar",
+    "headword": "～ものの",
+    "reading": "～ものの",
+    "level": "N2",
+    "tags": [
+      "concession",
+      "contrast",
+      "そば屋の先生"
+    ],
+    "id": "grammar-monono::gcloze::例文::1",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "引き受けた＿＿、やり方が分からない。",
+    "surface": "ものの",
+    "back": "～ものの"
+  },
+  {
+    "item_id": "grammar-nisaishite",
+    "kind": "grammar",
+    "headword": "～に際して",
+    "reading": "～にさいして",
+    "level": "N1",
+    "tags": [
+      "occasion",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nisaishite::gcloze::例文::0",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "裁判員制度が始まる＿＿、多くの人が不安を感じた。",
+    "surface": "に際して",
+    "back": "～に際して（～にさいして）"
+  },
+  {
+    "item_id": "grammar-nisaishite",
+    "kind": "grammar",
+    "headword": "～に際して",
+    "reading": "～にさいして",
+    "level": "N1",
+    "tags": [
+      "occasion",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nisaishite::gcloze::例文::1",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "開会＿＿、一言ごあいさつ申し上げます。",
+    "surface": "に際して",
+    "back": "～に際して（～にさいして）"
+  },
+  {
+    "item_id": "grammar-nishitemireba",
+    "kind": "grammar",
+    "headword": "～にしてみれば",
+    "reading": "～にしてみれば",
+    "level": "N1",
+    "tags": [
+      "viewpoint",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nishitemireba::gcloze::例文::0",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "裁かれる側＿＿、たまったものではない。",
+    "surface": "にしてみれば",
+    "back": "～にしてみれば"
+  },
+  {
+    "item_id": "grammar-nishitemireba",
+    "kind": "grammar",
+    "headword": "～にしてみれば",
+    "reading": "～にしてみれば",
+    "level": "N1",
+    "tags": [
+      "viewpoint",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nishitemireba::gcloze::例文::1",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "親＿＿、子どもはいくつになっても心配な存在だ。",
+    "surface": "にしてみれば",
+    "back": "～にしてみれば"
+  },
+  {
+    "item_id": "grammar-nisokushite",
+    "kind": "grammar",
+    "headword": "～に即して",
+    "reading": "～にそくして",
+    "level": "N1",
+    "tags": [
+      "conformity",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nisokushite::gcloze::article-saibanin-moyamoya::5",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "取り決めが守られるよう見張ることも、守らない者には申し合わせ＿＿処分を与えることも必要なことだ。",
+    "surface": "に即して",
+    "back": "～に即して（～にそくして）"
+  },
+  {
+    "item_id": "grammar-nisokushite",
+    "kind": "grammar",
+    "headword": "～に即して",
+    "reading": "～にそくして",
+    "level": "N1",
+    "tags": [
+      "conformity",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nisokushite::gcloze::例文::0",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "守らない者には、申し合わせ＿＿処分を与える。",
+    "surface": "に即して",
+    "back": "～に即して（～にそくして）"
+  },
+  {
+    "item_id": "grammar-sueni",
+    "kind": "grammar",
+    "headword": "～末に",
+    "reading": "～すえに",
+    "level": "N2",
+    "tags": [
+      "result",
+      "記事の裏側"
+    ],
+    "id": "grammar-sueni::gcloze::例文::0",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "しばらく考えた＿＿、こう答えた。",
+    "surface": "末に",
+    "back": "～末に（～すえに）"
+  },
+  {
+    "item_id": "grammar-sueni",
+    "kind": "grammar",
+    "headword": "～末に",
+    "reading": "～すえに",
+    "level": "N2",
+    "tags": [
+      "result",
+      "記事の裏側"
+    ],
+    "id": "grammar-sueni::gcloze::例文::1",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "激しい議論の＿＿、結論が出た。",
+    "surface": "末に",
+    "back": "～末に（～すえに）"
+  },
+  {
+    "item_id": "grammar-wo-tooshite",
+    "kind": "grammar",
+    "headword": "～を通して",
+    "reading": "～をとおして",
+    "level": "N2",
+    "tags": [
+      "means",
+      "初めての雪"
+    ],
+    "id": "grammar-wo-tooshite::gcloze::article-hajimete-no-yuki::23",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "これまで何か疑問に思うと、ついインターネットを＿＿答えを得ようとしてきた。",
+    "surface": "通して",
+    "back": "～を通して（～をとおして）"
+  },
+  {
+    "item_id": "grammar-wo-tooshite",
+    "kind": "grammar",
+    "headword": "～を通して",
+    "reading": "～をとおして",
+    "level": "N2",
+    "tags": [
+      "means",
+      "初めての雪"
+    ],
+    "id": "grammar-wo-tooshite::gcloze::例文::0",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "ついインターネット＿＿答えを得ようとしてきた。",
+    "surface": "を通して",
+    "back": "～を通して（～をとおして）"
+  },
+  {
+    "item_id": "grammar-wo-tooshite",
+    "kind": "grammar",
+    "headword": "～を通して",
+    "reading": "～をとおして",
+    "level": "N2",
+    "tags": [
+      "means",
+      "初めての雪"
+    ],
+    "id": "grammar-wo-tooshite::gcloze::例文::1",
+    "type": "gcloze",
+    "prompt": "空欄に入る文型は？",
+    "front": "一年＿＿温暖な地域だ。",
+    "surface": "を通して",
+    "back": "～を通して（～をとおして）"
+  },
+  {
+    "item_id": "grammar-kanarazushimo-nai",
+    "kind": "grammar",
+    "headword": "必ずしも～ない",
+    "reading": "かならずしも～ない",
+    "level": "N2",
+    "tags": [
+      "partial-negation",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-kanarazushimo-nai::gerror",
+    "type": "gerror",
+    "prompt": "誤りを正しなさい：",
+    "front": "✗ 彼は必ずしも来る",
+    "back": "「必ずしも」は否定と呼応するため、肯定文には使えない　✓ 彼は必ずしも来るとは限らない"
+  },
+  {
+    "item_id": "grammar-nisaishite",
+    "kind": "grammar",
+    "headword": "～に際して",
+    "reading": "～にさいして",
+    "level": "N1",
+    "tags": [
+      "occasion",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nisaishite::gerror",
+    "type": "gerror",
+    "prompt": "誤りを正しなさい：",
+    "front": "✗ ご飯を食べるに際して手を洗う",
+    "back": "日常の些事には大げさで不自然　✓ 入学に際して必要な書類を準備する"
+  },
+  {
+    "item_id": "grammar-nishitemireba",
+    "kind": "grammar",
+    "headword": "～にしてみれば",
+    "reading": "～にしてみれば",
+    "level": "N1",
+    "tags": [
+      "viewpoint",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nishitemireba::gerror",
+    "type": "gerror",
+    "prompt": "誤りを正しなさい：",
+    "front": "✗ この方法にしてみれば効率的だ",
+    "back": "立場を持つ人・主体でないと不自然　✓ 利用者にしてみれば、この方法は効率的だ"
+  },
+  {
+    "item_id": "grammar-nisokushite",
+    "kind": "grammar",
+    "headword": "～に即して",
+    "reading": "～にそくして",
+    "level": "N1",
+    "tags": [
+      "conformity",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nisokushite::gerror",
+    "type": "gerror",
+    "prompt": "誤りを正しなさい：",
+    "front": "✗ 気持ちに即して行動する",
+    "back": "前に来るのは規則・事実・実情など「合わせる基準」。感情や希望には使いにくい。　✓ 規則に即して対応する"
+  },
+  {
+    "item_id": "grammar-tomo-tomo-tsukanai",
+    "kind": "grammar",
+    "headword": "～とも～ともつかない",
+    "reading": "～とも～ともつかない",
+    "level": "N1",
+    "tags": [
+      "ambiguity",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-tomo-tomo-tsukanai::gerror",
+    "type": "gerror",
+    "prompt": "誤りを正しなさい：",
+    "front": "✗ 楽しいとも嬉しいともつかない — 意味が近すぎて対比にならず不自然",
+    "back": "✓ 楽しいとも悲しいともつかない — 対になる二語を並べるのが自然"
+  },
+  {
+    "item_id": "grammar-monono",
+    "kind": "grammar",
+    "headword": "～ものの",
+    "reading": "～ものの",
+    "level": "N2",
+    "tags": [
+      "concession",
+      "contrast",
+      "そば屋の先生"
+    ],
+    "id": "grammar-monono::gmc",
+    "type": "gmc",
+    "prompt": "空欄に入る文型を選びなさい：",
+    "front": "「すみません」と頭を下げた＿＿、内心は納得がいかなかった。",
+    "choices": [
+      "ものの",
+      "ながら（も）",
+      "末に",
+      "とはいうものの"
+    ],
+    "answer_index": 0,
+    "back": "ものの"
+  },
+  {
+    "item_id": "grammar-nisaishite",
+    "kind": "grammar",
+    "headword": "～に際して",
+    "reading": "～にさいして",
+    "level": "N1",
+    "tags": [
+      "occasion",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nisaishite::gmc",
+    "type": "gmc",
+    "prompt": "空欄に入る文型を選びなさい：",
+    "front": "裁判員制度が始まる＿＿、多くの人が不安を感じた。",
+    "choices": [
+      "にあたり",
+      "に当たって",
+      "に際して",
+      "に即して"
+    ],
+    "answer_index": 2,
+    "back": "に際して"
+  },
+  {
+    "item_id": "grammar-nishitemireba",
+    "kind": "grammar",
+    "headword": "～にしてみれば",
+    "reading": "～にしてみれば",
+    "level": "N1",
+    "tags": [
+      "viewpoint",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nishitemireba::gmc",
+    "type": "gmc",
+    "prompt": "空欄に入る文型を選びなさい：",
+    "front": "裁かれる側＿＿、たまったものではない。",
+    "choices": [
+      "にしてみれば",
+      "の身になって",
+      "としては",
+      "に際して"
+    ],
+    "answer_index": 0,
+    "back": "にしてみれば"
+  },
+  {
+    "item_id": "grammar-nisokushite",
+    "kind": "grammar",
+    "headword": "～に即して",
+    "reading": "～にそくして",
+    "level": "N1",
+    "tags": [
+      "conformity",
+      "裁判員のもやもや"
+    ],
+    "id": "grammar-nisokushite::gmc",
+    "type": "gmc",
+    "prompt": "空欄に入る文型を選びなさい：",
+    "front": "取り決めが守られるよう見張ることも、守らない者には申し合わせ＿＿処分を与えることも必要なことだ。",
+    "choices": [
+      "に基づいて",
+      "に沿って",
+      "に即して",
+      "にしてみれば"
+    ],
+    "answer_index": 2,
+    "back": "に即して"
+  },
+  {
+    "item_id": "grammar-sueni",
+    "kind": "grammar",
+    "headword": "～末に",
+    "reading": "～すえに",
+    "level": "N2",
+    "tags": [
+      "result",
+      "記事の裏側"
+    ],
+    "id": "grammar-sueni::gmc",
+    "type": "gmc",
+    "prompt": "空欄に入る文型を選びなさい：",
+    "front": "しばらく考えた＿＿、こう答えた。",
+    "choices": [
+      "あげく",
+      "結果",
+      "末に",
+      "ものの"
+    ],
+    "answer_index": 2,
+    "back": "末に"
+  },
+  {
+    "item_id": "grammar-wo-tooshite",
+    "kind": "grammar",
+    "headword": "～を通して",
+    "reading": "～をとおして",
+    "level": "N2",
+    "tags": [
+      "means",
+      "初めての雪"
+    ],
+    "id": "grammar-wo-tooshite::gmc",
+    "type": "gmc",
+    "prompt": "空欄に入る文型を選びなさい：",
+    "front": "ついインターネット＿＿答えを得ようとしてきた。",
+    "choices": [
+      "末に",
+      "によって",
+      "を通じて",
+      "を通して"
+    ],
+    "answer_index": 3,
+    "back": "を通して"
+  },
+  {
+    "item_id": "vocab-dounyuu",
+    "kind": "vocab",
+    "headword": "導入",
+    "reading": "どうにゅう",
+    "level": "N2",
+    "tags": [
+      "system",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-dounyuu::meaning",
+    "type": "meaning",
+    "prompt": "意味は？",
+    "front": "導入（どうにゅう）",
+    "choices": [
+      "二つのものの間に物を入れて押さえる",
+      "物事の成り行きや人の運命などを思いのままに動かす、また大きく影響を与えること",
+      "わざと、ある目的をもってするさま",
+      "新しい制度・方法・設備などを、外から取り入れて用いること"
+    ],
+    "answer_index": 3,
+    "back": "新しい制度・方法・設備などを、外から取り入れて用いること"
+  },
+  {
+    "item_id": "vocab-hasamu",
+    "kind": "vocab",
+    "headword": "挟む",
+    "reading": "はさむ",
+    "level": "N2",
+    "tags": [
+      "action",
+      "春の一日"
+    ],
+    "id": "vocab-hasamu::meaning",
+    "type": "meaning",
+    "prompt": "意味は？",
+    "front": "挟む（はさむ）",
+    "choices": [
+      "二つのものの間に物を入れて押さえる",
+      "時間がたって、そのうちにある状態・結果になるさま",
+      "風が細く鋭く吹き抜ける音を表す",
+      "気持ちや物事がはっきりせず、心に引っかかりが残るさま"
+    ],
+    "answer_index": 0,
+    "back": "二つのものの間に物を入れて押さえる"
+  },
+  {
+    "item_id": "vocab-hyuhyu",
+    "kind": "vocab",
+    "headword": "ヒューヒュー",
+    "reading": "ヒューヒュー",
+    "level": "N1",
+    "tags": [
+      "onomatopoeia",
+      "sound",
+      "初めての雪"
+    ],
+    "id": "vocab-hyuhyu::meaning",
+    "type": "meaning",
+    "prompt": "意味は？",
+    "front": "ヒューヒュー",
+    "choices": [
+      "時間がたって、そのうちにある状態・結果になるさま",
+      "気持ちや物事がはっきりせず、心に引っかかりが残るさま",
+      "風が細く鋭く吹き抜ける音を表す",
+      "争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと"
+    ],
+    "answer_index": 2,
+    "back": "風が細く鋭く吹き抜ける音を表す"
+  },
+  {
+    "item_id": "vocab-itoteki",
+    "kind": "vocab",
+    "headword": "意図的",
+    "reading": "いとてき",
+    "level": "N1",
+    "tags": [
+      "intention",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-itoteki::meaning",
+    "type": "meaning",
+    "prompt": "意味は？",
+    "front": "意図的（いとてき）",
+    "choices": [
+      "形・表情や、事実・考えなどを正しくない状態に曲げる",
+      "わざと、ある目的をもってするさま",
+      "争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと",
+      "風が細く鋭く吹き抜ける音を表す"
+    ],
+    "answer_index": 1,
+    "back": "わざと、ある目的をもってするさま"
+  },
+  {
+    "item_id": "vocab-moyamoya",
+    "kind": "vocab",
+    "headword": "もやもや",
+    "reading": "もやもや",
+    "level": "N1",
+    "tags": [
+      "feeling",
+      "onomatopoeia",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-moyamoya::meaning",
+    "type": "meaning",
+    "prompt": "意味は？",
+    "front": "もやもや",
+    "choices": [
+      "気持ちや物事がはっきりせず、心に引っかかりが残るさま",
+      "風が細く鋭く吹き抜ける音を表す",
+      "時間がたって、そのうちにある状態・結果になるさま",
+      "争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと"
+    ],
+    "answer_index": 0,
+    "back": "気持ちや物事がはっきりせず、心に引っかかりが残るさま"
+  },
+  {
+    "item_id": "vocab-saiban",
+    "kind": "vocab",
+    "headword": "裁判",
+    "reading": "さいばん",
+    "level": "N2",
+    "tags": [
+      "law",
+      "society",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-saiban::meaning",
+    "type": "meaning",
+    "prompt": "意味は？",
+    "front": "裁判（さいばん）",
+    "choices": [
+      "気持ちや物事がはっきりせず、心に引っかかりが残るさま",
+      "二つのものの間に物を入れて押さえる",
+      "形・表情や、事実・考えなどを正しくない状態に曲げる",
+      "争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと"
+    ],
+    "answer_index": 3,
+    "back": "争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと"
+  },
+  {
+    "item_id": "vocab-sayuu-suru",
+    "kind": "vocab",
+    "headword": "左右する",
+    "reading": "さゆうする",
+    "level": "N1",
+    "tags": [
+      "influence",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-sayuu-suru::meaning",
+    "type": "meaning",
+    "prompt": "意味は？",
+    "front": "左右する（さゆうする）",
+    "choices": [
+      "物事の成り行きや人の運命などを思いのままに動かす、また大きく影響を与えること",
+      "二つのものの間に物を入れて押さえる",
+      "新しい制度・方法・設備などを、外から取り入れて用いること",
+      "わざと、ある目的をもってするさま"
+    ],
+    "answer_index": 0,
+    "back": "物事の成り行きや人の運命などを思いのままに動かす、また大きく影響を与えること"
+  },
+  {
+    "item_id": "vocab-yagate",
+    "kind": "vocab",
+    "headword": "やがて",
+    "reading": "やがて",
+    "level": "N2",
+    "tags": [
+      "time",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-yagate::meaning",
+    "type": "meaning",
+    "prompt": "意味は？",
+    "front": "やがて",
+    "choices": [
+      "気持ちや物事がはっきりせず、心に引っかかりが残るさま",
+      "風が細く鋭く吹き抜ける音を表す",
+      "争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと",
+      "時間がたって、そのうちにある状態・結果になるさま"
+    ],
+    "answer_index": 3,
+    "back": "時間がたって、そのうちにある状態・結果になるさま"
+  },
+  {
+    "item_id": "vocab-yugameru",
+    "kind": "vocab",
+    "headword": "ゆがめる",
+    "reading": "ゆがめる",
+    "level": "N1",
+    "tags": [
+      "distortion",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-yugameru::meaning",
+    "type": "meaning",
+    "prompt": "意味は？",
+    "front": "ゆがめる",
+    "choices": [
+      "新しい制度・方法・設備などを、外から取り入れて用いること",
+      "形・表情や、事実・考えなどを正しくない状態に曲げる",
+      "風が細く鋭く吹き抜ける音を表す",
+      "争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと"
+    ],
+    "answer_index": 1,
+    "back": "形・表情や、事実・考えなどを正しくない状態に曲げる"
+  },
+  {
+    "item_id": "vocab-dounyuu",
+    "kind": "vocab",
+    "headword": "導入",
+    "reading": "どうにゅう",
+    "level": "N2",
+    "tags": [
+      "system",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-dounyuu::reading",
+    "type": "reading",
+    "prompt": "読みは？",
+    "front": "導入",
+    "back": "どうにゅう"
+  },
+  {
+    "item_id": "vocab-hasamu",
+    "kind": "vocab",
+    "headword": "挟む",
+    "reading": "はさむ",
+    "level": "N2",
+    "tags": [
+      "action",
+      "春の一日"
+    ],
+    "id": "vocab-hasamu::reading",
+    "type": "reading",
+    "prompt": "読みは？",
+    "front": "挟む",
+    "back": "はさむ"
+  },
+  {
+    "item_id": "vocab-itoteki",
+    "kind": "vocab",
+    "headword": "意図的",
+    "reading": "いとてき",
+    "level": "N1",
+    "tags": [
+      "intention",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-itoteki::reading",
+    "type": "reading",
+    "prompt": "読みは？",
+    "front": "意図的",
+    "back": "いとてき"
+  },
+  {
+    "item_id": "vocab-saiban",
+    "kind": "vocab",
+    "headword": "裁判",
+    "reading": "さいばん",
+    "level": "N2",
+    "tags": [
+      "law",
+      "society",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-saiban::reading",
+    "type": "reading",
+    "prompt": "読みは？",
+    "front": "裁判",
+    "back": "さいばん"
+  },
+  {
+    "item_id": "vocab-sayuu-suru",
+    "kind": "vocab",
+    "headword": "左右する",
+    "reading": "さゆうする",
+    "level": "N1",
+    "tags": [
+      "influence",
+      "裁判員のもやもや"
+    ],
+    "id": "vocab-sayuu-suru::reading",
+    "type": "reading",
+    "prompt": "読みは？",
+    "front": "左右する",
+    "back": "さゆうする"
+  }
+]

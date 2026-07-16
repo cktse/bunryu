@@ -6,7 +6,7 @@ Runs `scraper/lint.py` against `tests/test-llm-wiki/`, captures its
 against the EXPECTED table below. Prints a pass/fail summary and exits non-zero
 on any mismatch.
 
-    python tests/run_tests.py        # from the repo root
+    python tests/run_lint_tests.py   # from the repo root
 """
 
 import io
@@ -75,7 +75,7 @@ def run_linter():
 
 def main():
     if not FIX.is_dir():
-        print(f"run_tests: fixture vault not found: {FIX}", file=sys.stderr)
+        print(f"run_lint_tests: fixture vault not found: {FIX}", file=sys.stderr)
         return 2
     findings = run_linter()
     on_disk = {str(p.relative_to(FIX)) for p in FIX.rglob("*.md")}

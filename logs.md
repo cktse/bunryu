@@ -328,3 +328,96 @@ user feedback in specs §10.4; overwrote all 138 notes (no meaningful schedules 
   `note_text`/`card_block`, full-text drift `--check`; append-only preserved.
 - Regenerated: 138 notes, `--check` clean, lint unaffected (181, 0/0). specs §5,
   §10.4, §11 reconciled to the new naming/format.
+
+## 2026-07-10 16:35 HKT — Fix: canto gloss with nested parentheses (bug report)
+
+Not an ingest. `parse_imi` extracted the `（粵：…）` gloss with a non-greedy regex
+that stopped at the **first** `）`, so a gloss containing its own parens truncated —
+e.g. ヒューヒュー `（粵：（風）呼呼聲、咻咻咁吹。）` yielded only `（風`.
+- `study/cards.py`: replaced the regex with **balanced depth-counting**
+  (`_balanced_paren`) to find the matching `）`; also made the jp-definition
+  parenthetical stripping **nesting-safe** (iterative innermost removal).
+- Regenerated `cards.json`; `--check` flagged **29** drifted flashcards
+  (20 canto corrections + 6 meaning cards whose distractor pool shifted + 3
+  structural). `--force`-regenerated all 138 (no schedules yet); `--check` clean.
+- Note: MC distractors are sampled from the global def pool, so a single content
+  edit can ripple to unrelated meaning cards — acceptable now (pre-review), but a
+  candidate for more stable distractor selection later.
+
+## 2026-07-13 18:20 HKT — Grammar flashcards (§10.2/§10.4)
+
+Not an ingest. Implemented the three full-context grammar card types.
+- `study/cards.py`: added `gcloze` (pattern blanked → produce it; from `例文`
+  core-match + article `[[pattern|surface]]`), `gmc` (blanked sentence + 4 choices
+  from `## 関連` + same-level fill; contiguous patterns only), and `gerror`
+  (✗/✓ from `## 間違いやすい点`, incl. short inline pairs). Span detection:
+  `blank_target` uses the contiguous core, or a distinctive leading fragment
+  (必ずしも/到底/からといって) for split patterns. Generic rename `vocab_id → item_id`
+  + `kind` (vocab|grammar); output is unchanged for vocab cards.
+- `study/obsidian_cards.py`: per-kind sequence filenames `card-grammar-{NNNN}.md`,
+  deck `#flashcards/grammar/{level}`, grammar `card_block`s.
+- `study/cli.py`: `--item`/`--kind` filters; renders grammar types.
+- Result: 638 cards (127 grammar: 86 gcloze + 31 gmc + 10 gerror). Generated
+  **37 grammar notes** (append-only; 138 vocab notes skipped). `lint-all` 181,0/0.
+- **Append-only proved its worth:** the vocab notes already carry real
+  `<!--SR:!fsrs,…-->` review schedules — they were correctly preserved.
+- Fixed a `--check` false-positive: `canonical()` now collapses the blank line a
+  stripped SR comment leaves, so reviewed notes don't read as drifted.
+- Coverage gap (1/38): `～といい～といい` gets 0 cards (bracketing pattern, not in any
+  article, no distinctive fragment, no ✗/✓ pair) — acceptable for now.
+
+## 2026-07-15 16:28 HKT — Tests for cards.py (§10.7) + rename lint runner
+
+Not an ingest.
+- Renamed `tests/run_tests.py` → `tests/run_lint_tests.py` (git mv; parallel to
+  the new cards runner); updated its docstring/error string and specs §5/§7.1.
+- `study/cards.py`: `load_pages`/`build` take a **wiki-root override** (default
+  `llm-wiki/`); `main --wiki` prints the summary but **does not write cards.json**
+  (a first cut clobbered the real artifact — fixed).
+- `tests/cards-wiki/` (new) — fixture wiki: 9 vocab + 6 grammar + 1 article
+  copied from `llm-wiki/`, chosen to hit every card type and edge case
+  (nested-paren 粵 ヒューヒュー, ①-sense 挟む, split 必ずしも～ない, bracketing
+  ～とも～ともつかない, 0-card ～といい～といい, article gcloze via ～に即して).
+- `tests/cards-baseline.json` (new, committed) — expected `build(cards-wiki)`
+  output (47 cards). `tests/run_cards_tests.py` (new) rebuilds and compares;
+  PASS iff identical, else lists NEW/MISSING/CHANGED ids and exits non-zero;
+  `--update` rewrites the baseline.
+- Verified: snapshot PASS (47), negative test (mutating a reading) correctly
+  fails and pinpoints the 5 affected cards; lint suite 25/25; real `cards.json`
+  (638) and `lint-all` (181, 0/0) intact.
+
+## 2026-07-16 12:24 HKT — cards.py test: redesign per design review (§10.7)
+
+Not an ingest. Cleaned up the design flagged in review.
+- **Decoupled input/output** in `cards.py`: replaced the inelegant "write
+  cards.json iff no `--wiki`" conditional with independent `--wiki` (input,
+  default `llm-wiki/`) and `--out` (output, default `cards.json`); it always
+  writes to `--out`. Guard: **`--wiki` requires `--out`** (argparse error, exit 2)
+  so a test wiki can't overwrite the real `cards.json`.
+- **Runner is now a true black box:** `tests/run_cards_tests.py` invokes
+  `cards.py --wiki cards-wiki --out <tmp>` as a **subprocess**, JSON-loads the temp
+  file, and diffs against the baseline — exercising arg parsing → build →
+  serialization → file output (not just the `build()` import). `--update` writes
+  the baseline via the same CLI path.
+- Verified: snapshot PASS (47); guard exits 2; a non-card-field edit (register)
+  still PASSes (confirms it compares output, not inputs); lint 25/25; real
+  `cards.json` (638) + `lint-all` (181, 0/0) intact. specs §10.7 updated.
+
+## 2026-07-16 12:47 HKT — Fix: gmc double-particle bug + regression coverage
+
+Not an ingest. User-reported bug: `～を通して` gmc front `…インターネットを＿＿…`
+with choice `を通して` doubled the particle (`…をを通して…`).
+- Cause: gmc used the first context, which could be an **article span whose
+  surface ≠ the pattern core** — e.g. `を[[～を通して|通して]]` (surface `通して`,
+  particle `を` outside the link) while the choice is the core `を通して`.
+- Fix (`study/cards.py grammar_mc_cards`): gmc now requires a context where the
+  **blanked span equals the choice (the core)** — the `例文` always blanks the
+  whole core. gmc 31→29 (`～めく`, `～かのようだ` had only surface≠core contexts →
+  correctly lose gmc; `～を通して` keeps it via 例文).
+- Regression coverage: added `～を通して`, `初めての雪`, `～末に`, `～ものの` to
+  `tests/cards-wiki/` so `～を通して` gets a gmc; baseline now 58 cards. Confirmed
+  that reverting the fix fails the test (CHANGED `grammar-wo-tooshite::gmc`).
+- Real flashcards: 3 grammar notes drifted; regenerated `～めく` (no schedule).
+  `～かのようだ` + `～を通して` carry FSRS schedules — regeneration pending user
+  decision (per-note --force resets the whole note's schedule).
+- Both suites pass (cards 58, lint 25/25).

@@ -47,3 +47,5 @@ The product comprises of the following components:
 - use existing tools/libraries as much as possible
 - code should be writting primarily in python, with some javascript for display going forward. No need for compiled languages.
 - keep all docs and course content/schema in markdown MD files (human readable)
+- test-driven design, includes automated tests covering positive and negative cases where possible, exercising the code being tested as extensive as possible (e.g. a good pattern is to curate a set of representative test cases as input files to generate expected baseline for comparison)
+- avoid hardcoding, use CLI argv where possible (pre-defined defaults are OK) and avoid unobvious coupling in the logic

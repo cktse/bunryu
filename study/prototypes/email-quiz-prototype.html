@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>今日の復習クイズ</title>
+<style>
+body{margin:0;padding:0;background:#eceff1;
+ font-family:-apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;
+ -webkit-text-size-adjust:100%;}
+.wrap{max-width:600px;margin:0 auto;background:#fff;counter-reset:score;}
+.hd{background:#1f6feb;color:#fff;padding:20px 22px;}
+.hd h1{margin:0;font-size:19px;font-weight:700;}
+.hd p{margin:6px 0 0;font-size:13px;opacity:.9;}
+.body{padding:8px 22px 24px;}
+.q{border-top:1px solid #eee;padding:18px 0 6px;}
+.qn{font-size:12px;color:#1f6feb;font-weight:700;letter-spacing:.05em;}
+.qt{font-size:16px;font-weight:600;margin:4px 0 12px;line-height:1.5;}
+/* hide the actual inputs; the label is the tap target */
+.opt,.sub{position:absolute;left:-9999px;opacity:0;}
+.lbl{display:block;border:1.5px solid #d0d7de;border-radius:10px;
+ padding:11px 14px;margin:7px 0;font-size:15px;line-height:1.45;color:#24292f;}
+.opt:checked+.lbl{border-color:#1f6feb;background:#eaf2ff;}
+/* one feedback box per question, hidden until 答え合わせ */
+.fb{display:none;margin:8px 0 4px;padding:12px 14px;border-radius:10px;
+ background:#f6f8fa;font-size:14px;line-height:1.6;}
+.v{font-weight:700;} .v-ok{color:#1a7f37;} .v-no{color:#cf222e;}
+.v-ok,.v-no{display:none;}
+.expl{margin-top:6px;}
+.expl .imi{color:#57606a;margin-top:4px;}
+.expl .rei{margin:6px 0 0;padding-left:18px;}
+.expl .rc{color:#8a94a6;font-size:13px;margin:1px 0 4px;}
+.subbtn{display:block;text-align:center;background:#1f6feb;color:#fff;
+ font-size:16px;font-weight:700;padding:14px;border-radius:10px;margin:22px 0 6px;}
+.score{display:none;text-align:center;font-size:20px;font-weight:800;
+ color:#1f6feb;padding:10px 0 4px;}
+.num::before{content:counter(score);}
+.foot{color:#8b949e;font-size:12px;text-align:center;padding:14px 0 4px;line-height:1.6;}
+/* ===== after 答え合わせ is tapped ===== */
+#sub:checked~.body .q .fb{display:block;}
+#sub:checked~.body .score{display:block;}
+/* mark the correct choice, and tint any wrong pick */
+#sub:checked~.body .correct+.lbl{border-color:#1a7f37;background:#e6f4ea;}
+#sub:checked~.body .correct+.lbl::after{content:' ✓';color:#1a7f37;font-weight:700;}
+#sub:checked~.body .wrong:checked+.lbl{border-color:#cf222e;background:#ffebe9;}
+#sub:checked~.body .wrong:checked+.lbl::after{content:' ✕';color:#cf222e;font-weight:700;}
+/* single box: verdict resolves by correctness; explanation always shows */
+#sub:checked~.body .correct:checked~.fb{background:#e6f4ea;}
+#sub:checked~.body .wrong:checked~.fb{background:#fff5f5;}
+#sub:checked~.body .correct:checked~.fb .v-ok{display:inline;}
+#sub:checked~.body .wrong:checked~.fb .v-no{display:inline;}
+/* score: count each correctly-answered question */
+#sub:checked~.body .correct:checked+.lbl{counter-increment:score;}
+</style></head>
+<body>
+<div class="wrap">
+ <input class="sub" type="checkbox" id="sub">
+ <div class="hd"><h1>今日の復習クイズ</h1>
+   <p>「そば屋の先生」より　全5問　—　選んで下の「答え合わせ」を押してください</p></div>
+ <div class="body">
+<div class="q"><div class="qn">問 1　語彙</div>
+<div class="qt">遭う（あう）</div>
+<input class="opt wrong" type="radio" name="q1" id="q1o0"><label class="lbl" for="q1o0">身にしみて、はっきりと悟る</label>
+<input class="opt wrong" type="radio" name="q1" id="q1o1"><label class="lbl" for="q1o1">ある状態を変えずに維持し続ける</label>
+<input class="opt correct" type="radio" name="q1" id="q1o2"><label class="lbl" for="q1o2">好ましくない出来事・災難などに出くわす</label>
+<input class="opt wrong" type="radio" name="q1" id="q1o3"><label class="lbl" for="q1o3">判断・命令・結論などを決めて示す</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">好ましくない出来事・災難などに出くわす。（粵：遭遇、撞上（唔好嘅事）。）</div><ol class="rei"><li>軽率な返事をして痛い目に遭った。<div class="rc">（粵）求求其其答咗句，結果食咗苦頭。</div></li><li>帰り道で急な雨に遭った。<div class="rc">（粵）返屋企途中撞正一場大雨。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 2　語彙</div>
+<div class="qt">中途半端（ちゅうとはんぱ）</div>
+<input class="opt wrong" type="radio" name="q2" id="q2o0"><label class="lbl" for="q2o0">ねらいや要点をはずしていること</label>
+<input class="opt wrong" type="radio" name="q2" id="q2o1"><label class="lbl" for="q2o1">都合が悪いこと</label>
+<input class="opt correct" type="radio" name="q2" id="q2o2"><label class="lbl" for="q2o2">物事が完成せず、どっちつかずで徹底しないこと</label>
+<input class="opt wrong" type="radio" name="q2" id="q2o3"><label class="lbl" for="q2o3">年老いて足腰が弱り、しっかり歩けないさま</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">物事が完成せず、どっちつかずで徹底しないこと。（粵：半桶水、唔上唔落、做嘢唔徹底。）</div><ol class="rei"><li>中途半端な日本語は使うなと注意された。<div class="rc">（粵）俾人提醒唔好用半桶水嘅日文。</div></li><li>中途半端なところで仕事を投げ出す。<div class="rc">（粵）做到一半唔上唔落就放棄。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 3　語彙</div>
+<div class="qt">段取り（だんどり）</div>
+<input class="opt wrong" type="radio" name="q3" id="q3o0"><label class="lbl" for="q3o0">相手を喜ばせるための、心にもない褒め言葉</label>
+<input class="opt correct" type="radio" name="q3" id="q3o1"><label class="lbl" for="q3o1">物事を進めるための順序・手はず・準備</label>
+<input class="opt wrong" type="radio" name="q3" id="q3o2"><label class="lbl" for="q3o2">植物や物の先のとがった刺</label>
+<input class="opt wrong" type="radio" name="q3" id="q3o3"><label class="lbl" for="q3o3">道具・言葉・仕組みなどの使いやすさ・使い心地</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">物事を進めるための順序・手はず・準備。（粵：安排、部署、程序。）</div><ol class="rei"><li>段取りの悪い、もたもたした仕事ぶりだった。<div class="rc">（粵）安排得唔好，做嘢又拖拖拉拉。</div></li><li>会議の段取りを前もって整えておく。<div class="rc">（粵）事先安排好個會議嘅程序。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 4　文型</div>
+<div class="qt">今のままで満足していたら、どこかで恥をかくような＿＿。</div>
+<input class="opt wrong" type="radio" name="q4" id="q4o0"><label class="lbl" for="q4o0">ことはあっても</label>
+<input class="opt wrong" type="radio" name="q4" id="q4o1"><label class="lbl" for="q4o1">ことになる</label>
+<input class="opt correct" type="radio" name="q4" id="q4o2"><label class="lbl" for="q4o2">はめになる</label>
+<input class="opt wrong" type="radio" name="q4" id="q4o3"><label class="lbl" for="q4o3">羽目に陥る</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">「（成り行きで）～する羽目になる」＝望まない困った状況・結果に陥ることを表す。<br>（粵：落得要…嘅下場、搞到要…。）</div><ol class="rei"><li>今のままでは、どこかで恥をかくはめになる。<div class="rc">（粵）咁樣落去，遲早會落得喺邊度出醜嘅下場。</div></li><li>安請け合いして、徹夜するはめになった。<div class="rc">（粵）求其應承咗，搞到要通宵。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 5　文型</div>
+<div class="qt">ここで働く＿＿、中途半端な日本語は使うな、くれぐれも気をつけるようにと、厳しい口調で注意された。</div>
+<input class="opt correct" type="radio" name="q5" id="q5o0"><label class="lbl" for="q5o0">からには</label>
+<input class="opt wrong" type="radio" name="q5" id="q5o1"><label class="lbl" for="q5o1">以上（は）</label>
+<input class="opt wrong" type="radio" name="q5" id="q5o2"><label class="lbl" for="q5o2">ものの</label>
+<input class="opt wrong" type="radio" name="q5" id="q5o3"><label class="lbl" for="q5o3">上は</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">「～する以上は、当然～すべきだ／～しなければならない」の意。前件を前提に、後件で<br>話し手の決意・義務・当然の判断を述べる。（粵：既然…就（應該）…。）</div><ol class="rei"><li>ここで働くからには、中途半端な日本語は使うな。<div class="rc">（粵）既然喺度做嘢，就唔好用半桶水嘅日文。</div></li><li>引き受けたからには、最後までやり遂げる。<div class="rc">（粵）既然接咗落嚟，就會做到底。</div></li></ol></div></div>
+</div>
+ <label class="subbtn" for="sub">答え合わせ　✓</label>
+ <div class="score">スコア　<span class="num"></span> / 5</div>
+ <p class="foot">これは試作メールです。回答は保存されません。<br>
+   採点・解説はすべてこのメール内（Apple Mail）で完結します。</p>
+ </div>
+</div>
+</body></html>

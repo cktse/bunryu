@@ -421,3 +421,26 @@ with choice `を通して` doubled the particle (`…をを通して…`).
   `～かのようだ` + `～を通して` carry FSRS schedules — regeneration pending user
   decision (per-note --force resets the whole note's schedule).
 - Both suites pass (cards 58, lint 25/25).
+
+## 2026-07-18 — Feature: daily email quiz (§10.8)
+
+Not an ingest. New delivery channel: a daily, self-grading, CSS-interactive MC
+quiz email that grades itself **inside Apple Mail** (no JavaScript).
+- **Prototype → proven on iPhone Mail.** Pure-CSS interactivity (`:checked` +
+  sibling selectors + a counter score) survives Apple Mail's sanitizer. Findings:
+  copy-paste into Mail's composer strips it; Gmail API/compose strips
+  `<head><style>`; **only raw `text/html` via SMTP** delivers it intact.
+  Prototype kept under `study/prototypes/` (`gen_email.py`, `send_quiz.py`).
+- **Design (specs §10.8):** 5 questions from one article (shared context);
+  MC-only; questions from `cards.json` (vocab `meaning` + grammar `gmc`); the
+  reveal (意味 + （粵）, 2 例文 + （粵）) is **looked up live from the llm-wiki
+  pages** — `cards.json` stays minimal (rejected enriching it: duplication /
+  drift / data-minimization). Phase 1 self-graded, **no persistence** (CSS can't
+  capture answers).
+- **Credentials:** `study/secrets.json` (gitignored), grouped by service under an
+  `smtp` key; committed `study/secrets.template.json` placeholder. **Mandatory
+  file, no env fallback** (avoids stray `SMTP_*` from other sessions).
+- **Implemented `study/email_quiz.py`** — reuses `cards.py` `load_pages` /
+  `lint.LINK_RE` (no re-implemented page parsing); CLI `--list` / `--article` /
+  `-n` / `--out` / `--send`. Byte-identical question output to the approved
+  prototype; both suites still pass (cards 58, lint 25/25).

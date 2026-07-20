@@ -1,6 +1,6 @@
 # JLPT N1 Exam Prep Assistant — Specification
 
-> Status: **Draft v0.7** · Last updated: 2026-07-15
+> Status: **Draft v0.8** · Last updated: 2026-07-18
 > See [CLAUDE.md](bunryu/CLAUDE.md) for the high-level overview and ground rules.
 
 ## 1. Purpose
@@ -21,6 +21,15 @@ doubles as an Obsidian vault.
   stay human-editable and Obsidian-viewable.
 - **Single user** to start; the design should not *prevent* multi-user later but
   must not pay for it now.
+- **Data minimization.** Keep a clean data lineage: store keys and look up the
+  authoritative source rather than duplicating data. (Drives keeping `cards.json`
+  minimal and looking the reveal up from the pages, §10.8.4.)
+- **Test-driven.** Cover positive *and* negative cases; a curated fixture set
+  generates a baseline to compare against (§7.1, §10.7).
+- **No hardcoding; no secrets in source.** Prefer CLI args with sensible defaults;
+  credentials live outside the tree in a gitignored file (§10.8.5).
+- **Flag technical debt.** Trade-offs — especially backward-compatibility hacks —
+  are surfaced for deliberate review, not absorbed silently.
 
 ### 2.1 Language policy (important)
 
@@ -49,16 +58,19 @@ This policy applies to all generated/ingested content bodies (`## 意味`,
 3. **Content linting** (§7).
 4. **Progress tracker & scheduling** (§10.1).
 5. **Learning aids** — deterministic vocabulary & grammar flashcards reviewed via
-   the Obsidian SR plugin (FSRS); CLI trainer/email deferred (§10).
+   the Obsidian SR plugin (FSRS, §10.4), plus a self-grading **daily quiz email**
+   (Phase 1, §10.8).
 
 ### Deferred (do not build yet)
-- Daily email / quiz **generator** (§10.4).
+- **Progress-persisted quizzing / CLI trainer** over `progress.json` (§10.1,
+  §10.6). The Phase-1 quiz email is built and *self-graded*; saving results back
+  (the answer-capture surface) is the deferred Phase 2 (§10.8.3).
 - **AI-enriched ingest** for non-deterministic card material (§10.6).
+- **Web scraper** for bulk seeding (§9) — pending source selection.
 - Any **GUI** / web dashboard (§10.6).
 
-The learning-aids plan is detailed in §10 (near-term deterministic cards + a
-future roadmap); the items listed as deferred above are not yet built. Per
-CLAUDE.md, the schema and its initial seeding come first.
+The learning-aids plan is detailed in §10 (deterministic cards + a future
+roadmap). Per CLAUDE.md, the schema and its initial seeding come first.
 
 ## 4. System Overview
 
@@ -84,10 +96,15 @@ CLAUDE.md, the schema and its initial seeding come first.
                               └─────────┬───────────┘
                                         │ read
                               ┌─────────▼───────────┐
-                              │ Quiz Generator      │  (DEFERRED)
-                              │  + Email            │
+                              │ Quiz Generator      │  Phase 1 built (§10.8);
+                              │  + Email            │  progress-persisted: deferred
                               └─────────────────────┘
 ```
+
+*Note:* the built Phase-1 quiz email (§10.8) reads `cards.json` (derived from
+`llm-wiki/` by `study/cards.py`) and the pages directly — **not** `progress.json`.
+Progress-persisted quizzing, which would close the loop back to the tracker, is
+the deferred Phase 2 (§10.8.3). The diagram shows the eventual end state.
 
 ## 5. Repository Layout
 
@@ -119,7 +136,11 @@ bunryu/
 │   ├── cards.py              # deterministic card generator → cards.json (§10.2–10.3)
 │   ├── obsidian_cards.py     # render cards.json → flashcards/ Obsidian SR notes (§10.4)
 │   ├── cli.py                # card viewer (MVP); interactive trainer deferred (§10.4)
-│   └── schedule.py           # SM-2 scheduler for the deferred CLI/email channel (§10.1)
+│   ├── email_quiz.py         # daily CSS-interactive quiz email over cards.json + pages (§10.8)
+│   ├── schedule.py           # SM-2 scheduler for the deferred CLI/email channel (§10.1)
+│   ├── secrets.template.json # dummy-value placeholder for secrets.json (§10.8.5; committed)
+│   ├── secrets.json          # real credentials grouped by service, e.g. "smtp" (§10.8.5; gitignored)
+│   └── prototypes/           # throwaway email-quiz prototype (§10.8.7); not a build dependency
 ├── tests/                    # run_lint_tests.py + test-llm-wiki/ (§7.1);
 │                             #   run_cards_tests.py + cards-wiki/ + cards-baseline.json (§10.7)
 └── requirements.txt
@@ -153,7 +174,7 @@ level, focus, tags). The body is for the learner.
 
 | Field        | Type            | Req | Description |
 |--------------|-----------------|-----|-------------|
-| `id`         | string          | ✓   | Stable unique id, kebab/slug or hash. Never changes once assigned. Used by progress tracker. |
+| `id`         | string          | ✓   | Stable unique id — a human-readable kebab/slug (not an opaque hash; §11). Never changes once assigned. Used by progress tracker. |
 | `type`       | enum            | ✓   | `vocabulary`, `grammar`, or `article`. |
 | `headword`   | string          | ✓   | The term as displayed (kanji/kana for vocab; pattern for grammar; **essay title for article**). |
 | `reading`    | string          | ·   | Kana reading (furigana). Required for vocab; optional for grammar; n/a for article. |
@@ -589,7 +610,8 @@ complements the manual `ingest article` path for bulk seeding.
 
 The goal is to turn the LLM-wiki from a reference into **active-recall practice** —
 flashcards, quizzes, a daily push — with light gamification to sustain a solo
-learner. **Start with vocabulary**; grammar and article cards come later (§10.6).
+learner. Vocabulary came first, then the full-context grammar cards; **article
+card types remain future** (§10.6).
 
 Two design decisions are settled:
 
@@ -658,7 +680,7 @@ convention, `## 関連`, and `## 間違いやすい点` each feed a card type.
 | **Meaning (MC)** | word → its meaning, 4 choices | `## 意味` as the answer; distractors sampled by matching `part_of_speech` + nearby `level` |
 | **Context cloze** | sentence with the word blanked → the word | article `## 本文`: blank a `[[dict\|surface]]` span — the alias gives both the exact span to hide **and** the answer (`dict-form`). Also `例文` where the surface equals the headword verbatim. |
 
-**Grammar** (near-term — full-context, JLPT-shaped; build these three first):
+**Grammar** (implemented — full-context, JLPT-shaped; these three, in order gcloze/gmc/gerror):
 
 | Card | Prompt → answer | Derived from |
 |---|---|---|
@@ -691,7 +713,8 @@ llm-wiki/**                 (content — never modified)
 cards.json                  (build artifact: derived cards; rebuildable)
    │
    ├── study/obsidian_cards.py ─▶ flashcards/card-*.md   (Obsidian SR channel; §10.4)
-   └── (deferred) CLI / email over cards.json + progress.json  (§10.1, §10.6)
+   ├── study/email_quiz.py ─▶ daily quiz email (reveal looked up from pages; §10.8)
+   └── (deferred) CLI trainer + progress-persisted quizzing over progress.json (§10.1, §10.6)
 ```
 
 - `study/cards.py` walks `llm-wiki/` and emits `cards.json`; content pages are
@@ -805,11 +828,16 @@ Using the same example vocab from above, the corresponding flashcard is:
   notes are **committed** — review history is precious. Chose the mainstream
   plugin over the SR-Recall fork for maintenance; can switch later.
 
-**Deferred — CLI trainer & daily email (§10.6).** A stdlib CLI and a daily-email
-channel over `cards.json` + `progress.json` (SM-2, §10.1) remain planned; they
-would add multiple-choice and push delivery. Running both later means two
-schedulers (Obsidian-SR + `progress.json`) — reconcile then. `study/cli.py` today
-is a read-only card *viewer* for content review, not yet a review session.
+**Built — daily quiz email (§10.8).** A self-grading, CSS-interactive quiz email
+over `cards.json` (with the reveal looked up from the pages) is implemented; it
+adds the multiple-choice + push-delivery channel. It is **self-graded (Phase 1)**
+— results are not yet persisted.
+
+**Still deferred — CLI trainer & progress-persisted quizzing (§10.6).** A stdlib
+CLI trainer and result-persistence over `progress.json` (SM-2, §10.1) remain
+planned; persistence needs the Phase-2 answer-capture surface (§10.8.3). Running
+that alongside Obsidian-SR means two schedulers — reconcile then. `study/cli.py`
+today is a read-only card *viewer* for content review, not yet a review session.
 
 ### 10.5 Gamification mechanics (design intent)
 
@@ -836,12 +864,15 @@ Explicitly deferred:
 - **Remaining grammar cards** — meaning-recognition, `formation`, reading (the
   full-context MC / cloze / error-correction set is near-term, §10.2) — and
   **article card types**.
-- **CLI trainer + daily email** over `cards.json` + `progress.json` (SM-2,
-  §10.1): a second channel adding multiple-choice and push delivery. Adds a second
-  scheduler alongside Obsidian-SR — reconcile then. FSRS could later replace the
-  CLI's SM-2 (Obsidian already uses FSRS).
+- **CLI trainer & progress-persisted quizzing** over `cards.json` +
+  `progress.json` (SM-2, §10.1). The daily quiz **email** is already built and
+  self-graded (§10.8); what remains deferred is a stdlib CLI trainer and
+  **persisting results** (the Phase-2 answer-capture surface, §10.8.3), which adds
+  a second scheduler alongside Obsidian-SR — reconcile then. FSRS could later
+  replace SM-2 (Obsidian already uses FSRS).
 - **Web dashboard** with the constellation view; **audio / TTS** listening cards
-  (see the audio open question, §11).
+  (pitch-accent / audio are in scope for N1, but the drills are deferred — §11
+  resolved).
 - **Any GUI** remains deferred.
 
 ### 10.7 Tests for the card generator
@@ -885,6 +916,154 @@ match a saved baseline. Standard library only (like §7.1) — no `pytest`.
 `cards.py` stays otherwise unchanged; the fixture + baseline are the test surface,
 so adding or altering a card type means re-running `--update` and eyeballing the diff.
 
+### 10.8 Daily Email Quiz
+
+A second delivery channel (alongside the Obsidian SR notes of §10.4): a **daily,
+bite-size, self-grading quiz email**. Prototype proven end-to-end — the
+interactive quiz renders and grades **inside iPhone Mail** with no external
+browser. This section documents the design and data flow; the generator lives in
+`study/email_quiz.py` (promoted from the prototype under `study/prototypes/`).
+
+**10.8.1 Design goals & target clients**
+
+- **One article per email** — the 5–8 questions are all drawn from a single
+  source article, so they read in a shared context (§10 theme `tags`).
+- **Bite-size** — **5 questions** by default (tunable; 8 is the comfortable
+  ceiling before the expanded email feels long). Vocabulary ≈60 %, grammar the
+  rest.
+- **Multiple-choice only** — MC is the one format that self-grades with no
+  server and no JavaScript (see 10.8.2).
+- **Self-contained** — answer, submit, score, and the reveal of explanations all
+  happen *inside* the one email. Nothing links out; nothing is required to load.
+- **Target clients, in priority order:**
+  1. **iPhone Mail (primary, must-support).**
+  2. **macOS Mail (secondary).**
+  3. Web/HTML front-ends like Gmail (nice-to-have).
+
+  Apple Mail (iOS + macOS) is **WebKit-based** — the most CSS-capable mail
+  renderer — which is what makes the in-email interactivity possible. Outside
+  WebKit (e.g. Gmail web strips `<style>`) the email **degrades gracefully** to a
+  static, still-readable quiz. We design for Apple Mail and accept the fallback.
+
+**10.8.2 Interactivity — pure CSS, no JavaScript**
+
+**No mail client runs JavaScript** (Apple Mail included), so the quiz is built
+entirely from CSS that WebKit honours:
+
+- Each choice is a hidden `radio`/`checkbox` `<input>` + a `<label>` tap target;
+  selecting checks the input (`:checked`) and highlights the label.
+- **答え合わせ (submit)** is one checkbox toggle; `#sub:checked ~ …` sibling
+  selectors then reveal every question's feedback at once.
+- **Score** uses a **CSS counter**: each correctly-answered question does
+  `counter-increment`, and the score line prints `counter(score)` — e.g.
+  「スコア 4 / 5」.
+- Per-question **verdict** resolves by correctness (`.correct:checked` → ✓ 正解！,
+  `.wrong:checked` → ✕ 復習：); the **explanation always shows** after submit.
+
+This is intricate, WebKit-specific CSS; **the source of truth for "does it
+render" is a real send to Apple Mail**, not a browser preview (Mail's sanitizer
+is stricter than Safari). Verified on iPhone Mail via the SMTP path (10.8.5).
+
+**10.8.3 Persistence — self-graded only (Phase 1)**
+
+CSS can compute and reveal, but **cannot send data anywhere** (that needs JS,
+and mail `<form>` POST is unreliable/stripped). Therefore:
+
+- **Phase 1 (current): no persistence.** The quiz is self-graded in-email; the
+  immediate feedback *is* the value. Results are **not** saved back to
+  `flashcards/` or `progress.json`. The email says so plainly.
+- **Deferred (Phase 2+):** capturing which answers were picked requires a
+  **companion surface** (a tiny local page / CLI) that the email links to, which
+  then writes to **`progress.json`** (§10.1) — never directly to the SR plugin's
+  inline schedule (replicating FSRS state is fragile). This adds the same
+  two-scheduler debt already noted in §10.4; reconcile then.
+
+> Do **not** attempt in-email auto-save — it is not achievable with CSS-only mail.
+
+**10.8.4 Data flow — questions from `cards.json`, reveal from the pages**
+
+The quiz **reuses the existing deterministic pipeline** and adds no duplicated
+data (data-minimization, §2 tenets):
+
+```
+llm-wiki/**  ──cards.py──▶  cards.json         (§10.3; the question bank)
+                                 │
+                                 │  MC cards only: vocab `meaning` + grammar `gmc`
+                                 ▼
+                        study/email_quiz.py
+                                 │  ├─ picks N MC cards sharing one article tag
+                                 │  │     → front / choices / answer_index / back
+                                 │  └─ for each item, looks up its page in
+                                 │        llm-wiki/{vocabulary,grammar}/<headword>.md
+                                 │        for the REVEAL: 意味 (with （粵）) + 2 例文
+                                 │        (each with its （粵） line)
+                                 ▼
+                        one self-contained text/html email  ──SMTP──▶ iPhone Mail
+```
+
+- **`cards.json` drives the questions** and stays **minimal** — it holds only
+  flashcard Q&A (front, choices, answer, back). It is **not** enriched with
+  explanations. (Deliberately rejected: bundling 意味/例文/canto onto every card —
+  it duplicates page data across a word's ~4 cards, risks drift, and violates
+  data-minimization. See §11.)
+- **The reveal is looked up live from the llm-wiki page** — the single source of
+  truth for 意味 (incl. its `（粵）` gloss) and 例文 (incl. each example's `（粵）`
+  translation). The generator reuses `cards.py` helpers (`load_pages` and
+  `lint.LINK_RE`) rather than re-implementing page loading / wikilink parsing.
+- Consequence: `cards.py` and `cards.json` are **unchanged** by this channel.
+
+**10.8.5 Delivery — SMTP (`smtplib`), raw MIME**
+
+- Send via **`smtplib`** as a `multipart/alternative` message (plain-text
+  fallback + the `text/html` part). The **raw HTML is transmitted verbatim**, so
+  the `<head><style>` block the interactivity depends on arrives intact.
+- **The Gmail API / compose path is unusable here** — it strips `<head><style>`
+  on send, which flattens the quiz to static. Confirmed during prototyping. SMTP
+  is the channel we use.
+- **Credentials via a gitignored `study/secrets.json`** — a file grouping
+  related secrets by service; SMTP lives under an `smtp` key
+  (`user` / `pass` / `host` / `port` / `from` / `to`), where `pass` is a provider
+  **app password**, not the account password. `smtp.gmail.com:465` (implicit SSL)
+  is the default; `587` STARTTLS supported.
+  - **The file is mandatory — no environment-variable fallback.** Rationale:
+    reading creds from the ambient env risks silently picking up `SMTP_*` left by
+    an unrelated session (or an injected value); requiring an explicit local file
+    is more predictable and safer. Missing file / missing `user`/`pass` → hard error.
+  - **`secrets.json` is never committed** (`.gitignore`, bare name so it is ignored
+    at any depth). A **`secrets.template.json` with dummy values IS committed** as
+    the format placeholder — copy it to `secrets.json` and fill in real values. New
+    service secrets get their own top-level key (e.g. add `"openai": {…}`), keeping
+    the top-level tree clean; both files live in `study/` beside the code that reads them.
+  - **Never hardcode credentials in source.** If a secret ever lands in a tracked
+    file, rotate it at the provider.
+- Scheduling the *daily* send (cron / launchd) is a later step; the near-term
+  deliverable is the generator + manual send.
+
+**10.8.6 Reveal content & length**
+
+- Per question, after submit: a single feedback box — verdict (✓ 正解！/ ✕ 復習：)
+  then the explanation (shown regardless of correctness): the item's **意味 with
+  its `（粵）` gloss**, and up to **2 例文, each with its `（粵）` translation**.
+- Length is roughly ~2 phone screens to answer and ~3.5 screens fully expanded at
+  5 questions; that scales with the question count, which is why 8 is the ceiling.
+
+**10.8.7 Status**
+
+- **Prototype proven** on iPhone Mail via SMTP (interactivity, scoring, reveal
+  with Cantonese all working). Prototype artifacts kept under `study/prototypes/`
+  (`gen_email.py`, `send_quiz.py`) for reference; not a build dependency.
+- **Implemented — `study/email_quiz.py`:** reads questions from `cards.json`,
+  looks up the reveal from the pages via `cards.py` helpers (`load_pages`,
+  `lint.LINK_RE`), builds the email, and sends via SMTP (`study/secrets.json`).
+  CLI: `--list` (articles + MC counts), `--article`, `-n/--num` (default 5),
+  `--out` (preview HTML, default `study/daily-quiz.html`, gitignored), `--send`.
+  Auto-selects the article with the most MC cards when `--article` is omitted;
+  subject carries the date. Verified byte-identical question output to the
+  approved prototype.
+- **Next:** the daily scheduler (cron / launchd) and, later, the Phase-2
+  companion capture surface (10.8.3). Article selection is deterministic for now;
+  day-based rotation is a later refinement.
+
 ## 11. Decisions & Open Questions
 
 **Resolved:**
@@ -908,8 +1087,9 @@ so adding or altering a card type means re-running `--update` and eyeballing the
 - **Flashcard delivery** — near-term channel is the **mainstream Obsidian
   *Spaced Repetition* plugin (FSRS)**, reviewing generated notes in a separate
   top-level `flashcards/` folder (never inside content pages). Chosen over the
-  SR-Recall fork for maintenance; can switch later. CLI trainer / email deferred
-  (§10.4, §10.6).
+  SR-Recall fork for maintenance; can switch later. The daily quiz **email** is a
+  second, built channel (§10.8); a CLI trainer and progress-persisted quizzing
+  remain deferred (§10.4, §10.6).
 - **Flashcard notes** — one per item, `card-vocab-{NNNN}.md` /
   `card-grammar-{NNNN}.md` (answer-opaque sequence; the plugin shows the note name
   during review, so no headword / heading / backlink). The llm-wiki link is
@@ -919,27 +1099,98 @@ so adding or altering a card type means re-running `--update` and eyeballing the
   (§10.2): pattern MC-in-context (distractors from `## 関連`), cloze production
   (`例文` + article), and error-correction (`## 間違いやすい点`). Meaning /
   formation / reading cards deferred; no 粵→pattern card.
+- **Daily email quiz** (§10.8) — a **self-grading CSS-interactive** MC email,
+  Apple-Mail-first, **5 questions from one article**. Questions come from
+  `cards.json` (vocab `meaning` + grammar `gmc`); the reveal is **looked up live
+  from the llm-wiki pages** (意味 + `（粵）`, 2 例文 + `（粵）`) — `cards.json` is
+  **not** enriched (*data-minimization* tenet, §2). Delivered by **`smtplib` (raw
+  MIME)**, not the Gmail API (which strips `<style>`). Credentials load from a
+  **mandatory, gitignored `study/secrets.json`** (no env fallback), with a
+  committed dummy-value template (*no-secrets-in-source* tenet, §2). Phase 1 is
+  self-graded with **no persistence** (CSS can't capture answers); save-back
+  needs a Phase-2 companion surface (§10.8.3).
+
+### 11.1 How key decisions evolved
+
+A short record of the questions that shaped the current design, so the rationale
+survives even though the code no longer shows the paths not taken.
+
+- **Card generation: AI vs. deterministic.** Considered authoring cards with an
+  LLM for richer distractors/nuance. Chose **100% deterministic** generation from
+  existing note fields: it is reproducible, testable (§10.7), and free for every
+  future ingest. AI value is instead deferred to *ingest time*, written **into the
+  note**, so generation stays deterministic (§10.6). *(Keep-it-simple; test-driven.)*
+- **Where flashcards live.** Considered embedding cards/scheduling inline in the
+  content pages. Rejected: it re-mixes the raw→llm-wiki→progress layers and, since
+  the vault is regenerated often, would risk **wiping review history**. Cards live
+  in a separate `flashcards/` folder, generated **append-only** so the SR plugin's
+  inline schedule is never clobbered (§10.3–10.4).
+- **Flashcard scheduler: build vs. reuse.** Considered writing an SM-2 scheduler
+  now. Chose to **reuse the mainstream Obsidian SR plugin (FSRS)** near-term and
+  defer our own `progress.json`/SM-2 to the CLI/email channel — avoids building a
+  scheduler before it is needed. *(Reuse-libraries.)* The two-scheduler overlap is
+  a known reconciliation item.
+- **Email interactivity & transport.** The daily quiz went through three dead ends
+  before the working path: pasting HTML into Mail's composer (rich-text editor
+  strips the `<style>`), then the Gmail API/compose path (also strips
+  `<head><style>`). The answer was **raw `text/html` over SMTP**, which Apple Mail
+  (WebKit) renders with full CSS-only interactivity. The definitive test is a real
+  send to iPhone Mail, not a browser preview (§10.8.2, §10.8.5).
+- **`cards.json`: minimal vs. enriched.** Considered bundling 意味/例文/`（粵）`
+  onto every card so the email needn't touch the pages. Rejected: it duplicates
+  page data across a word's ~4 cards and risks drift. The email instead **looks the
+  reveal up from the pages** at send time. *(Data-minimization; flag-tech-debt.)*
+- **Secrets handling.** An early prototype hardcoded an SMTP app password, then
+  moved to env vars. Settled on a **mandatory gitignored `secrets.json` with a
+  committed template** and **no env fallback** — an explicit local file is more
+  predictable than ambient env that a stray session could inject (§10.8.5).
+  *(No-secrets-in-source.)*
+
+### 11.2 Known gaps & smaller opportunities
+
+Beyond the roadmap (§10.6), these are the smaller known gaps in the current build:
+
+- **No answer capture yet.** The quiz email is self-graded; results are not saved
+  (Phase 2, §10.8.3). Designing the companion capture surface is the main open
+  question below.
+- **Deterministic email selection.** The daily email always picks the article with
+  the most MC cards; there is **no day-based rotation** yet, so successive days can
+  repeat. A date-seeded or least-recently-served rotation is a small enhancement.
+- **Grammar coverage gaps.** `例文`-cloze is skipped for split/呼応 patterns where
+  span detection is unreliable, and one bracketing pattern (`～といい～といい`)
+  currently yields **0 cards** (§10.2, §10.7). Acceptable, but revisitable.
+- **Two schedulers on the horizon.** Obsidian-SR (FSRS) and the deferred
+  `progress.json` (SM-2) will need reconciliation once the CLI/email persistence
+  lands (§10.4, §10.6).
 
 **Open:**
 
 1. Which external site(s) to scrape for seeding (§9)? — postponed (instructor
    role to research).
+2. **Phase-2 answer capture (§10.8.3).** What is the companion surface that records
+   quiz results back to `progress.json` — a tiny local page, a CLI re-entry, or a
+   mailto/deep-link? Constrained by the fact that CSS-only email cannot post data.
 
 ## 12. Next Steps
 
-**Done so far:** schema (§6); `lint.py` + `lint-all` + fixture tests (§7, §7.1);
-the `ingest article` workflow (§8) with 5 articles seeded; the learning-aids plan
-(§10); `study/cards.py` → `cards.json`, `study/cli.py` viewer, and
-`study/obsidian_cards.py` → 138 **vocabulary** flashcards in `flashcards/`.
+**Done so far:**
+- Schema (§6); `lint.py` + `lint-all` + fixture tests (§7, §7.1).
+- The `ingest article` workflow (§8) with 5 articles seeded.
+- Learning-aids pipeline (§10): `study/cards.py` → `cards.json` (+ snapshot tests,
+  §10.7), `study/cli.py` viewer, `study/obsidian_cards.py` → **vocabulary and
+  grammar** flashcards in `flashcards/` (append-only).
+- Daily quiz email (§10.8): `study/email_quiz.py` (questions from `cards.json`,
+  reveal from the pages, `smtplib` send via a gitignored `study/secrets.json`),
+  proven interactive on iPhone Mail.
 
-**Near-term — grammar flashcards (§10.2, §10.4):**
-1. Extend `study/cards.py` to derive the three grammar card types — pattern
-   MC-in-context, cloze (production), error-correction — into `cards.json`.
-2. Extend `study/obsidian_cards.py` to render `card-grammar-{NNNN}.md`
-   (deck `#flashcards/grammar/{level}`), append-only.
+**Near-term:**
+1. **Daily send scheduler** for the quiz email (cron / launchd), + day-based
+   article rotation (§10.8.7, §11.2).
+2. Select and document the **web seeding source** (§9); implement the first source.
 
 **After that:**
-3. Deferred CLI trainer + daily email over `progress.json` (§10.1, §10.6).
-4. Select and document the web seeding source (§9); implement the first source.
-5. Roadmap items (§10.6): AI-enriched ingest, remaining grammar/article cards,
-   web dashboard, TTS.
+3. **Phase-2 answer capture** — companion surface writing quiz results to
+   `progress.json` (§10.8.3, open question §11).
+4. CLI trainer + progress-persisted quizzing over `progress.json` (§10.1, §10.6).
+5. Roadmap items (§10.6): AI-enriched ingest, remaining article card types,
+   web dashboard, audio / TTS.

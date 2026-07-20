@@ -45,7 +45,9 @@ The product comprises of the following components:
 ## Tenets/Ground Rules
 - keep things simple, do not over-engineer
 - use existing tools/libraries as much as possible
-- code should be writting primarily in python, with some javascript for display going forward. No need for compiled languages.
+- code should be writing primarily in python, with some javascript for display going forward. No need for compiled languages.
 - keep all docs and course content/schema in markdown MD files (human readable)
 - test-driven design, includes automated tests covering positive and negative cases where possible, exercising the code being tested as extensive as possible (e.g. a good pattern is to curate a set of representative test cases as input files to generate expected baseline for comparison)
 - avoid hardcoding, use CLI argv where possible (pre-defined defaults are OK) and avoid unobvious coupling in the logic
+- data minimalization principle: clean data lineage, avoid storing duplicative copies of data, instead store data keys and look up the authoritative data source
+- flag technical debt: trade off to the design and/or code base say in flavor of preserving backward compatibility must be subject to careful deliberation

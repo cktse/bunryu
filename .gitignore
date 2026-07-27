@@ -1,0 +1,15 @@
+*.pyc
+__pycache__/
+.DS_Store
+cache/
+
+# regenerable build artifacts — rebuildable from llm-wiki (specs §10.3):
+#   build/cards.json (card bank) + build/daily-quiz.html (email preview).
+# NOTE: progress/progress.json and flashcards/ are intentionally NOT ignored —
+# precious, non-regenerable state (exposure history / FSRS schedules).
+build/
+
+# real credentials — never committed. study/secrets.template.json (dummy values) IS
+# tracked as the format placeholder; copy it to study/secrets.json and fill in real
+# values (specs §10.8.5). Bare name ignores secrets.json at any depth as a safety net.
+secrets.json

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Daily quiz email LaunchAgent (specs §10.8.8).
+     Sends once per day at 07:00 local, with a login/boot catch-up (RunAtLoad)
+     for days the Mac was off at 07:00; the app's --once-daily guard makes the
+     multiple triggers idempotent. Install: see study/launchd/README.md.
+     Paths are absolute and machine-specific — regenerate if the repo or the
+     Python interpreter moves. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.bunryu.dailyquiz</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/cktse/.pyenv/versions/3.14.3/bin/python3</string>
+    <string>/Users/cktse/Library/Mobile Documents/iCloud~md~obsidian/Documents/bunryu/study/email_quiz.py</string>
+    <string>--send</string>
+    <string>--once-daily</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/cktse/Library/Mobile Documents/iCloud~md~obsidian/Documents/bunryu</string>
+
+  <!-- fire at 07:00 local; if asleep then, launchd runs it on the next wake -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>7</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+
+  <!-- catch-up when the Mac was OFF at 07:00 and is opened later in the day -->
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/cktse/Library/Logs/bunryu-dailyquiz.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/cktse/Library/Logs/bunryu-dailyquiz.log</string>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>

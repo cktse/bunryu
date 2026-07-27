@@ -19,7 +19,6 @@ import argparse
 import datetime
 import html
 import json
-import math
 import re
 import smtplib
 import ssl
@@ -30,12 +29,13 @@ from pathlib import Path
 STUDY = Path(__file__).resolve().parent
 sys.path.insert(0, str(STUDY))
 import cards as cardgen  # noqa: E402  (reuse load_pages, lint.LINK_RE, WIKI, REPO, CARDS_OUT)
+import scheduler         # noqa: E402  (selection by urgency + exposure logging, §10.1)
 
 REPO = cardgen.REPO
 SECRETS = STUDY / "secrets.json"
-PREVIEW_OUT = STUDY / "daily-quiz.html"
+PREVIEW_OUT = REPO / "build" / "daily-quiz.html"
 E = html.escape
-MC_TYPES = ("meaning", "gmc")
+MC_TYPES = scheduler.PUSHABLE_TYPES
 
 
 # ---------------------------------------------------------------- reveal (from pages)
@@ -100,26 +100,6 @@ def mc_counts(cards, articles):
         if m or g:
             out[a] = (m, g)
     return out
-
-
-def pick_article(counts):
-    """Default article: the one with the most MC cards (alphabetical tie-break)."""
-    return max(sorted(counts), key=lambda a: sum(counts[a])) if counts else None
-
-
-def select(cards, article, n):
-    """n MC cards from one article: ~60% vocab meaning, rest grammar gmc, id-sorted.
-    Back-fills from the other type if one is short, so we still reach n where possible."""
-    m = sorted((c for c in cards if c["type"] == "meaning" and article in c["tags"]),
-               key=lambda c: c["id"])
-    g = sorted((c for c in cards if c["type"] == "gmc" and article in c["tags"]),
-               key=lambda c: c["id"])
-    nv = math.ceil(n * 0.6)
-    chosen = m[:nv] + g[:n - nv]
-    if len(chosen) < n:                                    # back-fill from leftovers
-        pool = m[nv:] + g[n - nv:]
-        chosen += pool[:n - len(chosen)]
-    return chosen[:n]
 
 
 # ---------------------------------------------------------------- HTML
@@ -202,11 +182,8 @@ def render_q(i, c, pages):
     return "\n".join(rows)
 
 
-def build_html(cards, article, n, pages, today=None):
-    qs = select(cards, article, n)
-    if not qs:
-        raise SystemExit(f"no MC cards found for article 「{article}」.")
-    today = today or datetime.date.today().isoformat()
+def build_html(qs, article, pages, today):
+    """Render the email from an already-selected list of cards (see main → scheduler)."""
     body = "\n".join(render_q(i + 1, c, pages) for i, c in enumerate(qs))
     doc = f"""<!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
@@ -227,7 +204,7 @@ def build_html(cards, article, n, pages, today=None):
  </div>
 </div>
 </body></html>"""
-    return doc, qs, today
+    return doc
 
 
 # ---------------------------------------------------------------- send
@@ -269,15 +246,18 @@ def send_email(html_doc, subject, smtp):
 # ---------------------------------------------------------------- CLI
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Daily CSS-interactive quiz email (§10.8).")
-    ap.add_argument("--article", help="article title to draw from (default: most MC cards)")
+    ap.add_argument("--article", help="article title to draw from (default: least-recently-served)")
     ap.add_argument("-n", "--num", type=int, default=5, help="number of questions (default 5)")
     ap.add_argument("--out", help="write the HTML to this path (default: preview file)")
     ap.add_argument("--send", action="store_true", help="email it via study/secrets.json")
+    ap.add_argument("--once-daily", action="store_true",
+                    help="no-op if an email was already sent today (idempotent; for launchd §10.8.8)")
     ap.add_argument("--list", action="store_true", help="list articles and MC counts, then exit")
     args = ap.parse_args(argv)
 
     cards = load_cards()
-    counts = mc_counts(cards, article_names())
+    arts = article_names()
+    counts = mc_counts(cards, arts)
 
     if args.list:
         for a in sorted(counts):
@@ -285,24 +265,47 @@ def main(argv=None):
             print(f"  {a}\t(meaning {m}, gmc {g}, total {m + g})")
         return 0
 
-    article = args.article or pick_article(counts)
-    if not article:
-        raise SystemExit("no article has MC cards; run `python study/cards.py` first.")
-    if article not in counts:
-        raise SystemExit(f"article 「{article}」 has no MC cards. Try --list.")
+    today = datetime.date.today()
+
+    # Idempotent daily guard (§10.8.8): skip if any article was already served
+    # today. Exposure is written only on a successful send, so a failed attempt
+    # leaves the day unsent and the next launchd trigger retries.
+    if args.once_daily:
+        served = scheduler.load_progress().get("articles", {}).values()
+        if any(a.get("last_served") == today.isoformat() for a in served):
+            print(f"--once-daily: already sent today ({today.isoformat()}); nothing to do.")
+            return 0
+
+    # Scheduler: refresh urgency (exposure + read-only FSRS), then select the
+    # least-recently-served article and its top-N cards by urgency (§10.1).
+    mc = [c for c in cards if c["type"] in scheduler.PUSHABLE_TYPES]
+    progress = scheduler.recompute(mc, scheduler.load_progress(),
+                                   scheduler.scan_fsrs(cards), today)
+    article, chosen = scheduler.select(mc, arts, progress, args.num, today,
+                                       article=args.article)
+    if not chosen:
+        raise SystemExit(
+            f"no MC cards for article 「{article}」." if article
+            else "no article has MC cards; run `python study/cards.py` first.")
+    chosen.sort(key=lambda c: (0 if c["kind"] == "vocab" else 1, c["id"]))  # display order
 
     pages = page_index()
-    doc, qs, today = build_html(cards, article, args.num, pages)
-    subject = f"今日の復習クイズ（{today}）"
+    doc = build_html(chosen, article, pages, today.isoformat())
+    subject = f"今日の復習クイズ（{today.isoformat()}）"
 
     if args.send:
         smtp = load_smtp()
         send_email(doc, subject, smtp)
-        print(f"sent → {smtp['to']}  「{article}」 {len(qs)}問")
+        # only on a successful send: log exposure (delivery) and persist (§10.8.3)
+        progress = scheduler.record_delivery(progress, [c["id"] for c in chosen],
+                                             article, today)
+        scheduler.save_progress(progress)
+        print(f"sent → {smtp['to']}  「{article}」 {len(chosen)}問  (exposure logged)")
     out = Path(args.out) if args.out else (None if args.send else PREVIEW_OUT)
     if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(doc, encoding="utf-8")
-        print(f"wrote {out}  「{article}」 {len(qs)}問, {len(doc)} bytes")
+        print(f"wrote {out}  「{article}」 {len(chosen)}問, {len(doc)} bytes")
     return 0
 
 

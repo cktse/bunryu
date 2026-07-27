@@ -31,7 +31,7 @@ sys.path.insert(0, str(REPO))
 from scraper import lint  # noqa: E402  (reuse parse_frontmatter / split_body / LINK_RE)
 
 WIKI = REPO / "llm-wiki"
-CARDS_OUT = REPO / "cards.json"
+CARDS_OUT = REPO / "build" / "cards.json"
 KANJI = lint.KANJI_RE
 
 CANTO_START = re.compile(r"（粵[：:]")
@@ -402,6 +402,7 @@ def main(argv=None):
         print(f"  {t:8} {by_type.get(t, 0)}")
 
     out = Path(args.out) if args.out else CARDS_OUT
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(cards, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"written: {out}")
 

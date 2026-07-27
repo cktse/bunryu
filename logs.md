@@ -444,3 +444,45 @@ quiz email that grades itself **inside Apple Mail** (no JavaScript).
   `lint.LINK_RE` (no re-implemented page parsing); CLI `--list` / `--article` /
   `-n` / `--out` / `--send`. Byte-identical question output to the approved
   prototype; both suites still pass (cards 58, lint 25/25).
+
+## 2026-07-20 — Feature: card scheduler, urgency & exposure (§10.1, §10.9)
+
+Not an ingest. New `study/scheduler.py` — a read-model over two schedulers, per
+the design agreed in specs §10.1.
+- **Read-model, not a merge.** Obsidian owns FSRS (read-only for us); we own
+  *exposure*. `scheduler.py` blends both into a per-card **urgency** (0–100, tunable
+  linear model: recency + frequency + FSRS-fragility, +future error-rate).
+- **`progress/progress.json`** — single committed file, namespaced `cards`
+  (`exposure` + derived `urgency`) + `articles` (`last_served`, the rotation
+  signal). **Atomic sanity-checked writes** (temp → validate → `os.replace`): the
+  validator rejects dropping a card *with exposure*, regressed exposure, dropped
+  articles, or out-of-range scores, leaving the original intact; urgency-only
+  entries are regenerable and may be dropped. Committed as an empty skeleton.
+- **FSRS read-only scan** parses the plugin's `<!--SR:!fsrs,…-->` comments
+  (due/last_review/stability/difficulty/state), joining block→card-id by **content
+  match** (reusing `obsidian_cards.card_block`/`canonical`) — 68/167 pushable cards
+  matched in the live vault. Tolerant: unknown formats → "no FSRS data".
+- **`email_quiz.py` wired to it:** selection is now least-recently-served article
+  + top-N by urgency; `record_delivery` logs exposure only on a successful
+  `--send` (preview is side-effect-free). Rotation verified (3 sends → 3 distinct
+  articles).
+- **Tests:** `tests/run_scheduler_tests.py` (24) — pure urgency, FSRS parse+join,
+  atomic-write safety. All suites green: lint 25/25, cards 58, scheduler 24/24.
+
+## 2026-07-27 — Housekeeping: build/ for regenerable artifacts + spec fixes
+
+Not an ingest. File-location cleanup delineating data tiers (specs §5).
+- **New `build/` (gitignored)** collects the two regenerable artifacts —
+  `cards.json` (was repo root) and `daily-quiz.html` (was `study/`). Updated
+  `cards.py` `CARDS_OUT`, `email_quiz.py` `PREVIEW_OUT` (+ `mkdir` on write),
+  `prototypes/gen_email.py`, and `.gitignore` (`build/`). Consumers via
+  `cardgen.CARDS_OUT` followed automatically; regenerated into `build/`, verified
+  pipeline + all suites (25/58/24). Precious state (`flashcards/`,
+  `progress/progress.json`) deliberately left in place.
+- **Spec §5 rewrite:** documented the three data tiers (authored source /
+  code-maintained precious state / regenerable) and the regenerability-vs-tracking
+  mapping. **Fixed a bug:** §5 said `llm-wiki/` was the Obsidian vault root, but
+  `.obsidian/` is at `bunryu/` — the vault root is `bunryu/` (so the SR plugin sees
+  `flashcards/`); corrected to match §10.4.
+- Note: the daily launchd send has been running for real — `progress.json` shows a
+  full week of article rotation (all 5 articles), preserved intact through the move.

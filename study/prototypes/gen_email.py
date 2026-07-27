@@ -15,7 +15,7 @@ ART = "そば屋の先生"
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 5
 E = html.escape
 
-cards = json.load(open(REPO / "cards.json"))
+cards = json.load(open(REPO / "build" / "cards.json"))
 
 
 def pick(tp, n):

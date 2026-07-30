@@ -486,3 +486,29 @@ Not an ingest. File-location cleanup delineating data tiers (specs §5).
   `flashcards/`); corrected to match §10.4.
 - Note: the daily launchd send has been running for real — `progress.json` shows a
   full week of article rotation (all 5 articles), preserved intact through the move.
+
+## 2026-07-30 — Ingest: raw/哲学の目的.md (article + 10 items)
+
+Ingested the Tsuchiya Kenji essay per §8. All 11 pages **new** (no updates).
+- **`llm-wiki/articles/哲学の目的.md`** (new) — article page (word_count ≈ 560).
+  `## 本文` re-wrapped per §6.5.2, `[[...]]` markers preserved as wikilinks; the
+  `<u>…</u>①②` reference markers and the source citation line kept for the quiz.
+  First-ever use of §8.2 step 5: the `## 読解問題` section's three ```quiz``` blocks
+  (quizblock plugin) copied to the page end.
+- **Vocabulary (6, new):** [[あくまでも]] (adv), [[手っ取り早い]] (i-adj),
+  [[探究]] (noun), [[厳密]] (na-adj), [[思い込み]] (noun), [[確信]] (noun).
+- **Grammar (4, new):** [[～わけではない]] and [[～わけでもない]] (cross-linked
+  part-negation pair — source marked both distinctly), [[いかに～べきか]],
+  [[～しかない]] (dictionary forms; article links them via aliases, e.g.
+  `[[～しかない|言うしかありません]]`, `[[いかに～べきか|いかに生きるべきか]]`).
+- **Lint:** clean — 192 files, 0 errors, 0 warnings.
+- **Items needing human review (footnotes):**
+  1. **Title has no top `##` heading.** Unlike other raw files, this source starts
+     with body text; headword/filename taken as `哲学の目的` (the `<u>…</u>①`
+     phrase + raw filename) rather than a `##` heading.
+  2. **OCR fixes in the quiz text (raw left untouched per §8.3).** Corrected three
+     garbled runs in the copied quiz blocks: `無意いみおもじんせいおく味` →
+     `無意味`; `ことがりゆうせいかい理由` → `ことが理由`; `もっといせいかい最も`
+     → `最も`. The raw source still contains these; worth fixing there too.
+  3. **Tilde normalization.** Raw used a wave dash `〜` (U+301C) in `いかに〜べきか`;
+     normalized to the vault's fullwidth `～` (U+FF5E) so the wikilink resolves.

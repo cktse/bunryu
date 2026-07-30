@@ -79,7 +79,7 @@ roadmap). Per CLAUDE.md, the schema and its initial seeding come first.
  (raw/)        │  Article Ingestion   │  Claude Code reads the article, pulls
  ────────────▶ │  `ingest article`    │──┐  out [[marked]] vocab/grammar,
                └──────────────────────┘  │  writes/updates wiki pages
-                                          │
+                                         │
  web / PDF     ┌──────────────────────┐  │
  ────────────▶ │      Scraper         │──┤  normalises external sources
                │      (Python)        │  │  into the schema
@@ -87,7 +87,7 @@ roadmap). Per CLAUDE.md, the schema and its initial seeding come first.
                                           ▼
                               ┌─────────────────────┐
  manual edits ───────────────▶│  LLM-wiki           │  markdown files (Obsidian)
-                              │  llm-wiki/...        │
+                              │  llm-wiki/...       │
                               └─────────┬───────────┘
                                         │ read
                               ┌─────────▼───────────┐
@@ -584,9 +584,10 @@ A curated source file in `raw/`:
    - `## 注目語彙・文法` list = the extracted items as wikilinks (no `references`
      frontmatter — the wikilinks are the sole cross-reference; §6.4).
    - `source` = the `raw/...` path.
-5. **Lint** every created/updated file through §7 before finalizing.
-6. **Add new log entry** to logs.md to audit trail changes made as part of this ingestion, include date, time, summary of the changes to each file (1-2 sentences per new/updated file) -- always add to the logs.md, never change existing log entries.
-7. **Report** what was created vs. updated, and any items needing human review.
+1. **Embedded quizzes**: some source files contain embedded quizzes which are named code blocks (\`\`\`quiz) typically grouped under the heading 読解問題. The whole section should be copied as-is to the end of the newly created article page (used by the quizblock plug-in).
+2. **Lint** every created/updated file through §7 before finalizing.
+3. **Add new log entry** to logs.md to audit trail changes made as part of this ingestion, include date, time, summary of the changes to each file (1-2 sentences per new/updated file) -- always add to the logs.md, never change existing log entries.
+4. **Report** what was created vs. updated, and any items needing human review.
 
 ### 8.3 Rules
 

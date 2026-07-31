@@ -512,3 +512,34 @@ Ingested the Tsuchiya Kenji essay per §8. All 11 pages **new** (no updates).
      → `最も`. The raw source still contains these; worth fixing there too.
   3. **Tilde normalization.** Raw used a wave dash `〜` (U+301C) in `いかに〜べきか`;
      normalized to the vault's fullwidth `～` (U+FF5E) so the wikilink resolves.
+
+## 2026-07-31 — Ingest: raw/食料安全保障.md (article + 18 items)
+
+Ingested the Yamaguchi Hidemasa editorial (食環境科学入門) per §8. All 19 pages
+**new** (no updates); first ingest to run the new §8.2 step-3 `index.md`
+regeneration.
+- **`llm-wiki/articles/食料安全保障.md`** (new) — article page (word_count ≈ 600).
+  `## 本文` re-wrapped per §6.5.2, all 18 `[[…]]` markers preserved; `<u>…</u>①②`
+  reference markers + citation kept. Source's three `（注）` moved into `## 語釈`.
+  The `## 読解問題` block's three ```quiz``` blocks copied verbatim (§8.2 step 5).
+- **Vocabulary (14, new):** [[飽食]] [[確保]] [[側面]] [[飢餓]] [[到来]] [[倫理]]
+  [[円滑]] [[志向]] [[せめて]] [[粗食]] [[禁欲]] [[汚染]] [[愚か]] [[再考]].
+- **Grammar (4, new):** [[～を目前に]] [[～てまで]] [[～こそ]] [[～とともに]]
+  (dictionary form; article links inflected surfaces via aliases, e.g.
+  `[[～てまで|捨ててまで]]`, `[[～を目前に|目前に]]`, `[[～こそ|こそ]]`).
+- **`index.md`** regenerated (§7.2): now 158 語彙 / 46 文法 / 7 記事.
+- **Lint:** clean — 211 files, 0 errors, 0 warnings.
+- **Notes / human-review footnotes:**
+  1. **Punctuation normalized.** Source body used full-width commas `，` (U+FF0C);
+     normalized to `、` in `## 本文` / `## 語釈` for consistency with the rest of
+     the vault (and this file's own quiz blocks). Quiz blocks copied as-is, so a
+     couple of `，` remain inside them by design.
+  2. **`～を目前に` reading fixed at lint.** First wrote `reading: ～を目前に`
+     (headword copy); the linter correctly rejected it because 目前 is kanji, so
+     the §6.5.1 title needs the kana reading — corrected to `～をもくぜんに`
+     (title `# ～を目前に（～をもくぜんに）`).
+  3. **`～を目前に` marked focus** (`focus: true`) in Obsidian during ingest;
+     preserved.
+  4. **`あまりに～すぎる` deliberately not ingested** — the ①-referenced phrase is
+     discontiguous and a near-duplicate of existing `あまりにも`; left for a future
+     cross-link rather than a new page (data-minimization).

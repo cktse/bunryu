@@ -122,9 +122,9 @@ def check_frontmatter(fm):
         if d in fm and fm[d] and not DATE_RE.match(str(fm[d])):
             out.append((ERROR, f"`{d}` not ISO YYYY-MM-DD: {fm[d]!r}"))
 
+    if t in ("vocabulary", "grammar") and not str(fm.get("reading", "")).strip():
+        out.append((ERROR, f"{t} missing required `reading`"))
     if t == "vocabulary":
-        if not str(fm.get("reading", "")).strip():
-            out.append((ERROR, "vocabulary missing required `reading`"))
         pos = fm.get("part_of_speech")
         if pos not in POS:
             out.append((ERROR, f"`part_of_speech` {pos!r} not in {sorted(POS)}"))
@@ -134,6 +134,11 @@ def check_frontmatter(fm):
     elif t == "article":
         if "word_count" in fm and not str(fm["word_count"]).isdigit():
             out.append((ERROR, f"`word_count` not an int: {fm['word_count']!r}"))
+
+    # `reading` is furigana — kana only, never contains kanji (§6.1)
+    rd = str(fm.get("reading", "") or "")
+    if rd and KANJI_RE.search(rd):
+        out.append((ERROR, f"`reading` must be kana, contains kanji: {rd!r}"))
 
     reg = fm.get("register")
     if reg is not None and reg not in REGISTERS:

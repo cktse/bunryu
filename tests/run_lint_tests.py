@@ -50,6 +50,8 @@ EXPECTED = {
     "grammar/～に際して.md": None,
     "grammar/neg-missing-formation.md": (E, "grammar missing required `formation`"),
     "grammar/neg-register.md": (E, "`register`"),
+    "grammar/neg-missing-reading.md": (E, "grammar missing required `reading`"),
+    "grammar/neg-kanji-reading.md": (E, "`reading` must be kana"),
     # articles
     "articles/pos-article.md": None,
     "articles/neg-missing-honbun.md": (E, "missing `## 本文`"),

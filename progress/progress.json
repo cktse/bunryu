@@ -1,10 +1,10 @@
 {
   "cards": {
     "grammar-hame-ni-naru::gmc": {
-      "urgency": 54,
-      "urgency_at": "2026-07-30",
+      "urgency": 55,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.3,
+        "rec": 0.333,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -18,10 +18,10 @@
       }
     },
     "grammar-ikandewa::gmc": {
-      "urgency": 49,
-      "urgency_at": "2026-07-30",
+      "urgency": 50,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.167,
+        "rec": 0.2,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -35,30 +35,30 @@
       }
     },
     "grammar-kagiri::gmc": {
-      "urgency": 82,
-      "urgency_at": "2026-07-30",
+      "urgency": 83,
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.552,
+        "fsrs": 0.568,
         "err": 0.0
       }
     },
     "grammar-kara-niwa::gmc": {
-      "urgency": 83,
-      "urgency_at": "2026-07-30",
+      "urgency": 84,
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.585,
+        "fsrs": 0.602,
         "err": 0.0
       }
     },
     "grammar-kara-tomonaku::gmc": {
-      "urgency": 54,
-      "urgency_at": "2026-07-30",
+      "urgency": 55,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.3,
+        "rec": 0.333,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -72,20 +72,20 @@
       }
     },
     "grammar-karashite::gmc": {
-      "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency": 85,
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.612,
+        "fsrs": 0.628,
         "err": 0.0
       }
     },
     "grammar-kato-omoeba::gmc": {
-      "urgency": 49,
-      "urgency_at": "2026-07-30",
+      "urgency": 50,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.167,
+        "rec": 0.2,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -99,10 +99,10 @@
       }
     },
     "grammar-kiwamarinai::gmc": {
-      "urgency": 54,
-      "urgency_at": "2026-07-30",
+      "urgency": 55,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.3,
+        "rec": 0.333,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -117,7 +117,7 @@
     },
     "grammar-koto-naku::gmc": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -126,10 +126,10 @@
       }
     },
     "grammar-koto-nashi-ni::gmc": {
-      "urgency": 54,
-      "urgency_at": "2026-07-30",
+      "urgency": 55,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.3,
+        "rec": 0.333,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -143,10 +143,10 @@
       }
     },
     "grammar-koto-wa-attemo::gmc": {
-      "urgency": 53,
-      "urgency_at": "2026-07-30",
+      "urgency": 54,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.267,
+        "rec": 0.3,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -160,20 +160,20 @@
       }
     },
     "grammar-monono::gmc": {
-      "urgency": 83,
-      "urgency_at": "2026-07-30",
+      "urgency": 84,
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.585,
+        "fsrs": 0.602,
         "err": 0.0
       }
     },
     "grammar-nai-demo-nai::gmc": {
-      "urgency": 51,
-      "urgency_at": "2026-07-30",
+      "urgency": 53,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.233,
+        "rec": 0.267,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -187,10 +187,10 @@
       }
     },
     "grammar-nara-iza-shirazu::gmc": {
-      "urgency": 54,
-      "urgency_at": "2026-07-30",
+      "urgency": 55,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.3,
+        "rec": 0.333,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -204,10 +204,10 @@
       }
     },
     "grammar-nara-madashimo::gmc": {
-      "urgency": 47,
-      "urgency_at": "2026-07-30",
+      "urgency": 49,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.133,
+        "rec": 0.167,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -221,10 +221,10 @@
       }
     },
     "grammar-ni-taenai::gmc": {
-      "urgency": 47,
-      "urgency_at": "2026-07-30",
+      "urgency": 49,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.133,
+        "rec": 0.167,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -238,10 +238,10 @@
       }
     },
     "grammar-nimomashite::gmc": {
-      "urgency": 51,
-      "urgency_at": "2026-07-30",
+      "urgency": 53,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.233,
+        "rec": 0.267,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -255,10 +255,10 @@
       }
     },
     "grammar-nisaishite::gmc": {
-      "urgency": 50,
-      "urgency_at": "2026-07-30",
+      "urgency": 51,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.2,
+        "rec": 0.233,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -272,10 +272,10 @@
       }
     },
     "grammar-nishitemireba::gmc": {
-      "urgency": 50,
-      "urgency_at": "2026-07-30",
+      "urgency": 51,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.2,
+        "rec": 0.233,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -289,12 +289,12 @@
       }
     },
     "grammar-nisokushite::gmc": {
-      "urgency": 44,
-      "urgency_at": "2026-07-30",
+      "urgency": 46,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.033,
+        "rec": 0.067,
         "freq": 0.9,
-        "fsrs": 0.612,
+        "fsrs": 0.628,
         "err": 0.0
       },
       "exposure": {
@@ -306,12 +306,12 @@
       }
     },
     "grammar-sore-ni-shitemo::gmc": {
-      "urgency": 47,
-      "urgency_at": "2026-07-30",
+      "urgency": 49,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.067,
+        "rec": 0.1,
         "freq": 0.9,
-        "fsrs": 0.662,
+        "fsrs": 0.678,
         "err": 0.0
       },
       "exposure": {
@@ -323,20 +323,20 @@
       }
     },
     "grammar-sueni::gmc": {
-      "urgency": 82,
-      "urgency_at": "2026-07-30",
+      "urgency": 83,
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.552,
+        "fsrs": 0.568,
         "err": 0.0
       }
     },
     "grammar-ta-tokoro-de::gmc": {
-      "urgency": 53,
-      "urgency_at": "2026-07-30",
+      "urgency": 54,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.267,
+        "rec": 0.3,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -350,10 +350,10 @@
       }
     },
     "grammar-temae::gmc": {
-      "urgency": 49,
-      "urgency_at": "2026-07-30",
+      "urgency": 50,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.167,
+        "rec": 0.2,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -367,20 +367,20 @@
       }
     },
     "grammar-totan::gmc": {
-      "urgency": 82,
-      "urgency_at": "2026-07-30",
+      "urgency": 83,
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.552,
+        "fsrs": 0.568,
         "err": 0.0
       }
     },
     "grammar-wo-ii-koto-ni::gmc": {
-      "urgency": 47,
-      "urgency_at": "2026-07-30",
+      "urgency": 49,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.133,
+        "rec": 0.167,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -395,7 +395,7 @@
     },
     "grammar-wo-tooshite::gmc": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -405,7 +405,7 @@
     },
     "grammar-wo-towazu::gmc": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -414,10 +414,10 @@
       }
     },
     "grammar-zu-niwa-irarenai::gmc": {
-      "urgency": 51,
-      "urgency_at": "2026-07-30",
+      "urgency": 53,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.233,
+        "rec": 0.267,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -431,18 +431,18 @@
       }
     },
     "vocab-akiru::meaning": {
-      "urgency": 85,
-      "urgency_at": "2026-07-30",
+      "urgency": 86,
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.635,
+        "fsrs": 0.652,
         "err": 0.0
       }
     },
     "vocab-amarinimo::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -451,10 +451,10 @@
       }
     },
     "vocab-ato-no-matsuri::meaning": {
-      "urgency": 50,
-      "urgency_at": "2026-07-30",
+      "urgency": 51,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.2,
+        "rec": 0.233,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -468,10 +468,10 @@
       }
     },
     "vocab-ato-wo-tatanai::meaning": {
-      "urgency": 53,
-      "urgency_at": "2026-07-30",
+      "urgency": 54,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.267,
+        "rec": 0.3,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -486,7 +486,7 @@
     },
     "vocab-au::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -496,7 +496,7 @@
     },
     "vocab-ayamari::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -506,7 +506,7 @@
     },
     "vocab-chuto-hanpa::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -515,10 +515,10 @@
       }
     },
     "vocab-dandori::meaning": {
-      "urgency": 47,
-      "urgency_at": "2026-07-30",
+      "urgency": 49,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.133,
+        "rec": 0.167,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -532,10 +532,10 @@
       }
     },
     "vocab-demuku::meaning": {
-      "urgency": 51,
-      "urgency_at": "2026-07-30",
+      "urgency": 53,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.233,
+        "rec": 0.267,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -550,17 +550,17 @@
     },
     "vocab-dokidoki::meaning": {
       "urgency": 77,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.417,
+        "fsrs": 0.434,
         "err": 0.0
       }
     },
     "vocab-dounyuu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -569,10 +569,10 @@
       }
     },
     "vocab-eshaku::meaning": {
-      "urgency": 51,
-      "urgency_at": "2026-07-30",
+      "urgency": 53,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.233,
+        "rec": 0.267,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -586,10 +586,10 @@
       }
     },
     "vocab-furumai::meaning": {
-      "urgency": 45,
-      "urgency_at": "2026-07-30",
+      "urgency": 46,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.067,
+        "rec": 0.1,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -604,7 +604,7 @@
     },
     "vocab-futsugou::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -613,10 +613,10 @@
       }
     },
     "vocab-gamigami::meaning": {
-      "urgency": 47,
-      "urgency_at": "2026-07-30",
+      "urgency": 49,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.133,
+        "rec": 0.167,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -630,10 +630,10 @@
       }
     },
     "vocab-gisugisu::meaning": {
-      "urgency": 45,
-      "urgency_at": "2026-07-30",
+      "urgency": 46,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.067,
+        "rec": 0.1,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -648,7 +648,7 @@
     },
     "vocab-goui::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -657,10 +657,10 @@
       }
     },
     "vocab-hagire-no-warusa::meaning": {
-      "urgency": 49,
-      "urgency_at": "2026-07-30",
+      "urgency": 50,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.167,
+        "rec": 0.2,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -675,7 +675,7 @@
     },
     "vocab-haji-wo-kaku::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -685,7 +685,7 @@
     },
     "vocab-hasamu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -694,20 +694,27 @@
       }
     },
     "vocab-heiki::meaning": {
-      "urgency": 85,
-      "urgency_at": "2026-07-30",
+      "urgency": 86,
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.635,
+        "fsrs": 0.652,
         "err": 0.0
+      },
+      "exposure": {
+        "count": 1,
+        "last": "2026-07-31",
+        "channels": [
+          "email"
+        ]
       }
     },
     "vocab-hiitewa::meaning": {
-      "urgency": 45,
-      "urgency_at": "2026-07-30",
+      "urgency": 46,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.067,
+        "rec": 0.1,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -722,17 +729,24 @@
     },
     "vocab-hin-i::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
         "fsrs": 0.6,
         "err": 0.0
+      },
+      "exposure": {
+        "count": 1,
+        "last": "2026-07-31",
+        "channels": [
+          "email"
+        ]
       }
     },
     "vocab-hirahira::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -741,10 +755,10 @@
       }
     },
     "vocab-honshitsuteki::meaning": {
-      "urgency": 49,
-      "urgency_at": "2026-07-30",
+      "urgency": 50,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.167,
+        "rec": 0.2,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -758,10 +772,10 @@
       }
     },
     "vocab-hoyahoya::meaning": {
-      "urgency": 45,
-      "urgency_at": "2026-07-30",
+      "urgency": 46,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.067,
+        "rec": 0.1,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -775,10 +789,10 @@
       }
     },
     "vocab-hyuhyu::meaning": {
-      "urgency": 53,
-      "urgency_at": "2026-07-30",
+      "urgency": 54,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.267,
+        "rec": 0.3,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -792,10 +806,10 @@
       }
     },
     "vocab-ichimenteki::meaning": {
-      "urgency": 53,
-      "urgency_at": "2026-07-30",
+      "urgency": 54,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.267,
+        "rec": 0.3,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -810,7 +824,7 @@
     },
     "vocab-ikanimo::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -820,7 +834,7 @@
     },
     "vocab-itai-me::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -830,7 +844,7 @@
     },
     "vocab-itawari::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -839,10 +853,10 @@
       }
     },
     "vocab-itoteki::meaning": {
-      "urgency": 50,
-      "urgency_at": "2026-07-30",
+      "urgency": 51,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.2,
+        "rec": 0.233,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -857,7 +871,7 @@
     },
     "vocab-jinwari::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -866,11 +880,11 @@
       }
     },
     "vocab-jittai::meaning": {
-      "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency": 43,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 1.0,
-        "freq": 1.0,
+        "rec": 0.033,
+        "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
       },
@@ -884,19 +898,26 @@
     },
     "vocab-jokentsuki::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
         "fsrs": 0.6,
         "err": 0.0
+      },
+      "exposure": {
+        "count": 1,
+        "last": "2026-07-31",
+        "channels": [
+          "email"
+        ]
       }
     },
     "vocab-kakera::meaning": {
-      "urgency": 46,
-      "urgency_at": "2026-07-30",
+      "urgency": 47,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.1,
+        "rec": 0.133,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -911,7 +932,7 @@
     },
     "vocab-kanchigai::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -921,17 +942,24 @@
     },
     "vocab-katawara::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
         "fsrs": 0.6,
         "err": 0.0
+      },
+      "exposure": {
+        "count": 1,
+        "last": "2026-07-31",
+        "channels": [
+          "email"
+        ]
       }
     },
     "vocab-kehai::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -941,17 +969,24 @@
     },
     "vocab-ki-ga-yurumu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
         "fsrs": 0.6,
         "err": 0.0
+      },
+      "exposure": {
+        "count": 1,
+        "last": "2026-07-31",
+        "channels": [
+          "email"
+        ]
       }
     },
     "vocab-ki-ni-sawaru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -961,7 +996,7 @@
     },
     "vocab-kirakira::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -971,7 +1006,7 @@
     },
     "vocab-kiyou::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -981,7 +1016,7 @@
     },
     "vocab-kotobazukai::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -990,11 +1025,11 @@
       }
     },
     "vocab-kotokomaka::meaning": {
-      "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency": 43,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 1.0,
-        "freq": 1.0,
+        "rec": 0.033,
+        "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
       },
@@ -1008,7 +1043,7 @@
     },
     "vocab-kotsukotsu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1017,11 +1052,11 @@
       }
     },
     "vocab-kuchigomoru::meaning": {
-      "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency": 43,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 1.0,
-        "freq": 1.0,
+        "rec": 0.033,
+        "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
       },
@@ -1035,7 +1070,7 @@
     },
     "vocab-kuchiyakamashii::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1044,10 +1079,10 @@
       }
     },
     "vocab-kudasu::meaning": {
-      "urgency": 50,
-      "urgency_at": "2026-07-30",
+      "urgency": 51,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.2,
+        "rec": 0.233,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -1061,11 +1096,11 @@
       }
     },
     "vocab-kuitomeru::meaning": {
-      "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency": 43,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 1.0,
-        "freq": 1.0,
+        "rec": 0.033,
+        "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
       },
@@ -1079,7 +1114,7 @@
     },
     "vocab-kuregure-mo::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1089,7 +1124,7 @@
     },
     "vocab-kutakuta::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1098,10 +1133,10 @@
       }
     },
     "vocab-kyukkyu::meaning": {
-      "urgency": 46,
-      "urgency_at": "2026-07-30",
+      "urgency": 47,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.1,
+        "rec": 0.133,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -1115,10 +1150,10 @@
       }
     },
     "vocab-majimaji::meaning": {
-      "urgency": 43,
-      "urgency_at": "2026-07-30",
+      "urgency": 45,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.033,
+        "rec": 0.067,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -1132,10 +1167,10 @@
       }
     },
     "vocab-marukkiri::meaning": {
-      "urgency": 46,
-      "urgency_at": "2026-07-30",
+      "urgency": 47,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.1,
+        "rec": 0.133,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -1150,7 +1185,7 @@
     },
     "vocab-mashiteya::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1159,10 +1194,10 @@
       }
     },
     "vocab-masu::meaning": {
-      "urgency": 46,
-      "urgency_at": "2026-07-30",
+      "urgency": 47,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.1,
+        "rec": 0.133,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -1176,11 +1211,11 @@
       }
     },
     "vocab-matohazure::meaning": {
-      "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency": 43,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 1.0,
-        "freq": 1.0,
+        "rec": 0.033,
+        "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
       },
@@ -1193,10 +1228,10 @@
       }
     },
     "vocab-mayu-wo-kumoraseru::meaning": {
-      "urgency": 43,
-      "urgency_at": "2026-07-30",
+      "urgency": 45,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.033,
+        "rec": 0.067,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -1211,7 +1246,7 @@
     },
     "vocab-me-ni-amaru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1221,7 +1256,7 @@
     },
     "vocab-me-wo-toosu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1230,10 +1265,10 @@
       }
     },
     "vocab-megakeru::meaning": {
-      "urgency": 46,
-      "urgency_at": "2026-07-30",
+      "urgency": 47,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.1,
+        "rec": 0.133,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -1248,7 +1283,7 @@
     },
     "vocab-mekujira-wo-tateru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1258,7 +1293,7 @@
     },
     "vocab-meue::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1268,7 +1303,7 @@
     },
     "vocab-mi-wo-hisomeru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1278,7 +1313,7 @@
     },
     "vocab-mimi-wo-sumasu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1288,7 +1323,7 @@
     },
     "vocab-mimuki-mo-shinai::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1298,7 +1333,7 @@
     },
     "vocab-minogasu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1308,7 +1343,7 @@
     },
     "vocab-minomawari::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1318,7 +1353,7 @@
     },
     "vocab-mirumiru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1328,7 +1363,7 @@
     },
     "vocab-mizu-wo-sasu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1338,7 +1373,7 @@
     },
     "vocab-mizushirazu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1347,10 +1382,10 @@
       }
     },
     "vocab-mochiawaseru::meaning": {
-      "urgency": 43,
-      "urgency_at": "2026-07-30",
+      "urgency": 45,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.033,
+        "rec": 0.067,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -1365,7 +1400,7 @@
     },
     "vocab-mojibanare::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1375,7 +1410,7 @@
     },
     "vocab-motamota::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1385,7 +1420,7 @@
     },
     "vocab-motte-no-hoka::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1394,10 +1429,10 @@
       }
     },
     "vocab-moushiawase::meaning": {
-      "urgency": 43,
-      "urgency_at": "2026-07-30",
+      "urgency": 45,
+      "urgency_at": "2026-07-31",
       "parts": {
-        "rec": 0.033,
+        "rec": 0.067,
         "freq": 0.9,
         "fsrs": 0.6,
         "err": 0.0
@@ -1412,7 +1447,7 @@
     },
     "vocab-moyamoya::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1422,17 +1457,17 @@
     },
     "vocab-mukau::meaning": {
       "urgency": 77,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.417,
+        "fsrs": 0.434,
         "err": 0.0
       }
     },
     "vocab-mune-ni-shimiru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1442,7 +1477,7 @@
     },
     "vocab-nakigoe::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1452,7 +1487,7 @@
     },
     "vocab-nantomo::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1462,7 +1497,7 @@
     },
     "vocab-nezasu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1472,7 +1507,7 @@
     },
     "vocab-niramu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1482,7 +1517,7 @@
     },
     "vocab-nobi-wo-suru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1492,7 +1527,7 @@
     },
     "vocab-nukenuke::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1502,7 +1537,7 @@
     },
     "vocab-omoi-itaru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1512,7 +1547,7 @@
     },
     "vocab-omoi-mo-yoranai::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1522,7 +1557,7 @@
     },
     "vocab-omoi-ni-torawareru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1532,7 +1567,7 @@
     },
     "vocab-omoiataru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1542,7 +1577,7 @@
     },
     "vocab-omoishiru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1552,7 +1587,7 @@
     },
     "vocab-oseji::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1562,7 +1597,7 @@
     },
     "vocab-oshitsubusu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1572,17 +1607,17 @@
     },
     "vocab-osu::meaning": {
       "urgency": 77,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.417,
+        "fsrs": 0.434,
         "err": 0.0
       }
     },
     "vocab-pokapoka::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1592,7 +1627,7 @@
     },
     "vocab-saiban::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1602,7 +1637,7 @@
     },
     "vocab-saichu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1612,7 +1647,7 @@
     },
     "vocab-sakai::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1622,7 +1657,7 @@
     },
     "vocab-sarigenai::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1632,7 +1667,7 @@
     },
     "vocab-sayuu-suru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1642,7 +1677,7 @@
     },
     "vocab-seki-wo-akeru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1652,7 +1687,7 @@
     },
     "vocab-seki-wo-tatsu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1662,7 +1697,7 @@
     },
     "vocab-shibushibu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1672,7 +1707,7 @@
     },
     "vocab-shidaini::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1682,7 +1717,7 @@
     },
     "vocab-shigotoburi::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1692,7 +1727,7 @@
     },
     "vocab-shobun::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1702,7 +1737,7 @@
     },
     "vocab-shousai::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1712,7 +1747,7 @@
     },
     "vocab-sokosoko::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1722,7 +1757,7 @@
     },
     "vocab-somosomo::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1732,7 +1767,7 @@
     },
     "vocab-sono-ki-ni-naru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1742,7 +1777,7 @@
     },
     "vocab-sotto::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1752,7 +1787,7 @@
     },
     "vocab-sugasugashii::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1762,7 +1797,7 @@
     },
     "vocab-sukkiri::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1772,17 +1807,17 @@
     },
     "vocab-sukoshi-zutsu::meaning": {
       "urgency": 77,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
-        "fsrs": 0.417,
+        "fsrs": 0.434,
         "err": 0.0
       }
     },
     "vocab-surasura::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1792,7 +1827,7 @@
     },
     "vocab-surechigau::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1802,7 +1837,7 @@
     },
     "vocab-tachitsukusu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1812,7 +1847,7 @@
     },
     "vocab-tamatama::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1822,7 +1857,7 @@
     },
     "vocab-tamotsu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1832,7 +1867,7 @@
     },
     "vocab-tekibishii::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1842,7 +1877,7 @@
     },
     "vocab-tenohira::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1852,7 +1887,7 @@
     },
     "vocab-tobidasu::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1862,7 +1897,7 @@
     },
     "vocab-toge::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1872,7 +1907,7 @@
     },
     "vocab-tsujiru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1882,7 +1917,7 @@
     },
     "vocab-tsukaigatte::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1892,7 +1927,7 @@
     },
     "vocab-tsukitsukeru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1902,7 +1937,7 @@
     },
     "vocab-tsukuzuku::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1912,7 +1947,7 @@
     },
     "vocab-uchitokeru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1922,7 +1957,7 @@
     },
     "vocab-uketomeru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1932,7 +1967,7 @@
     },
     "vocab-uruoi::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1942,7 +1977,7 @@
     },
     "vocab-utagau::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1952,7 +1987,7 @@
     },
     "vocab-uwazuru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1962,7 +1997,7 @@
     },
     "vocab-waki::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1972,7 +2007,7 @@
     },
     "vocab-yagate::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1982,7 +2017,7 @@
     },
     "vocab-yareyare::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -1992,7 +2027,7 @@
     },
     "vocab-yoboyobo::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -2002,7 +2037,7 @@
     },
     "vocab-yugameru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -2012,7 +2047,7 @@
     },
     "vocab-yuzuru::meaning": {
       "urgency": 84,
-      "urgency_at": "2026-07-30",
+      "urgency_at": "2026-07-31",
       "parts": {
         "rec": 1.0,
         "freq": 1.0,
@@ -2023,8 +2058,8 @@
   },
   "articles": {
     "そば屋の先生": {
-      "last_served": "2026-07-26",
-      "count": 2
+      "last_served": "2026-07-31",
+      "count": 3
     },
     "初めての雪": {
       "last_served": "2026-07-27",

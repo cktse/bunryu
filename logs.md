@@ -543,3 +543,34 @@ regeneration.
   4. **`あまりに～すぎる` deliberately not ingested** — the ①-referenced phrase is
      discontiguous and a near-duplicate of existing `あまりにも`; left for a future
      cross-link rather than a new page (data-minimization).
+
+## 2026-07-31 — Feature: suru-verb 「・する」 display + POS-grouped index
+
+Not an ingest. Surfaces サ変 (suru-verb) items distinctly and groups the index
+by part-of-speech. Spec updated first (§6.2, §6.5.1, §7, §7.1, §7.2).
+- **Convention (§6.2):** a サ変名詞 (verbal noun taking する) is `suru-verb`; a
+  noun that does not is `noun`. Suru-ness lives **only** in `part_of_speech` —
+  never in `headword`.
+- **Display (§6.5.1, §7.2):** suru-verbs render `勉強・する（べんきょう・する）` in
+  both the page `# title` and the index row (shared `lint.suru_suffix`). `index.py`
+  now sub-groups `## 語彙` by POS into 名詞/動詞/形容詞/副詞/表現 (noun+suru-verb →
+  名詞); 文法/記事 stay flat.
+- **Lint (§7):** title check is POS-aware (expects 「・する」 for suru-verbs); new
+  rule — `headword` must not end in する for noun/suru-verb.
+- **Content migration (14 pages):** reclassified 8 noun→suru-verb (確保・汚染・
+  到来・志向・探究・確信・再考・禁欲); retitled 5 already-suru pages (会釈・処分・
+  勘違い・合意・導入); renamed `左右する`→`左右` (headword/reading/title/filename)
+  and aliased its 2 wikilinks in 裁判員のもやもや.md to `[[左右|左右する]]`.
+- **Tests/baselines:** lint fixtures +3 (suru title ±, headword-する) → 30/30;
+  index fixtures +3 (動詞/形容詞/表現) + 改ざん→suru-verb, baseline regenerated →
+  14/14. cards (58) unaffected — its fixture vault is separate; scheduler 24/24.
+  Full vault lint clean (211/0/0). `build/cards.json`/`index.md` regenerated.
+- **Flashcards (follow-up):** applied the 「・する」 display to the Obsidian SR
+  channel too. `cards.py` `disp()` is POS-aware; `obsidian_cards.py` canto card
+  now reuses the rendered `c['back']` (dropped its duplicate `disp` + dead `lint`
+  import); §6.5.1/§10.2 note flashcards as a third surface (Reading card exempt).
+  Cards fixture `左右する`→`左右` (mirrors the vault rename); cards baseline
+  updated. **Full flashcards resync** (`obsidian_cards.py --force`): 28 created +
+  175 regenerated, 0 drift — this **reset 28 local pilot FSRS schedules** (OK'd,
+  pilot phase). Root-caused the drift to ingestion never regenerating
+  cards.json/flashcards (spec gap, §8.2 — under review).

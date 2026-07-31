@@ -55,9 +55,13 @@ def load_pages(kind, wiki=WIKI):
     return out
 
 
-def disp(hw, rd):
-    """Answer display: 改ざん（かいざん） for kanji, やがて for pure-kana."""
-    return f"{hw}（{rd}）" if KANJI.search(hw or "") else hw
+def disp(hw, rd, pos=None):
+    """Word display: 改ざん・する（かいざん・する） for a suru-verb,
+    改ざん（かいざん） for a plain kanji noun, やがて for pure-kana. The 「・する」
+    marker (shared with the page title §6.5.1 and the index §7.2) is derived from
+    part_of_speech via lint.suru_suffix."""
+    suru = lint.suru_suffix(pos)
+    return f"{hw}{suru}（{rd}{suru}）" if KANJI.search(hw or "") else f"{hw}{suru}"
 
 
 def base_card(page, kind):
@@ -145,7 +149,7 @@ def canto_cards(vocab):
         c = base_card(v, "vocab")
         c.update(id=f"{c['item_id']}::canto", type="canto",
                  prompt="この意味の言葉は何ですか？", front=canto,
-                 back=disp(c["headword"], c["reading"]))
+                 back=disp(c["headword"], c["reading"], v["fm"].get("part_of_speech")))
         cards.append(c)
     return cards
 
@@ -184,7 +188,7 @@ def meaning_cards(vocab):
         rng.shuffle(choices)
         c = base_card(v, "vocab")
         c.update(id=f"{vid}::meaning", type="meaning", prompt="意味は？",
-                 front=disp(c["headword"], c["reading"]),
+                 front=disp(c["headword"], c["reading"], v["fm"].get("part_of_speech")),
                  choices=choices, answer_index=choices.index(answer), back=answer)
         cards.append(c)
     return cards
@@ -213,7 +217,7 @@ def cloze_cards(articles, vocab_by_headword):
                 c.update(
                     id=f"{v['fm']['id']}::cloze::{aid}::{i}", type="cloze",
                     prompt="空欄に入る語は？", front=front,
-                    back=disp(c["headword"], c["reading"]),
+                    back=disp(c["headword"], c["reading"], v["fm"].get("part_of_speech")),
                     surface=m.group(1).split("|")[-1], article=aid)
                 cards.append(c)
     return cards

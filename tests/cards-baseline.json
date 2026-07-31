@@ -13,7 +13,7 @@
     "type": "canto",
     "prompt": "この意味の言葉は何ですか？",
     "front": "引入、引進",
-    "back": "導入（どうにゅう）"
+    "back": "導入・する（どうにゅう・する）"
   },
   {
     "item_id": "vocab-hasamu",
@@ -99,20 +99,20 @@
     "back": "裁判（さいばん）"
   },
   {
-    "item_id": "vocab-sayuu-suru",
+    "item_id": "vocab-sayuu",
     "kind": "vocab",
-    "headword": "左右する",
-    "reading": "さゆうする",
+    "headword": "左右",
+    "reading": "さゆう",
     "level": "N1",
     "tags": [
       "influence",
       "裁判員のもやもや"
     ],
-    "id": "vocab-sayuu-suru::canto",
+    "id": "vocab-sayuu::canto",
     "type": "canto",
     "prompt": "この意味の言葉は何ですか？",
     "front": "左右、支配、影響大局",
-    "back": "左右する（さゆうする）"
+    "back": "左右・する（さゆう・する）"
   },
   {
     "item_id": "vocab-yagate",
@@ -160,7 +160,7 @@
     "type": "cloze",
     "prompt": "空欄に入る語は？",
     "front": "「裁判員制度」の＿＿が決まり、一体裁判員とはどんな人が選ばれるのかと、その資格を見ると、「誰でも」とある。",
-    "back": "導入（どうにゅう）",
+    "back": "導入・する（どうにゅう・する）",
     "surface": "導入",
     "article": "article-saibanin-moyamoya"
   },
@@ -259,20 +259,20 @@
     "article": "article-saibanin-moyamoya"
   },
   {
-    "item_id": "vocab-sayuu-suru",
+    "item_id": "vocab-sayuu",
     "kind": "vocab",
-    "headword": "左右する",
-    "reading": "さゆうする",
+    "headword": "左右",
+    "reading": "さゆう",
     "level": "N1",
     "tags": [
       "influence",
       "裁判員のもやもや"
     ],
-    "id": "vocab-sayuu-suru::cloze::article-saibanin-moyamoya::1",
+    "id": "vocab-sayuu::cloze::article-saibanin-moyamoya::1",
     "type": "cloze",
     "prompt": "空欄に入る語は？",
     "front": "一般人の「日常感覚と常識を裁判に反映させる」というが、そもそも自分は、他人の一生を＿＿「日常感覚と常識」を持ち合わせているのかと考え、さらには、「人が人を裁く」ことなどできるのか、そんな権利があるのかと裁判制度そのものを問い直した。",
-    "back": "左右する（さゆうする）",
+    "back": "左右・する（さゆう・する）",
     "surface": "左右する",
     "article": "article-saibanin-moyamoya"
   },
@@ -801,7 +801,7 @@
     "id": "vocab-dounyuu::meaning",
     "type": "meaning",
     "prompt": "意味は？",
-    "front": "導入（どうにゅう）",
+    "front": "導入・する（どうにゅう・する）",
     "choices": [
       "二つのものの間に物を入れて押さえる",
       "物事の成り行きや人の運命などを思いのままに動かす、また大きく影響を与えること",
@@ -930,26 +930,26 @@
     "back": "争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと"
   },
   {
-    "item_id": "vocab-sayuu-suru",
+    "item_id": "vocab-sayuu",
     "kind": "vocab",
-    "headword": "左右する",
-    "reading": "さゆうする",
+    "headword": "左右",
+    "reading": "さゆう",
     "level": "N1",
     "tags": [
       "influence",
       "裁判員のもやもや"
     ],
-    "id": "vocab-sayuu-suru::meaning",
+    "id": "vocab-sayuu::meaning",
     "type": "meaning",
     "prompt": "意味は？",
-    "front": "左右する（さゆうする）",
+    "front": "左右・する（さゆう・する）",
     "choices": [
-      "物事の成り行きや人の運命などを思いのままに動かす、また大きく影響を与えること",
-      "二つのものの間に物を入れて押さえる",
+      "形・表情や、事実・考えなどを正しくない状態に曲げる",
       "新しい制度・方法・設備などを、外から取り入れて用いること",
-      "わざと、ある目的をもってするさま"
+      "争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと",
+      "物事の成り行きや人の運命などを思いのままに動かす、また大きく影響を与えること"
     ],
-    "answer_index": 0,
+    "answer_index": 3,
     "back": "物事の成り行きや人の運命などを思いのままに動かす、また大きく影響を与えること"
   },
   {
@@ -1064,19 +1064,19 @@
     "back": "さいばん"
   },
   {
-    "item_id": "vocab-sayuu-suru",
+    "item_id": "vocab-sayuu",
     "kind": "vocab",
-    "headword": "左右する",
-    "reading": "さゆうする",
+    "headword": "左右",
+    "reading": "さゆう",
     "level": "N1",
     "tags": [
       "influence",
       "裁判員のもやもや"
     ],
-    "id": "vocab-sayuu-suru::reading",
+    "id": "vocab-sayuu::reading",
     "type": "reading",
     "prompt": "読みは？",
-    "front": "左右する",
-    "back": "さゆうする"
+    "front": "左右",
+    "back": "さゆう"
   }
 ]

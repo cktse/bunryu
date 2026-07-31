@@ -225,6 +225,13 @@ level, focus, tags). The body is for the learner.
 | `part_of_speech` | enum      | ✓   | e.g. `noun`, `na-adjective`, `i-adjective`, `godan-verb`, `ichidan-verb`, `suru-verb`, `adverb`, `expression`. |
 | `accent`      | string       | ·   | Pitch-accent notation if available. In scope for N1 (§11); may be captured now even though accent/audio drills are deferred (§10.6). |
 
+**`noun` vs `suru-verb` (サ変).** A verbal noun that also takes する — a サ変名詞
+such as 確保・汚染・解決 — is classified **`suru-verb`**; a noun that does *not*
+take する (一時・側面・倫理・飢餓) is **`noun`**. This is a per-word judgment (Japanese language instructor role): being 漢語 does not automatically make a word サ変. The distinction is what drives the「・する」 display marker (§6.5.1, §7.2). **The suru-ness lives only in
+`part_of_speech`** — never fold する into the `headword` (the headword is the plain
+dictionary form / filename / `[[wikilink]]` target; e.g. headword `左右`, not
+`左右する`). A lint rule enforces this (§7).
+
 ### 6.3 Grammar-specific frontmatter
 
 | Field         | Type         | Req | Description |
@@ -276,11 +283,20 @@ The body opens with a single **level-1 title line** (`# …`), then the fixed
 `##` sections. The title is derived from the frontmatter:
 
 - If `headword` **contains any kanji**, the title is **`# headword（reading）`**
-  — the reading in full-width parentheses, e.g. `# 改ざん（かいざん）`,
+  — the reading in full-width parentheses, e.g. `# 側面（そくめん）`,
   `# 必ずしも～ない（かならずしも～ない）`.
 - If `headword` **contains no kanji** (pure kana / a `～…` pattern), the title is
   just **`# headword`** — no parenthetical reading, since it would merely repeat
   the headword, e.g. `# やがて`, `# ～をものともせず`.
+- **suru-verbs** (`part_of_speech: suru-verb`, §6.2) additionally carry a
+  「・する」 marker: `・する` after the headword, and — when a reading is shown —
+  `・する` at the end of the reading, e.g. `# 勉強・する（べんきょう・する）`,
+  `# 確保・する（かくほ・する）`. A kana suru-verb (no reading shown) is just
+  `# …・する`. Plain nouns take no marker (`# 一時（いちじ）`). The same rendering
+  is reused verbatim in the index (§7.2) and in the flashcard word-display
+  (§10.2), so a page's title, its index row, and its cards all match. Because
+  `・する` is derived from `part_of_speech`, the linter's title check is POS-aware
+  (§7).
 
 **例文 sub-lines (per §2.1).** Each example sentence carries, in this order:
 1. **(primary)** the Japanese note on nuance / usage;
@@ -292,7 +308,7 @@ The Japanese sentence and its Japanese nuance note remain the primary text; the
 `（粵）`/`（英）` line is a secondary comprehension aid placed beneath them.
 
 ```markdown
-# 改ざん（かいざん）
+# 側面（そくめん）
 
 ## 意味
 日本語による簡潔な定義・説明。必要なら広東語の補足、最後の手段として英語。
@@ -407,6 +423,9 @@ focus: false
 
 ### 6.7 Example content file — vocabulary
 
+(A `suru-verb`, so its title carries the 「・する」 marker per §6.5.1 — `改ざん`
+is a サ変名詞, `改ざんする`.)
+
 ```markdown
 ---
 id: vocab-kaizan
@@ -421,7 +440,7 @@ created: 2026-07-06
 focus: false
 ---
 
-# 改ざん（かいざん）
+# 改ざん・する（かいざん・する）
 
 ## 意味
 文書・データ・記録などを不正に書き換えること。（粵：竄改、篡改。
@@ -499,10 +518,16 @@ engine.
   - **`reading` is kana only** — a `reading` that contains kanji is an error;
     furigana must spell the kanji out (e.g. `～を目前に` → `～をもくぜんに`, §6.1).
     This catches a `reading` mistakenly left as a copy of a kanji headword.
+  - **`headword` does not end in する** for `part_of_speech` `noun`/`suru-verb` —
+    suru-ness belongs in `part_of_speech`, not the headword (§6.2). Catches
+    e.g. a headword `左右する` that should be `左右`. Scoped to noun/suru-verb so
+    verb/expression headwords that legitimately contain する are unaffected.
   - Enum fields (`level`, `type`, `part_of_speech`, `register`) fall in
     module-level allowed sets (`frozenset` constants).
   - `id` unique across the whole `llm-wiki/` tree.
-  - First body line is the `# title` per §6.5.1 (vocab/grammar).
+  - First body line is the `# title` per §6.5.1 (vocab/grammar) — the check is
+    **POS-aware**: for a `suru-verb` the expected title carries the 「・する」
+    marker (§6.5.1).
   - **vocabulary/grammar:** body has a `## 意味` and a `## 例文` with ≥2 numbered
     examples, each example carrying a `（粵）`/`（英）` line (§6.5.1).
   - **article:** body has a `## 本文`; every `[[wikilink]]` in the body /
@@ -532,7 +557,8 @@ exactly as in production, just pointed at a different root.
   page that trips exactly one rule). Cover every §7 rule with **1–2 positive and
   1–2 negative** files: required fields; `focus` bool; date format; `word_count`
   int; type-specific fields; `reading` required (vocab & grammar) + kana-only;
-  each enum; `id` uniqueness; `# title` line; `## 意味`/`## 例文` presence; ≥2
+  `headword`-not-する (noun/suru-verb); each enum; `id` uniqueness; `# title` line
+  (incl. the suru-verb 「・する」 title); `## 意味`/`## 例文` presence; ≥2
   examples; `（粵）`/`（英）` line; article `## 本文`; wikilink resolution;
   split-wikilink; code-span exclusion.
   - Keep each negative file valid in every respect **except** the one rule under
@@ -576,11 +602,34 @@ never drifts.
 - **Three sections, by `type`** — `## 語彙`, `## 文法`, `## 記事` — each headed
   with its item count. Splitting by type keeps it scannable and lets each section
   carry only the columns that apply (articles have no `reading` and no `## 意味`).
+- **`## 語彙` is sub-grouped by part-of-speech** into `### 名詞`, `### 動詞`,
+  `### 形容詞`, `### 副詞`, `### 表現` (each with its own count), to surface
+  grammatical clusters — the confusable N1 adverbs together, the verbs together.
+  This is a *grammatical* axis, orthogonal to the *semantic* `## 関連` graph on
+  each page, so it complements rather than duplicates it. The `part_of_speech`
+  → sub-heading map:
+  - `noun` **and** `suru-verb` → **名詞** (suru-verbs stay with nouns, marked by
+    the 「・する」 glyph below);
+  - `godan-verb`, `ichidan-verb` → **動詞**;
+  - `na-adjective`, `i-adjective` → **形容詞**;
+  - `adverb` → **副詞**;  `expression` → **表現**.
+
+  `## 文法` and `## 記事` stay **flat** — grammar's only groupable field
+  (`register`) is too coarse, and its real similarity is functional (concession /
+  emphasis / …), which lives in `## 関連`/tags (a future tag-taxonomy question,
+  not POS).
 - **Per row — every field read, never authored:**
   - **`[[headword]]`** — the drill-down wikilink (= the page filename);
   - **reading** in `（…）`, shown **only when it differs from the headword** — the
     same rule as the §6.5.1 title line (kana-only / `～…` headwords would merely
     repeat themselves, so the reading is omitted);
+  - **`・する` marker for suru-verbs** (`part_of_speech: suru-verb`): `・する`
+    after the `[[headword]]`, plus `・する` appended inside the reading paren when
+    one is shown — e.g. `[[勉強]]・する（べんきょう・する）`,
+    `[[確保]]・する（かくほ・する）`; a kana suru-verb shows `[[…]]・する` (no paren).
+    Plain nouns get nothing (`[[一時]]（いちじ）`). Identical to the §6.5.1 title
+    rendering, so a page's title and its index row agree; derived from
+    `part_of_speech`, no data added;
   - **one-line gloss** — the **first paragraph of `## 意味`** (its lines up to the
     first blank line) **joined into a single line**, for vocab/grammar. Joining is
     necessary because that paragraph is usually soft-wrapped across two physical
@@ -588,9 +637,10 @@ never drifts.
     at its end (a first-*line*-only rule would truncate mid-sentence and drop the
     Cantonese). **Articles** have no 意味 → use the **first sentence of `## メモ`**
     (up to the first `。`), falling back to a `（tag・tag）` list.
-- **Deterministic order.** Vocab/grammar sorted by `reading` (あいうえお order);
-  articles by `headword`. A stable sort means unchanged input yields byte-identical
-  output — clean git diffs, and safe to regenerate on every ingest.
+- **Deterministic order.** Within each 語彙 POS sub-group sorted by `reading`
+  (あいうえお order); grammar by `reading`; articles by `headword`. A stable sort
+  means unchanged input yields byte-identical output — clean git diffs, and safe
+  to regenerate on every ingest.
 - **Generated-file header.** The top of `index.md` is marked machine-written
   (「自動生成 — 編集しないでください」) with the generation date, so it is never
   mistaken for a hand-curated note.
@@ -599,10 +649,12 @@ never drifts.
 
 **Tests (`tests/run_index_tests.py`).** The §7.1 fixture-vault approach, reused:
 run `index.py` over a small clean fixture vault and compare the emitted markdown
-against a committed **golden `index.md` baseline**, asserting section order,
-per-type counts, the reading-omission rule, gloss extraction (including the
-article `メモ` fallback), and the あいうえお sort. Regenerating the baseline is
-the intended way to update expectations when the format changes.
+against a committed **golden `index.md` baseline**, asserting section order, the
+語彙 POS sub-grouping (bucket order + per-bucket counts, noun+suru-verb merged),
+the 「・する」 marker (suru-verb vs plain noun), per-type counts, the
+reading-omission rule, gloss extraction (including the article `メモ` fallback),
+and the あいうえお sort. Regenerating the baseline is the intended way to update
+expectations when the format changes.
 
 ## 8. Article Ingestion (`ingest article`)
 
@@ -919,6 +971,14 @@ convention, `## 関連`, and `## 間違いやすい点` each feed a card type.
 | **粵→JP production** | Cantonese gloss → the Japanese word | the `（粵）` line in `## 意味` (heritage-language recall) |
 | **Meaning (MC)** | word → its meaning, 4 choices | `## 意味` as the answer; distractors sampled by matching `part_of_speech` + nearby `level` |
 | **Context cloze** | sentence with the word blanked → the word | article `## 本文`: blank a `[[dict\|surface]]` span — the alias gives both the exact span to hide **and** the answer (`dict-form`). Also `例文` where the surface equals the headword verbatim. |
+
+The **word display** — wherever the whole word is shown as prompt or answer: the
+粵→JP answer, the Meaning-MC prompt, and cloze answers — reuses the shared
+rendering of §6.5.1, so a card, the page title, and the index row all agree:
+`改ざん・する（かいざん・する）` for a suru-verb, `改ざん（かいざん）` for a plain
+kanji noun, `やがて` for kana. The **Reading** card is the deliberate exception:
+its front stays the plain headword (`改ざん`), since it quizzes the kanji reading
+itself and a 「・する」 there would make the expected answer ambiguous.
 
 **Grammar** (implemented — full-context, JLPT-shaped; these three, in order gcloze/gmc/gerror):
 

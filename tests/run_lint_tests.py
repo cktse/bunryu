@@ -46,6 +46,9 @@ EXPECTED = {
     "vocabulary/neg-no-frontmatter.md": (E, "no YAML frontmatter"),
     "vocabulary/neg-split-link.md": (E, "split across a line break"),
     "vocabulary/neg-dup-b.md": (E, "duplicate id"),
+    "vocabulary/pos-suru.md": None,                                    # suru-verb title, clean
+    "vocabulary/neg-suru-title.md": (E, "・する"),                      # suru title missing ・する
+    "vocabulary/neg-headword-suru.md": (E, "must not end in する"),
     # grammar
     "grammar/～に際して.md": None,
     "grammar/neg-missing-formation.md": (E, "grammar missing required `formation`"),

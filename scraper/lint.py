@@ -98,10 +98,17 @@ def strip_code(text):
     return re.sub(r"`[^`]*`", "", text)
 
 
-def expected_title(headword, reading):
+def suru_suffix(pos):
+    """The 「・する」 display marker for サ変 (suru-verb) items; '' otherwise.
+    Shared by the title check and the index (§6.5.1, §7.2)."""
+    return "・する" if pos == "suru-verb" else ""
+
+
+def expected_title(headword, reading, pos=None):
+    suru = suru_suffix(pos)
     if KANJI_RE.search(headword) and reading:
-        return f"# {headword}（{reading}）"
-    return f"# {headword}"
+        return f"# {headword}{suru}（{reading}{suru}）"
+    return f"# {headword}{suru}"
 
 
 # ---------------------------------------------------------------- rules
@@ -140,6 +147,13 @@ def check_frontmatter(fm):
     if rd and KANJI_RE.search(rd):
         out.append((ERROR, f"`reading` must be kana, contains kanji: {rd!r}"))
 
+    # suru-ness belongs in part_of_speech, not the headword (§6.2)
+    hw = str(fm.get("headword", ""))
+    if t == "vocabulary" and fm.get("part_of_speech") in ("noun", "suru-verb") \
+            and hw.endswith("する"):
+        out.append((ERROR,
+                    f"`headword` must not end in する (suru-ness is part_of_speech): {hw!r}"))
+
     reg = fm.get("register")
     if reg is not None and reg not in REGISTERS:
         out.append((ERROR, f"`register` {reg!r} not in {sorted(REGISTERS)}"))
@@ -147,7 +161,8 @@ def check_frontmatter(fm):
 
 
 def check_title_line(fm, first_line):
-    exp = expected_title(fm.get("headword", ""), fm.get("reading", ""))
+    exp = expected_title(fm.get("headword", ""), fm.get("reading", ""),
+                         fm.get("part_of_speech"))
     if first_line.strip() != exp:
         return [(ERROR, f"title line should be {exp!r}, got {first_line.strip()!r}")]
     return []

@@ -30,7 +30,6 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
-from scraper import lint          # noqa: E402
 from study import cards as cardgen  # noqa: E402
 
 FLASH = REPO / "flashcards"
@@ -41,16 +40,14 @@ SR_COMMENT = re.compile(r"<!--SR:.*?-->")
 
 
 # ---------------------------------------------------------------- rendering
-def disp(hw, rd):
-    return f"{hw}（{rd}）" if lint.KANJI_RE.search(hw or "") else hw
-
-
 def card_block(c):
     hw, rd, t = c["headword"], c["reading"], c["type"]
     if t == "reading":
         return f"{hw}::[[{hw}|{rd}]]"
     if t == "canto":
-        return f"（粵）{c['front']}::[[{hw}|{disp(hw, rd)}]]"
+        # reuse the word display already rendered by cards.py (carries 「・する」
+        # for suru-verbs, §10.2) rather than re-deriving it here
+        return f"（粵）{c['front']}::[[{hw}|{c['back']}]]"
     if t in ("cloze", "gcloze"):
         return c["front"].replace("＿＿", f"==[[{hw}|{c['surface']}]]==")
     if t in ("meaning", "gmc"):

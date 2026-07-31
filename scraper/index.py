@@ -19,6 +19,14 @@ from scraper import lint  # noqa: E402  (reuse its frontmatter reader / KANJI_RE
 
 # frontmatter `type` -> (section heading), in output order
 SECTIONS = (("vocabulary", "語彙"), ("grammar", "文法"), ("article", "記事"))
+# `## 語彙` is sub-grouped by part-of-speech into these buckets, in order (§7.2)
+POS_BUCKETS = (
+    ("名詞", ("noun", "suru-verb")),
+    ("動詞", ("godan-verb", "ichidan-verb")),
+    ("形容詞", ("na-adjective", "i-adjective")),
+    ("副詞", ("adverb",)),
+    ("表現", ("expression",)),
+)
 EDIT_NOTE = "直接編集しないでください（`scraper/index.py` が再生成します）"
 
 
@@ -60,17 +68,20 @@ def gloss_for(t, sections, fm):
 
 def reading_suffix(fm):
     """`（reading）` only when it adds information — same rule as the §6.5.1
-    title line: shown for kanji headwords, omitted for kana / ～… headwords."""
+    title line: shown for kanji headwords, omitted for kana / ～… headwords.
+    A suru-verb appends 「・する」 inside the paren (§7.2)."""
     hw = fm.get("headword", "")
     rd = str(fm.get("reading", "") or "")
+    suru = lint.suru_suffix(fm.get("part_of_speech"))
     if rd and rd != hw and lint.KANJI_RE.search(hw):
-        return f"（{rd}）"
+        return f"（{rd}{suru}）"
     return ""
 
 
 def row(t, fm, sections):
     hw = fm.get("headword", "")
-    link = f"[[{hw}]]{reading_suffix(fm)}"
+    surface = f"[[{hw}]]{lint.suru_suffix(fm.get('part_of_speech'))}"
+    link = f"{surface}{reading_suffix(fm)}"
     g = gloss_for(t, sections, fm)
     return f"- {link} — {g}" if g else f"- {link}"
 
@@ -104,10 +115,24 @@ def render(items, dates):
     out = ["# LLM-wiki 索引（自動生成）", "",
            f"> {EDIT_NOTE}",
            f"> 収録 {total} 項目・最終更新 {last}"]
-    for key, title in SECTIONS:
-        rows = sorted(items[key], key=lambda e: (e[0], e[1]))   # あいうえお, then headword
+
+    # 語彙 — sub-grouped by part-of-speech (§7.2); empty buckets are omitted
+    vocab = items["vocabulary"]
+    out += ["", f"## 語彙（{len(vocab)} 項目）"]
+    for label, poss in POS_BUCKETS:
+        rows = sorted((e for e in vocab if e[2].get("part_of_speech") in poss),
+                      key=lambda e: (e[0], e[1]))            # あいうえお, then headword
+        if not rows:
+            continue
+        out += ["", f"### {label}（{len(rows)} 項目）", ""]
+        out += [row("vocabulary", fm, sections) for _, _, fm, sections in rows]
+
+    # 文法・記事 — flat
+    for key, title in (("grammar", "文法"), ("article", "記事")):
+        rows = sorted(items[key], key=lambda e: (e[0], e[1]))
         out += ["", f"## {title}（{len(rows)} 項目）", ""]
         out += [row(key, fm, sections) for _, _, fm, sections in rows]
+
     return "\n".join(out) + "\n"
 
 

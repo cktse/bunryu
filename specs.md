@@ -148,7 +148,7 @@ bunryu/
 │   └── prototypes/           # throwaway email-quiz prototype (§10.8.7); not a build dependency
 ├── tests/                    # run_lint_tests.py + test-llm-wiki/ (§7.1);
 │                             #   run_cards_tests.py + cards-wiki/ + cards-baseline.json (§10.7)
-└── requirements.txt
+└── requirements.txt          # the one runtime dependency: py-yaml12 (§7); all else is stdlib
 ```
 
 **`raw/` (human) vs `llm-wiki/` (LLM), kept as sibling top-level directories.**
@@ -518,16 +518,18 @@ generator (§7.2), and the learning-aids generators (§10) all import it, so no
 module re-implements parsing and the dependency runs one way (schema ←
 everything; §5 code layering).
 
-`wikitools/lint.py` **consumes** `schema.py` to check every page against §6. The
-schema is tiny, so **use the standard library only** — no `python-frontmatter`,
-`PyYAML`, or `pydantic`. `pathlib` + `re` + plain `if`s suffice; the ~30-line
-hand-rolled frontmatter reader in `schema.py` replaces a YAML engine.
+`wikitools/lint.py` **consumes** `schema.py` to check every page against §6.
+Apart from `yaml12` (below), the tooling is **standard library only** — no
+`python-frontmatter`, no `pydantic`; `pathlib` + `re` + plain `if`s are enough
+for the rules themselves.
 
-- **Frontmatter parse (stdlib, in `schema.py`).** Split the file on its first two `---` fences,
-  then read the block line by line: `key: value` pairs, block lists (`key:`
-  followed by indented `- item` lines), and inline lists (`tags: [a, b]`) into
-  plain `dict`/`list`. That covers every field the schema uses — no YAML library
-  needed.
+- **Frontmatter parse (in `schema.py`).** Split the file on its first two `---`
+  fences and parse the block with **`yaml12`** (YAML 1.2, the project's one
+  runtime dependency). Values keep their natural types — `focus: false` → bool,
+  `word_count: 620` → int, `tags: [a, b]` → `list[str]`; dates stay **strings**
+  (YAML 1.2 has no timestamp type), which is what the `YYYY-MM-DD` check below
+  expects. A block that is not valid YAML raises `FrontmatterError`, reported as
+  **malformed YAML frontmatter** instead of being silently mis-parsed.
 - **Checks (plain `if` / `re`, no framework):**
   - All required common fields present and non-empty; `focus` parses as a bool,
     `created`/`updated` match `\d{4}-\d{2}-\d{2}`, `word_count` an int.
@@ -577,7 +579,7 @@ linter runs exactly as in production, just pointed at a different root.
   `headword`-not-する (noun/suru-verb); each enum; `id` uniqueness; `# title` line
   (incl. the suru-verb 「・する」 title); `## 意味`/`## 例文` presence; ≥2
   examples; `（粵）`/`（英）` line; article `## 本文`; wikilink resolution;
-  split-wikilink; code-span exclusion.
+  split-wikilink; code-span exclusion; malformed-YAML frontmatter.
   - Keep each negative file valid in every respect **except** the one rule under
     test, so exactly the expected finding fires.
   - `id`-uniqueness (a cross-file rule) needs a **pair** of fixtures sharing an
@@ -1620,6 +1622,17 @@ the code no longer shows the paths not taken.
   `progress.json`** because it is written on every delivery anyway, with **atomic,
   sanity-checked writes** as the safeguard instead of a second file. *(Reuse;
   data-minimization; flag-tech-debt.)*
+- **Frontmatter parsing: hand-rolled vs. a YAML library.** The reader began as
+  ~30 stdlib lines (`key: value`, inline and block lists) because the schema is
+  flat and no YAML 1.2 parser was to hand. Once **`yaml12`** was available it
+  replaced them with one `parse_yaml` call: fewer lines, real YAML semantics
+  (quoting, escaping, comments), and — the actual win — a malformed block now
+  **fails loudly** instead of silently mis-parsing, which was the one class of
+  breakage the linter could not see. Verified by parsing all 272 vault + fixture
+  pages with both readers: identical values, so `index.md` and `cards.json` stay
+  byte-identical. The cost is one pinned dependency (`requirements.txt`), shipped
+  as a compiled wheel — the no-compiled-languages tenet governs *our* code, not
+  our dependencies. *(Reuse-libraries; test-driven; flag-tech-debt.)*
 - **Regeneration: idempotent driver, not Make/mtime.** Drift (stale `index.md`,
   `cards.json`, flashcards after ingests) prompted considering a **Make**- or
   **mtime-dependency** build graph ("rebuild iff upstream newer"). Rejected for

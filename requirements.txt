@@ -1,0 +1,2 @@
+# Runtime dependencies (specs §5, §7). Everything else is standard library.
+py-yaml12>=0.1.0        # YAML 1.2 parser for the `---` frontmatter block (wikitools/schema.py)

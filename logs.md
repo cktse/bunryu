@@ -640,3 +640,30 @@ headwords** — no existing page needed enhancing.
   review history outweighs distractor freshness. Two candidate fixes for the
   §10.4 work: implement the id-matched resync, or make distractor draws depend
   only on a stable per-item neighbourhood so the pool stops being global.
+
+## 2026-09-05 — schema.py: hand-rolled frontmatter reader → yaml12 (YAML 1.2)
+
+Not an ingest. `yaml12` became available; adopted it **only** where it simplifies
+(specs §7, §11.1; CLAUDE.md reuse-libraries tenet).
+- **`wikitools/schema.py`** — `parse_frontmatter` drops the ~30-line hand-rolled
+  reader for a single `yaml12.parse_yaml` call (~6 lines). Values now carry real
+  types (`focus`→bool, `word_count`→int, `tags`→list[str]); dates stay strings,
+  since YAML 1.2 has no timestamp type, so the §7 `YYYY-MM-DD` check is
+  unaffected. New `FrontmatterError` for a `---` block that is not valid YAML.
+- **`wikitools/lint.py`** — catches `FrontmatterError` and reports
+  `malformed YAML frontmatter: …`. This is a **new rule**, not just a port: the
+  old reader silently skipped lines it could not parse, so broken YAML was the
+  one breakage class the linter could not see.
+- **New negative fixture** `tests/test-llm-wiki/vocabulary/neg-bad-yaml.md`
+  (unterminated `[`) + its `EXPECTED` entry; lint suite 30 → **31 cases**.
+- **New `requirements.txt`** (the file specs §5 already listed but that did not
+  exist): pins `py-yaml12>=0.1.0`, the project's sole runtime dependency.
+- **Equivalence checked before switching:** parsed all **272** pages
+  (llm-wiki 222 + both fixture vaults) with the old and new readers — 271
+  identical, 0 differing, 0 parse errors (the 272nd is the no-frontmatter
+  fixture).
+- **Verified:** lint 31/31, index 14/14, cards 58, scheduler 24/24; real-vault
+  lint 222/0/0; regenerated `build/cards.json` and `index.md` are
+  **byte-identical** to before the change.
+- **Specs updated** (§5 tree, §7 parse rule + stdlib-only claim, §7.1 fixture
+  list, §11.1 decision record incl. the compiled-wheel trade-off).

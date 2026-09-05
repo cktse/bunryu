@@ -2,8 +2,9 @@
 """The LLM-wiki content schema, as code (specs.md §6).
 
 Foundation module — the frontmatter parser, the body splitter, the schema's enum
-sets, the shared regexes, and the title/display rules. Standard library only; it
-depends on nothing else in the project.
+sets, the shared regexes, and the title/display rules. Depends on nothing else in
+the project; its one third-party dependency is `yaml12` (YAML 1.2), which parses
+the `---` block.
 
 It is imported by the linter (§7), the index generator (§7.2), and the
 learning-aids generators (§10), so parsing/schema logic lives in exactly one
@@ -12,6 +13,8 @@ design, minimal coupling, unidirectional dependencies; specs §5 code layering).
 """
 
 import re
+
+import yaml12
 
 # ---------------------------------------------------------------- schema vocab
 LEVELS = frozenset({"N1", "N2", "N3", "N4", "N5"})
@@ -27,38 +30,30 @@ LINK_RE = re.compile(r"\[\[(.*?)\]\]", re.S)          # inner text (may span \n)
 
 
 # ---------------------------------------------------------------- parsing
+class FrontmatterError(ValueError):
+    """A page has a `---` block, but it is not valid YAML (reported by §7 lint)."""
+
+
 def parse_frontmatter(text):
     """Return (frontmatter_dict, body_str). dict is {} if no frontmatter.
 
-    Hand-rolled — handles `key: value`, inline lists `[a, b]`, and block
-    lists (`key:` then indented `- item` lines). No YAML engine.
+    The `---` block is parsed as **YAML 1.2** (`yaml12`), so values keep their
+    natural types: `focus: false` -> bool, `word_count: 620` -> int,
+    `tags: [a, b]` -> list[str]. Dates stay strings (YAML 1.2 has no timestamp
+    type), which is what the §7 `YYYY-MM-DD` check expects.
     """
     m = re.match(r"---\n(.*?)\n---\n?(.*)", text, re.S)
     if not m:
         return {}, text
-    block, body = m.group(1), m.group(2)
-    data = {}
-    cur_list_key = None
-    for line in block.split("\n"):
-        if not line.strip():
-            continue
-        if cur_list_key and re.match(r"\s*-\s+", line):
-            data[cur_list_key].append(re.sub(r"^\s*-\s+", "", line).strip())
-            continue
-        cur_list_key = None
-        if ":" not in line:
-            continue
-        key, _, val = line.partition(":")
-        key, val = key.strip(), val.strip()
-        if val == "":
-            data[key] = []            # possible block list; items follow
-            cur_list_key = key
-        elif val.startswith("[") and val.endswith("]"):
-            inner = val[1:-1].strip()
-            data[key] = [x.strip() for x in inner.split(",")] if inner else []
-        else:
-            data[key] = val
-    return data, body
+    try:
+        data = yaml12.parse_yaml(m.group(1))
+    except Exception as exc:                      # malformed YAML — caller reports
+        raise FrontmatterError(str(exc)) from exc
+    if data is None:                              # empty block
+        return {}, m.group(2)
+    if not isinstance(data, dict):
+        raise FrontmatterError("frontmatter block is not a mapping")
+    return data, m.group(2)
 
 
 def split_body(body):

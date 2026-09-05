@@ -44,6 +44,7 @@ EXPECTED = {
     "vocabulary/neg-few-examples.md": (E, ">=2 examples"),
     "vocabulary/neg-missing-canto.md": (E, "missing a （粵）"),
     "vocabulary/neg-no-frontmatter.md": (E, "no YAML frontmatter"),
+    "vocabulary/neg-bad-yaml.md": (E, "malformed YAML frontmatter"),
     "vocabulary/neg-split-link.md": (E, "split across a line break"),
     "vocabulary/neg-dup-b.md": (E, "duplicate id"),
     "vocabulary/pos-suru.md": None,                                    # suru-verb title, clean

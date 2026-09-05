@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Content linter for the LLM-wiki (specs.md §7).
 
-A **consumer** of `wikitools.schema` (the §6 schema as code): standard library
-only, a flat script of small functions — one per rule — each returning a list of
-findings. Run `lint-all` over the whole vault:
+A **consumer** of `wikitools.schema` (the §6 schema as code): a flat script of
+small functions — one per rule — each returning a list of findings. Run
+`lint-all` over the whole vault:
 
     python -m wikitools.lint          # lint the sibling llm-wiki/ tree
     python wikitools/lint.py [ROOT]   # or point at a specific llm-wiki/ dir
@@ -17,7 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # repo root on path
 from wikitools.schema import (  # noqa: E402  — shared schema primitives
-    LEVELS, TYPES, POS, REGISTERS, KANJI_RE, LINK_RE,
+    LEVELS, TYPES, POS, REGISTERS, KANJI_RE, LINK_RE, FrontmatterError,
     parse_frontmatter, split_body, link_target, strip_code, expected_title,
 )
 
@@ -124,7 +124,10 @@ def check_split_links(text):
 def lint_file(path, valid_targets):
     print('linting', path)
     text = path.read_text(encoding="utf-8")
-    fm, body = parse_frontmatter(text)
+    try:
+        fm, body = parse_frontmatter(text)
+    except FrontmatterError as exc:
+        return [(ERROR, f"malformed YAML frontmatter: {exc}")], {}
     findings = []
     if not fm:
         return [(ERROR, "no YAML frontmatter")], fm

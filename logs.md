@@ -667,3 +667,98 @@ Not an ingest. `yaml12` became available; adopted it **only** where it simplifie
   **byte-identical** to before the change.
 - **Specs updated** (§5 tree, §7 parse rule + stdlib-only claim, §7.1 fixture
   list, §11.1 decision record incl. the compiled-wheel trade-off).
+
+## 2026-09-05 — Implement §10.3 regen.py + §10.4 schedule-preserving resync
+
+Not an ingest. Closes §12 near-term item 3; spec critiqued and amended first
+(two mechanisms in §10.4/§10.1 conflicted — see below).
+
+**Spec changes made before coding**
+- **§10.4 resync mechanism changed: inline id marker → sidecar.** The spec had
+  each card carry "a stable card id in a marker invisible to Obsidian", hedged by
+  a build note that its non-interference with the SR plugin's card-boundary
+  parsing "must be verified when implemented". Replaced with the id↔block mapping
+  recorded **outside** the note, in `.card-index.json` (`{"seq": …, "cards":
+  {note: [card_id, …]}}`). Nothing of ours is written into a note, so the plugin
+  cannot be confused by it, and `.card-index.json` was already precious state
+  (losing it renumbers every note) — no new risk class.
+- **§10.1's join was inconsistent with §10.4** — it aligned FSRS blocks to card
+  ids "by front text", which fails for exactly the case the resync exists for (a
+  card whose front changed). Both now name the one sidecar.
+- **New §11.2 gap: cloze ids embed a position** (`::cloze::{article}::{n}` is the
+  wikilink ordinal, `::gcloze::{article}::{n}` the sentence ordinal), so editing
+  an article renumbers them and the resync reads that as remove + add. Recorded,
+  reported at runtime rather than silent, and promoted to §12 near-term item 3
+  (fix before real FSRS history accumulates; it churns the §10.7 baseline).
+- **§10.2's "global distractor pool" gap (logged 2026-09-05) is dissolved, not
+  worked around**: MC distractors are redrawn vault-wide on every ingest, but the
+  *card id* is unchanged, so the resync rewrites those blocks and keeps their
+  schedules.
+
+**Code**
+- **New `study/regen.py`** — one idempotent entry point running `cards.py` →
+  `index.py` → `obsidian_cards.py` in dependency order, in-process. `--only
+  {cards,index,flashcards}` is repeatable; `select()` is a pure helper so the
+  ordering is testable.
+- **`study/obsidian_cards.py` — append-only → schedule-preserving.** A changed
+  note is now rewritten in place with each `<!--SR:…-->` re-attached to its card
+  by id (blocks aligned via the recorded id list; positional fallback when a note
+  has no record). Unchanged notes are left byte-identical. Dropped schedules are
+  reported with their card id. `--force [item…]` keeps its reset meaning.
+  Added `--wiki` / `--flashcards` with a `--wiki` requires `--flashcards` guard
+  (mirrors `cards.py` §10.7), which is what lets the tests run without touching
+  the real deck. Manifest migrates the legacy flat `{item_id: NNNN}` form,
+  preserving the sequence numbers that name every note.
+- **New `tests/run_regen_tests.py`** — 9 cases over a *copy* of `tests/cards-wiki`
+  and a throwaway deck: create; idempotence (byte-identical re-run); carry-over on
+  a reworded card; drop reported when a card disappears (removing the `[[導入]]`
+  link kills its cloze card); added card starts fresh; `--force` resets;
+  `--wiki`-without-`--flashcards` guard; legacy-manifest migration; `--only`
+  ordering.
+
+**Verified:** lint 31/31, index 14/14, cards 58, scheduler 24/24, **regen 9/9**.
+Live run: `regen.py` rebuilt `cards.json` + `index.md` (both unchanged) and
+**resynced 174 notes / 39 unchanged**; `--check` now reports **0 drifted**; a
+second `regen.py` reports **0 resynced, 213 unchanged** (idempotent).
+Note the 174 rewrites cost nothing: **0 of 213 notes carried an FSRS schedule**
+(the 28 pilot schedules were reset on 2026-07-31 and nothing has been reviewed
+since), so the resync landed with no history at stake.
+
+## 2026-09-05 — Content-derived cloze/gcloze card ids (§10.4, §11.2 closed)
+
+Not an ingest. Removes the last positional coupling in the card ids, so the
+§10.4 resync can actually keep review history across a re-ingest.
+- **`study/cards.py`** — new `span_key(blanked)` = first 8 hex of
+  `sha256(blanked sentence)`. Ids become `…::cloze::{article}::{h}` and
+  `…::gcloze::{article}::{h}` (`例文::{h}` for example-derived gcloze), replacing
+  the wikilink ordinal / sentence ordinal. The hash input is the **rendered**
+  blanked sentence — `_render_blank` has already resolved other wikilinks to
+  surface text — so re-wrapping an article (§6.5.2) or marking another word in the
+  same sentence leaves the id untouched. `build()` gained a deterministic `-2`
+  suffix for the only possible collision (the same blanked sentence twice in one
+  article).
+- **`tests/run_regen_tests.py`** — new case `cloze_id_survives_reingest`
+  simulates a re-ingest (re-wrap a line **and** insert `[[制度]]` before an
+  existing cloze target in the same sentence — both of which used to renumber the
+  id) and asserts the ids are unchanged *and* an injected FSRS schedule is still
+  attached afterwards. Suite 9 → **10 cases**.
+- **`tests/cards-baseline.json`** regenerated via `--update` (deliberate, §10.7):
+  30 lines, all id strings plus the re-sort they cause — **no card content
+  changed** (verified by comparing the full card bag ignoring ids: 783 = 783,
+  identical).
+
+**Obsidian-visible impact — checked, and it is layout-only.** Same 783 cards,
+same text, same decks, same note filenames. **14 of 213 notes** had their blocks
+re-ordered within the note (block order is by `(type, id)`, and the ids changed);
+the other 199 are byte-identical. Nothing was mis-attached: **0 notes carry an
+FSRS schedule** and `progress.json` holds **0 cloze/gcloze keys** (only `meaning`
++ `gmc`), so this migration — the one time ids *had* to churn — cost no history.
+Reviewing is unaffected either way: the SR plugin schedules each card
+independently of its position in the note. Residual cosmetic churn (editing a
+sentence can move its block) is recorded as a §11.2 note rather than fixed, since
+avoiding it means carrying a per-item ordinal on every card.
+
+**Verified:** lint 31/31, index 14/14, cards 58, scheduler 24/24, regen 10/10;
+`regen.py` → 14 resynced / 199 unchanged / 0 schedules dropped; `--check` 0
+drifted; second run 0 resynced / 213 unchanged; `index.md` and `progress.json`
+untouched.

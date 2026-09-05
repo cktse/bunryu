@@ -13,13 +13,16 @@ Card layouts (blank-line separated; deck tag first):
             gmc    blanked sentence + 4 choices + `<br>==core = [[hw]]==`
             gerror `誤りを正しなさい： ✗ …::… ✓ … [[hw]]`
 
-Generation is APPEND-ONLY so the plugin's inline `<!--SR:…-->` schedule is never
-clobbered: an existing note is left untouched unless explicitly --force'd.
+Generation is **schedule-preserving**: a changed note is rewritten in place and
+each `<!--SR:…-->` schedule is re-attached to its card **by card id**, so review
+history survives rewordings, reflows and redrawn MC distractors. The id↔block
+mapping is the ordered card-id list recorded per note in `.card-index.json`;
+nothing of ours is written into the note itself (§10.4).
 
-    python study/obsidian_cards.py            # create missing notes (append-only)
+    python study/obsidian_cards.py            # create + resync (safe, default)
     python study/obsidian_cards.py --check    # report notes whose cards drifted
     python study/obsidian_cards.py --force grammar-nisaishite ～に際して   # specific
-    python study/obsidian_cards.py --force     # regenerate ALL (resets schedules!)
+    python study/obsidian_cards.py --force    # regenerate ALL (resets schedules!)
 """
 
 import argparse
@@ -33,10 +36,11 @@ sys.path.insert(0, str(REPO))
 from study import cards as cardgen  # noqa: E402
 
 FLASH = REPO / "flashcards"
-MANIFEST = FLASH / ".card-index.json"
+INDEX_NAME = ".card-index.json"
 TYPE_ORDER = {"canto": 0, "cloze": 1, "meaning": 2, "reading": 3,
               "gcloze": 4, "gmc": 5, "gerror": 6}
 SR_COMMENT = re.compile(r"<!--SR:.*?-->")
+BLANK_LINE = re.compile(r"\n\s*\n")
 
 
 # ---------------------------------------------------------------- rendering
@@ -60,10 +64,22 @@ def card_block(c):
     raise ValueError(t)
 
 
-def note_text(cards):
+def ordered_cards(cards):
+    """The note's cards in written order — the order `.card-index.json` records."""
+    return sorted(cards, key=lambda c: (TYPE_ORDER[c["type"]], c["id"]))
+
+
+def note_text(cards, schedules=None):
+    """Render the note; re-attach each card's `<!--SR:…-->` schedule if given."""
+    schedules = schedules or {}
     kind, level = cards[0]["kind"], cards[0]["level"]
-    ordered = sorted(cards, key=lambda c: (TYPE_ORDER[c["type"]], c["id"]))
-    blocks = [card_block(c) for c in ordered]
+    blocks = []
+    for c in ordered_cards(cards):
+        block = card_block(c)
+        sr = schedules.get(c["id"])
+        if sr:
+            block += "\n" + sr
+        blocks.append(block)
     return f"#flashcards/{kind}/{level}\n" + "\n\n".join(blocks) + "\n"
 
 
@@ -78,32 +94,70 @@ def canonical(text):
     return "\n".join(out).strip()
 
 
-# ---------------------------------------------------------------- driver
-def group_by_item():
-    cards, n_vocab, n_gram, n_art = cardgen.build()
-    groups = {}
-    for c in cards:
-        groups.setdefault(c["item_id"], []).append(c)
-    return groups, n_vocab, n_gram, n_art
+# ---------------------------------------------------------------- resync
+def read_schedules(text, recorded_ids, current_ids):
+    """Map card id -> its `<!--SR:…-->` comment, from a note on disk.
+
+    Blocks are aligned to card ids by the ids recorded when the note was last
+    written; with no record (first resync, or a lost sidecar) alignment falls back
+    to the current order, which is how the note was generated (§10.4).
+    """
+    body = text.split("\n", 1)[1] if text.startswith("#flashcards") else text
+    blocks = [b for b in BLANK_LINE.split(body.strip()) if b.strip()]
+    ids = recorded_ids or current_ids
+    schedules = {}
+    for i, block in enumerate(blocks):
+        m = SR_COMMENT.search(block)
+        if m and i < len(ids):
+            schedules[ids[i]] = m.group(0)
+    return schedules
 
 
-def assign_sequences(groups):
-    """Load/extend the stable item_id -> sequence-number manifest (per kind)."""
-    manifest = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
+# ---------------------------------------------------------------- manifest
+def load_manifest(path):
+    """Return {"seq": {item_id: NNNN}, "cards": {note_name: [card_id, …]}}.
+
+    Migrates the original flat `{item_id: NNNN}` file in place on first read —
+    the sequence numbers are precious (they name every note on disk).
+    """
+    if not path.exists():
+        return {"seq": {}, "cards": {}}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if data and all(isinstance(v, int) for v in data.values()):
+        return {"seq": data, "cards": {}}            # legacy flat format
+    return {"seq": data.get("seq", {}), "cards": data.get("cards", {})}
+
+
+def save_manifest(path, manifest):
+    path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+                    encoding="utf-8")
+
+
+def assign_sequences(manifest, groups):
+    """Extend the stable item_id -> sequence-number map (per kind); never reassign."""
+    seq = manifest["seq"]
     kind_of = {iid: cs[0]["kind"] for iid, cs in groups.items()}
     max_by_kind = {}
-    for iid, s in manifest.items():
+    for iid, s in seq.items():
         k = kind_of.get(iid)
         if k:
             max_by_kind[k] = max(max_by_kind.get(k, 0), s)
     for iid in sorted(groups):
-        if iid not in manifest:
+        if iid not in seq:
             k = kind_of[iid]
             max_by_kind[k] = max_by_kind.get(k, 0) + 1
-            manifest[iid] = max_by_kind[k]
-    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2),
-                        encoding="utf-8")
-    return manifest
+            seq[iid] = max_by_kind[k]
+    return seq
+
+
+# ---------------------------------------------------------------- driver
+def group_by_item(wiki=None):
+    cards, n_vocab, n_gram, n_art = (cardgen.build(Path(wiki)) if wiki
+                                     else cardgen.build())
+    groups = {}
+    for c in cards:
+        groups.setdefault(c["item_id"], []).append(c)
+    return groups, n_vocab, n_gram, n_art
 
 
 def main(argv=None):
@@ -111,16 +165,24 @@ def main(argv=None):
     ap.add_argument("--check", action="store_true",
                     help="report notes whose generated cards differ from disk (no writes)")
     ap.add_argument("--force", nargs="*", default=None,
-                    help="regenerate matching notes (by item-id or headword); "
-                         "with no value, regenerate ALL (resets schedules)")
+                    help="regenerate matching notes (by item-id or headword), "
+                         "discarding their schedules; with no value, ALL notes")
+    ap.add_argument("--wiki", help="wiki root to read from (default llm-wiki/)")
+    ap.add_argument("--flashcards", help="deck directory to write (default flashcards/)")
     args = ap.parse_args(argv)
 
-    groups, n_vocab, n_gram, n_art = group_by_item()
-    FLASH.mkdir(exist_ok=True)
-    seq = assign_sequences(groups)
+    if args.wiki and not args.flashcards:
+        ap.error("--wiki requires --flashcards (refusing to write a test wiki "
+                 "into the real deck)")
+
+    flash = Path(args.flashcards) if args.flashcards else FLASH
+    groups, n_vocab, n_gram, n_art = group_by_item(args.wiki)
+    flash.mkdir(parents=True, exist_ok=True)
+    manifest = load_manifest(flash / INDEX_NAME)
+    seq = assign_sequences(manifest, groups)
 
     def path_for(iid):
-        return FLASH / f"card-{groups[iid][0]['kind']}-{seq[iid]:04d}.md"
+        return flash / f"card-{groups[iid][0]['kind']}-{seq[iid]:04d}.md"
 
     if args.check:
         drifted = []
@@ -135,26 +197,47 @@ def main(argv=None):
         return 1 if drifted else 0
 
     forced = args.force            # None | [] (all) | [ids/headwords]
-    created = skipped = regen = 0
+    created = unchanged = resynced = reset = 0
+    dropped = []                   # (note, card_id) whose schedule no longer has a card
     for iid, cs in sorted(groups.items()):
         p = path_for(iid)
-        text = note_text(cs)
-        if p.exists():
-            hit = forced is not None and (forced == [] or iid in forced
-                                          or cs[0]["headword"] in forced)
-            if not hit:
-                skipped += 1
-                continue
-            print(f"⚠  regenerating {p.name} ({cs[0]['headword']}) — resets its schedule")
-            regen += 1
-        else:
-            created += 1
-        p.write_text(text, encoding="utf-8")
+        current_ids = [c["id"] for c in ordered_cards(cs)]
+        recorded_ids = manifest["cards"].get(p.name)   # order the note was last written in
+        manifest["cards"][p.name] = current_ids
 
-    print(f"\nobsidian_cards: {n_vocab} vocab + {n_gram} grammar items → {FLASH.name}/")
-    print(f"  created {created}, regenerated {regen}, skipped(existing) {skipped}")
-    if forced is None and skipped:
-        print("  (existing notes preserved; --force <item> to regenerate, --check to audit)")
+        if not p.exists():
+            p.write_text(note_text(cs), encoding="utf-8")
+            created += 1
+            continue
+
+        old = p.read_text(encoding="utf-8")
+        hit = forced is not None and (forced == [] or iid in forced
+                                      or cs[0]["headword"] in forced)
+        if hit:
+            print(f"⚠  regenerating {p.name} ({cs[0]['headword']}) — resets its schedule")
+            p.write_text(note_text(cs), encoding="utf-8")
+            reset += 1
+            continue
+
+        schedules = read_schedules(old, recorded_ids, current_ids)
+        text = note_text(cs, schedules)
+        for cid in schedules:
+            if cid not in current_ids:
+                dropped.append((p.name, cid))
+        if text == old:
+            unchanged += 1
+            continue
+        p.write_text(text, encoding="utf-8")
+        resynced += 1
+
+    save_manifest(flash / INDEX_NAME, manifest)
+
+    print(f"\nobsidian_cards: {n_vocab} vocab + {n_gram} grammar items → {flash.name}/")
+    print(f"  created {created}, resynced {resynced}, unchanged {unchanged}, reset {reset}")
+    if dropped:
+        print(f"  {len(dropped)} schedule(s) dropped (card no longer generated):")
+        for name, cid in sorted(dropped):
+            print(f"    {name}: {cid}")
     return 0
 
 

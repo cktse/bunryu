@@ -943,9 +943,10 @@ inline `<!--SR:!fsrs,…-->` comments:
   **`state`** (new / learning / review / relearning). Remaining positional fields
   are plugin-version-specific and treated as opaque; a parse failure means "no FSRS
   data" — the card falls back to the `f_fsrs` default (degrade gracefully).
-- **Join:** `flashcards/.card-index.json` maps `item_id → NNNN`; within a note the
-  card blocks are aligned to card ids by **reusing `obsidian_cards.py`'s renderer**
-  (match by front text, not fragile block position).
+- **Join:** `flashcards/.card-index.json` maps `item_id → NNNN` **and** records
+  each note's ordered card ids, so a note's blocks align to card ids by that
+  recorded order — the same sidecar the resync uses (§10.4), not a second
+  mechanism.
 
 > **Forward-compat — review-state adapters (not built yet).** The read-model above
 > is currently Obsidian-specific. Treat it as *one adapter* behind a small seam —
@@ -1088,8 +1089,8 @@ its settings). Design:
   same vault (`bunryu/` is the vault root). Content pages are never touched.
   Vocabulary → `card-vocab-{NNNN}.md`, deck `#flashcards/vocab/{level}`; grammar →
   `card-grammar-{NNNN}.md`, deck `#flashcards/grammar/{level}`. Same rules for
-  both: answer-opaque filename, no heading/backlink, the `[[item]]` context link
-  embedded in each card's answer, append-only generation.
+  both: answer-opaque filename, no heading/backlink, and the `[[item]]` context
+  link embedded in each card's answer.
 - **Regenerated via `regen.py`, schedule-preserving.** Regeneration (§10.3)
   creates notes for new items **and resyncs drifted notes in place while carrying
   over their FSRS schedules** (below), so it is non-destructive and safe to run on
@@ -1098,20 +1099,32 @@ its settings). Design:
   `<!--SR:!fsrs,…-->` comment the plugin reads and writes in the note itself (the
   note *is* the database; there is no external store). On resync,
   `obsidian_cards.py` regenerates a note's card blocks but **re-attaches each
-  existing schedule to its card**, matched by a **stable card id** (carried in a
-  marker invisible to Obsidian). Policy:
+  existing schedule to its card**, matched by **card id**. The id↔block mapping
+  lives **outside the note**, in `flashcards/.card-index.json`: alongside
+  `item_id → NNNN` it records, per note, the **ordered card ids as last written**.
+  Nothing of ours is written into the note, so no marker of ours can interfere
+  with the plugin's card-boundary parsing. Block order is stable because the
+  plugin only appends/updates its own comment in place; where a note has no
+  recorded id list (first resync after this change, or a lost sidecar) the
+  fallback is positional. Policy:
   - card id **persists** → schedule carried over — correct for the common changes
-    (display tweaks like 「・する」, reflows, reclassifications);
+    (display tweaks like 「・する」, reflows, reclassifications, and MC distractors
+    redrawn as the vault-wide pool grows);
   - card **removed** (its block no longer generated) → its schedule is dropped,
     and the drop is **reported**;
   - card **added** → starts fresh (no schedule).
 
   Matching is by **id, not content**, so a *reworded* card keeps its review
   history by design. **`--force`** remains the explicit escape hatch to **reset**
-  a note's schedules when a card has changed enough to count as new. (Build note:
-  the id marker's non-interference with the SR plugin's own card-boundary parsing
-  must be verified when implemented; until then, append-only creation +
-  `--check`/manual `--force` is the interim behavior.)
+  a note's schedules when a card has changed enough to count as new.
+  **Cloze ids are content-derived**, not positional: `…::cloze::{article}::{h}`
+  and `…::gcloze::{article}::{h}`, where `h` is a short hash of the **blanked
+  sentence as rendered** — wikilink markup already resolved to surface text
+  (`cards.py: span_key`). Re-wrapping an article (§6.5.2) or marking another word
+  in the same sentence leaves that text unchanged, so the id and its history
+  survive a re-ingest; only editing *that sentence* mints a new card, which is
+  the intended reading of "a different card". Two identical blanked sentences in
+  one article collide and take a deterministic `-2` suffix.
 
 For example, study/cli.py generates the following quizzes for the vocab 挟む:
 ```
@@ -1194,12 +1207,15 @@ For the same example vocab, the corresponding flashcard is:
   **no heading and no `Source:` backlink** — those would reveal the word. The link
   to the llm-wiki page is embedded in each card's **answer** (`[[headword|display]]`),
   so context is one click away only *after* the card is flipped.
-- **Append-only / idempotent generation** protects review history: a note is
-  written only if it does not already exist; existing notes (carrying the
-  plugin's inline `<!--SR:…-->` schedule) are never rewritten. Future ingests add
-  only new notes. `--check` reports content drift without overwriting; `--force
-  <vocab>` regenerates one note deliberately (resets that note's schedule, with a
-  warning) — same philosophy as the ingest git-flag (§8.3).
+- **Idempotent, history-preserving generation.** A missing note is created; an
+  existing note is rewritten **only when its cards changed**, carrying its
+  schedules across (above); an unchanged note is left byte-identical. `--check`
+  audits drift without writing; `--force [item…]` deliberately **resets** the
+  matching notes' schedules, with a warning — same philosophy as the ingest
+  git-flag (§8.3). Inputs and outputs are decoupled by `--wiki` / `--flashcards`
+  (defaults `llm-wiki/` → `flashcards/`), and `--wiki` **requires**
+  `--flashcards`, so a fixture vault can never write into the real deck (the same
+  guard as `cards.py`, §10.7).
 - The plugin owns scheduling (FSRS, stored inline in `flashcards/` notes); those
   notes are **committed** — review history is precious. Chose the mainstream
   plugin over the SR-Recall fork for maintenance; can switch later.
@@ -1664,6 +1680,11 @@ Beyond the roadmap (§10.6), these are the smaller known gaps in the current bui
 - **FSRS parser is version-coupled.** It reads the current plugin's inline field
   layout; a plugin format change would silently drop to "no FSRS data" (safe, but
   degraded) until the parser is updated (§10.1).
+- **Note block order follows the card id.** A note's blocks are ordered by
+  (card type, id), so a content-hashed cloze id (§10.4) can move a block within
+  its note when that sentence is edited. Cosmetic only — the SR plugin schedules
+  each card independently, and the resync re-attaches by id, not position — but it
+  is avoidable churn if a stable per-item ordinal is ever carried on the card.
 
 **Open:**
 
@@ -1687,6 +1708,10 @@ Beyond the roadmap (§10.6), these are the smaller known gaps in the current bui
 - Content index (§7.2): `wikitools/index.py` → `index.md` (+ fixture tests), and the
   suru-verb 「・する」 display shared across page titles, index, and flashcards
   (§6.2, §6.5.1, §7.2, §10.2).
+- Unified regeneration (§10.3–10.4): `study/regen.py` (`--only` subsets) over the
+  **schedule-preserving** flashcard resync in `obsidian_cards.py`, plus
+  **content-derived cloze ids** (`span_key`) so a re-ingest no longer costs those
+  cards their history; `tests/run_regen_tests.py` covers both.
 
 **Near-term:**
 1. **Card scheduler (§10.1, §10.9)** — `study/scheduler.py`: exposure tracking +
@@ -1695,14 +1720,7 @@ Beyond the roadmap (§10.6), these are the smaller known gaps in the current bui
    least-recently-served article + top-N-by-urgency, and `record_delivery` on send.
 2. **Daily send scheduler** — `launchd` LaunchAgent (07:00, RunAtLoad catch-up) +
    `email_quiz.py --once-daily` idempotent guard (§10.8.8).
-3. **Unified regeneration (§10.3–10.4)** — `study/regen.py` (one idempotent entry
-   point rebuilding `index.md` + `build/cards.json` + `flashcards/`), plus the
-   **schedule-preserving** flashcard resync in `obsidian_cards.py` (re-attach
-   `<!--SR:…-->` by card id). Point ingest (§8.2 step 7), scrape (§9), and the
-   daily send (`--only cards`, §10.8.8) at it; have `email_quiz.py` rebuild
-   `cards.json` on start. Fixes the derived-artifact drift (stale card bank →
-   new items missing from the quiz).
-4. Select and document the **web seeding source** (§9); implement the first source.
+3. Select and document the **web seeding source** (§9); implement the first source.
 
 **After that:**
 5. **Phase-2 answer capture** — companion surface writing quiz results to

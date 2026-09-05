@@ -156,7 +156,7 @@
       "system",
       "裁判員のもやもや"
     ],
-    "id": "vocab-dounyuu::cloze::article-saibanin-moyamoya::1",
+    "id": "vocab-dounyuu::cloze::article-saibanin-moyamoya::73b15401",
     "type": "cloze",
     "prompt": "空欄に入る語は？",
     "front": "「裁判員制度」の＿＿が決まり、一体裁判員とはどんな人が選ばれるのかと、その資格を見ると、「誰でも」とある。",
@@ -175,7 +175,7 @@
       "sound",
       "初めての雪"
     ],
-    "id": "vocab-hyuhyu::cloze::article-hajimete-no-yuki::0",
+    "id": "vocab-hyuhyu::cloze::article-hajimete-no-yuki::af3ec107",
     "type": "cloze",
     "prompt": "空欄に入る語は？",
     "front": "しばらくたって、何日間か太陽が顔を見せず、＿＿空が泣いてでもいるかのような日が続き、休むことなく雪が降った。",
@@ -193,7 +193,7 @@
       "intention",
       "裁判員のもやもや"
     ],
-    "id": "vocab-itoteki::cloze::article-saibanin-moyamoya::0",
+    "id": "vocab-itoteki::cloze::article-saibanin-moyamoya::48447281",
     "type": "cloze",
     "prompt": "空欄に入る語は？",
     "front": "自分たちの利益を優先するために＿＿に、また、時代の勢いに押され、無意識のうちに「日常感覚と常識」がゆがめられるときもあった。",
@@ -212,7 +212,7 @@
       "onomatopoeia",
       "裁判員のもやもや"
     ],
-    "id": "vocab-moyamoya::cloze::article-saibanin-moyamoya::0",
+    "id": "vocab-moyamoya::cloze::article-saibanin-moyamoya::ab5d3e16",
     "type": "cloze",
     "prompt": "空欄に入る語は？",
     "front": "裁判員制度が始まるに際して、「人が人を裁く」ことを求められた一般の人たちが感じた＿＿は、そんな思いに根差していたのに違いない。",
@@ -231,10 +231,10 @@
       "society",
       "裁判員のもやもや"
     ],
-    "id": "vocab-saiban::cloze::article-saibanin-moyamoya::0",
+    "id": "vocab-saiban::cloze::article-saibanin-moyamoya::1dea1ce8",
     "type": "cloze",
     "prompt": "空欄に入る語は？",
-    "front": "「＿＿員制度」の導入が決まり、一体裁判員とはどんな人が選ばれるのかと、その資格を見ると、「誰でも」とある。",
+    "front": "「裁判員制度」の導入が決まり、一体＿＿員とはどんな人が選ばれるのかと、その資格を見ると、「誰でも」とある。",
     "back": "裁判（さいばん）",
     "surface": "裁判",
     "article": "article-saibanin-moyamoya"
@@ -250,10 +250,10 @@
       "society",
       "裁判員のもやもや"
     ],
-    "id": "vocab-saiban::cloze::article-saibanin-moyamoya::2",
+    "id": "vocab-saiban::cloze::article-saibanin-moyamoya::54923bcd",
     "type": "cloze",
     "prompt": "空欄に入る語は？",
-    "front": "「裁判員制度」の導入が決まり、一体＿＿員とはどんな人が選ばれるのかと、その資格を見ると、「誰でも」とある。",
+    "front": "「＿＿員制度」の導入が決まり、一体裁判員とはどんな人が選ばれるのかと、その資格を見ると、「誰でも」とある。",
     "back": "裁判（さいばん）",
     "surface": "裁判",
     "article": "article-saibanin-moyamoya"
@@ -268,7 +268,7 @@
       "influence",
       "裁判員のもやもや"
     ],
-    "id": "vocab-sayuu::cloze::article-saibanin-moyamoya::1",
+    "id": "vocab-sayuu::cloze::article-saibanin-moyamoya::45c4d34b",
     "type": "cloze",
     "prompt": "空欄に入る語は？",
     "front": "一般人の「日常感覚と常識を裁判に反映させる」というが、そもそも自分は、他人の一生を＿＿「日常感覚と常識」を持ち合わせているのかと考え、さらには、「人が人を裁く」ことなどできるのか、そんな権利があるのかと裁判制度そのものを問い直した。",
@@ -286,7 +286,7 @@
       "time",
       "裁判員のもやもや"
     ],
-    "id": "vocab-yagate::cloze::article-saibanin-moyamoya::1",
+    "id": "vocab-yagate::cloze::article-saibanin-moyamoya::a3f1921d",
     "type": "cloze",
     "prompt": "空欄に入る語は？",
     "front": "人々はそれをまじまじと見直し、＿＿眉を曇らせた。",
@@ -304,7 +304,7 @@
       "distortion",
       "裁判員のもやもや"
     ],
-    "id": "vocab-yugameru::cloze::article-saibanin-moyamoya::2",
+    "id": "vocab-yugameru::cloze::article-saibanin-moyamoya::471838a1",
     "type": "cloze",
     "prompt": "空欄に入る語は？",
     "front": "自分たちの利益を優先するために意図的に、また、時代の勢いに押され、無意識のうちに「日常感覚と常識」が＿＿ときもあった。",
@@ -322,7 +322,7 @@
       "partial-negation",
       "裁判員のもやもや"
     ],
-    "id": "grammar-kanarazushimo-nai::gcloze::例文::0",
+    "id": "grammar-kanarazushimo-nai::gcloze::例文::0d58d026",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
     "front": "地域の人たちの常識が、＿＿正しいとは言えない場合もある。",
@@ -339,7 +339,7 @@
       "partial-negation",
       "裁判員のもやもや"
     ],
-    "id": "grammar-kanarazushimo-nai::gcloze::例文::1",
+    "id": "grammar-kanarazushimo-nai::gcloze::例文::32ed0afd",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
     "front": "値段が高い品が、＿＿良いものだとは限らない。",
@@ -357,7 +357,7 @@
       "contrast",
       "そば屋の先生"
     ],
-    "id": "grammar-monono::gcloze::例文::0",
+    "id": "grammar-monono::gcloze::例文::23c78410",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
     "front": "「すみません」と頭を下げた＿＿、内心は納得がいかなかった。",
@@ -375,7 +375,7 @@
       "contrast",
       "そば屋の先生"
     ],
-    "id": "grammar-monono::gcloze::例文::1",
+    "id": "grammar-monono::gcloze::例文::320f2193",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
     "front": "引き受けた＿＿、やり方が分からない。",
@@ -392,7 +392,7 @@
       "occasion",
       "裁判員のもやもや"
     ],
-    "id": "grammar-nisaishite::gcloze::例文::0",
+    "id": "grammar-nisaishite::gcloze::例文::93edeced",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
     "front": "裁判員制度が始まる＿＿、多くの人が不安を感じた。",
@@ -409,7 +409,7 @@
       "occasion",
       "裁判員のもやもや"
     ],
-    "id": "grammar-nisaishite::gcloze::例文::1",
+    "id": "grammar-nisaishite::gcloze::例文::ce96e1ee",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
     "front": "開会＿＿、一言ごあいさつ申し上げます。",
@@ -426,10 +426,10 @@
       "viewpoint",
       "裁判員のもやもや"
     ],
-    "id": "grammar-nishitemireba::gcloze::例文::0",
+    "id": "grammar-nishitemireba::gcloze::例文::47f9e863",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
-    "front": "裁かれる側＿＿、たまったものではない。",
+    "front": "親＿＿、子どもはいくつになっても心配な存在だ。",
     "surface": "にしてみれば",
     "back": "～にしてみれば"
   },
@@ -443,10 +443,10 @@
       "viewpoint",
       "裁判員のもやもや"
     ],
-    "id": "grammar-nishitemireba::gcloze::例文::1",
+    "id": "grammar-nishitemireba::gcloze::例文::5f5ca511",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
-    "front": "親＿＿、子どもはいくつになっても心配な存在だ。",
+    "front": "裁かれる側＿＿、たまったものではない。",
     "surface": "にしてみれば",
     "back": "～にしてみれば"
   },
@@ -460,7 +460,7 @@
       "conformity",
       "裁判員のもやもや"
     ],
-    "id": "grammar-nisokushite::gcloze::article-saibanin-moyamoya::5",
+    "id": "grammar-nisokushite::gcloze::article-saibanin-moyamoya::b5afbd43",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
     "front": "取り決めが守られるよう見張ることも、守らない者には申し合わせ＿＿処分を与えることも必要なことだ。",
@@ -477,7 +477,7 @@
       "conformity",
       "裁判員のもやもや"
     ],
-    "id": "grammar-nisokushite::gcloze::例文::0",
+    "id": "grammar-nisokushite::gcloze::例文::8b7477f3",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
     "front": "守らない者には、申し合わせ＿＿処分を与える。",
@@ -494,10 +494,10 @@
       "result",
       "記事の裏側"
     ],
-    "id": "grammar-sueni::gcloze::例文::0",
+    "id": "grammar-sueni::gcloze::例文::39e51f80",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
-    "front": "しばらく考えた＿＿、こう答えた。",
+    "front": "激しい議論の＿＿、結論が出た。",
     "surface": "末に",
     "back": "～末に（～すえに）"
   },
@@ -511,10 +511,10 @@
       "result",
       "記事の裏側"
     ],
-    "id": "grammar-sueni::gcloze::例文::1",
+    "id": "grammar-sueni::gcloze::例文::41f64cdb",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
-    "front": "激しい議論の＿＿、結論が出た。",
+    "front": "しばらく考えた＿＿、こう答えた。",
     "surface": "末に",
     "back": "～末に（～すえに）"
   },
@@ -528,7 +528,7 @@
       "means",
       "初めての雪"
     ],
-    "id": "grammar-wo-tooshite::gcloze::article-hajimete-no-yuki::23",
+    "id": "grammar-wo-tooshite::gcloze::article-hajimete-no-yuki::b48ea4eb",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
     "front": "これまで何か疑問に思うと、ついインターネットを＿＿答えを得ようとしてきた。",
@@ -545,7 +545,7 @@
       "means",
       "初めての雪"
     ],
-    "id": "grammar-wo-tooshite::gcloze::例文::0",
+    "id": "grammar-wo-tooshite::gcloze::例文::4c90d784",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
     "front": "ついインターネット＿＿答えを得ようとしてきた。",
@@ -562,7 +562,7 @@
       "means",
       "初めての雪"
     ],
-    "id": "grammar-wo-tooshite::gcloze::例文::1",
+    "id": "grammar-wo-tooshite::gcloze::例文::ef0bbce3",
     "type": "gcloze",
     "prompt": "空欄に入る文型は？",
     "front": "一年＿＿温暖な地域だ。",

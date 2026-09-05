@@ -20,6 +20,7 @@ Usage:
 """
 
 import argparse
+import hashlib
 import json
 import random
 import re
@@ -74,6 +75,17 @@ def base_card(page, kind):
         "level": fm.get("level"),
         "tags": fm.get("tags", []),
     }
+
+
+def span_key(blanked):
+    """Short content hash of a blanked sentence — the stable tail of a cloze id.
+
+    Content-derived, never positional (§11.2): the rendered text carries no
+    wikilink markup, so re-wrapping an article (§6.5.2) or marking another word in
+    the same sentence leaves it unchanged and the card keeps its id — and with it
+    its FSRS history (§10.4). Only editing *that sentence* mints a new card.
+    """
+    return hashlib.sha256(blanked.encode("utf-8")).hexdigest()[:8]
 
 
 def _render_blank(sentence, target_match):
@@ -206,7 +218,7 @@ def cloze_cards(articles, vocab_by_headword):
         for sent in SENT_SPLIT.split(honbun):
             if "[[" not in sent:
                 continue
-            for i, m in enumerate(schema.LINK_RE.finditer(sent)):
+            for m in schema.LINK_RE.finditer(sent):
                 v = vocab_by_headword.get(schema.link_target(m.group(1)))
                 if not v:
                     continue                             # grammar link or unknown: skip
@@ -215,7 +227,7 @@ def cloze_cards(articles, vocab_by_headword):
                     continue
                 c = base_card(v, "vocab")
                 c.update(
-                    id=f"{v['fm']['id']}::cloze::{aid}::{i}", type="cloze",
+                    id=f"{v['fm']['id']}::cloze::{aid}::{span_key(front)}", type="cloze",
                     prompt="空欄に入る語は？", front=front,
                     back=disp(c["headword"], c["reading"], v["fm"].get("part_of_speech")),
                     surface=m.group(1).split("|")[-1], article=aid)
@@ -291,18 +303,20 @@ def grammar_context(grammar, articles):
             continue
         honbun = honbun.replace("\n", "")
         aid = art["fm"]["id"]
-        for si, sent in enumerate(SENT_SPLIT.split(honbun)):
+        for sent in SENT_SPLIT.split(honbun):
             for m in schema.LINK_RE.finditer(sent):
                 if schema.link_target(m.group(1)) == hw:
                     blanked = _render_blank(sent, m).strip()
                     if "＿＿" in blanked:
-                        cands.append((blanked, m.group(1).split("|")[-1], f"{aid}::{si}"))
+                        cands.append((blanked, m.group(1).split("|")[-1],
+                                      f"{aid}::{span_key(blanked)}"))
     tgt = blank_target(hw)
     if tgt:
-        for ei, sent in enumerate(example_sentences(grammar["sections"])):
+        for sent in example_sentences(grammar["sections"]):
             idx = sent.find(tgt)
             if idx != -1:
-                cands.append((sent[:idx] + "＿＿" + sent[idx + len(tgt):], tgt, f"例文::{ei}"))
+                blanked = sent[:idx] + "＿＿" + sent[idx + len(tgt):]
+                cands.append((blanked, tgt, f"例文::{span_key(blanked)}"))
     return cands
 
 
@@ -382,6 +396,14 @@ def build(wiki=WIKI):
         cards += grammar_cloze_cards(g, articles)
         cards += grammar_mc_cards(g, articles, level_cores)
         cards += grammar_error_cards(g)
+
+    # content-hashed cloze ids can only collide on an identical blanked sentence
+    # (the same sentence twice in one article); disambiguate deterministically.
+    seen = {}
+    for c in cards:
+        seen[c["id"]] = n = seen.get(c["id"], 0) + 1
+        if n > 1:
+            c["id"] = f"{c['id']}-{n}"
 
     cards.sort(key=lambda c: (c["type"], c["id"]))       # stable output
     return cards, len(vocab), len(grammar), len(articles)

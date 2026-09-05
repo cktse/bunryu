@@ -574,3 +574,69 @@ by part-of-speech. Spec updated first (§6.2, §6.5.1, §7, §7.1, §7.2).
   175 regenerated, 0 drift — this **reset 28 local pilot FSRS schedules** (OK'd,
   pilot phase). Root-caused the drift to ingestion never regenerating
   cards.json/flashcards (spec gap, §8.2 — under review).
+
+## 2026-07-31 — Refactor: scraper/ → wikitools/ + extract schema.py
+
+Not an ingest. Fixes a layering smell (the linter doubled as the shared parsing
+library) and a misnamed package (specs §5 code-layering; CLAUDE.md modular-design
+tenet).
+- **New `wikitools/schema.py`** — the §6 schema as code (foundation):
+  `parse_frontmatter`, `split_body`, `link_target`, `strip_code`,
+  `KANJI_RE`/`LINK_RE`, enum sets, `suru_suffix`, `expected_title`. Depends on
+  nothing.
+- **`git mv scraper/ → wikitools/`** (renames preserved): `lint.py` is now a pure
+  **consumer** of `schema`; `index.py` imports `schema` (not lint). `study/cards.py`
+  imports `schema` and **no longer imports the validator at all**; `email_quiz.py`
+  uses `cardgen.schema.LINK_RE`. Test runners import `wikitools.{lint,index}`.
+- **One-way layering now holds:** `wikitools/` ← `study/` ← `tests/`.
+- `index.py` `EDIT_NOTE` updated (the `index.md` header now cites
+  `wikitools/index.py`); index baseline regenerated; cards baseline unchanged.
+- **Verified:** lint 30/30, index 14/14, cards 58, scheduler 24/24; real-vault
+  lint 211/0/0 via `wikitools/lint.py`; `index.md` + `build/cards.json` regenerated.
+
+## 2026-09-05 — Ingest 地域をまわって考えたこと（小熊英二）/c embedded quizzes
+
+`ingest article raw/地域をまわって考えたこと.md` (§8). 10 marked items, **all new
+headwords** — no existing page needed enhancing.
+- **New article `llm-wiki/articles/地域をまわって考えたこと.md`** — 本文 re-wrapped
+  per §6.5.2 (~40–50 全角/line, breaks at particle/clause boundaries, wikilinks
+  intact), 原文注1–7 folded into `## 語釈`, 注目語彙・文法 split 語彙/文法, and the
+  source's `## 読解問題` (4 `quiz` blocks) copied verbatim to the end. `word_count`
+  888 computed from the rendered 本文.
+- **New vocabulary (9)**: `暗黙のうちに` (expression), `対極` (noun), `往々にして`
+  (adverb), `懐疑的` (na-adj), `卑下` (**suru-verb**), `経緯` (noun), `壊滅`
+  (**suru-verb**), `煩雑` (na-adj), `異なる` (godan-verb, N2 — 基本語だが本文の
+  対比の軸なので採録).
+- **New grammar (1)**: `とはいえ` — 文頭用法（本文）と接続用法の両方を記載。
+  Named without the `～` prefix, matching the sentence-initial 接続詞 precedent
+  (`それにしても`, which already carried a dangling `[[とはいえ]]` link — now
+  resolved).
+- **Source markup corrected on the way in** (raw is untouched, §8.3): the source
+  marked `[[卑下する|卑下]]`; per §6.2 suru-ness lives in `part_of_speech`, so the
+  page is `卑下` (`suru-verb`, title 「卑下・する（ひげ・する）」) and the body links
+  plain `[[卑下]]`.
+- **Ambiguous classifications recorded** (§8.3): `往々にして` → `adverb` (a set
+  副詞句; `expression` was the alternative); `暗黙のうちに` → `expression` rather
+  than a bare `暗黙` noun, since the fixed 「〜のうちに」 phrase is the N1 item;
+  `異なる` levelled **N2**, not N1.
+- **No `##` title heading in the source** — §8.2 step 1 takes the essay title from
+  the top `##` heading, but this source starts straight into 本文. Fell back to the
+  raw filename (＝出典の書名) for both `headword` and the article filename; noted in
+  the page's `## メモ`. Worth a spec sentence for the heading-less case.
+- **Verified:** real-vault lint **222 files, 0 error(s), 0 warning(s)**; suites
+  lint 30/30, index 14/14, cards 58, scheduler 24/24. Regenerated `index.md`
+  (167 語彙 / 47 文法 / 8 記事) and `build/cards.json` (783 cards);
+  `obsidian_cards.py` created the **10 new flashcard notes** (append-only,
+  203 existing notes untouched).
+- **Flashcard drift, root cause found — left unfixed by design.** After this
+  ingest `obsidian_cards.py --check` reports **174 drifted notes**; measured
+  against the same vault with the 10 new pages removed it is **0**. So the drift
+  is not stale generation — the MC distractors (`meaning` / `gmc`) are sampled
+  from the **whole-vault pool** (`random.Random(item_id)` seeds *which* draw, but
+  the pool is global), so **any** ingest reshuffles distractors vault-wide. The
+  §10.4 schedule-preserving resync (`regen.py` + stable card ids) is still
+  **unimplemented** — the only lever today is `--force`, which would **reset all
+  174 FSRS schedules**. Not run: the on-disk distractors are still valid, and
+  review history outweighs distractor freshness. Two candidate fixes for the
+  §10.4 work: implement the id-matched resync, or make distractor draws depend
+  only on a stable per-item neighbourhood so the pool stops being global.

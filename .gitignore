@@ -2,6 +2,7 @@
 __pycache__/
 .DS_Store
 cache/
+.obsidian
 
 # regenerable build artifacts — rebuildable from llm-wiki (specs §10.3):
 #   build/cards.json (card bank) + build/daily-quiz.html (email preview).

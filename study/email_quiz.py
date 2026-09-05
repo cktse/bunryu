@@ -41,7 +41,7 @@ MC_TYPES = scheduler.PUSHABLE_TYPES
 # ---------------------------------------------------------------- reveal (from pages)
 def _unwrap_links(s):
     """[[dict|surface]] / [[dict]] -> the surface text, reusing lint.LINK_RE."""
-    return cardgen.lint.LINK_RE.sub(lambda m: m.group(1).split("|")[-1], s)
+    return cardgen.schema.LINK_RE.sub(lambda m: m.group(1).split("|")[-1], s)
 
 
 def page_index():

@@ -51,3 +51,4 @@ The product comprises of the following components:
 - avoid hardcoding, use CLI argv where possible (pre-defined defaults are OK) and avoid unobvious coupling in the logic
 - data minimalization principle: clean data lineage, avoid storing duplicative copies of data, instead store data keys and look up the authoritative data source
 - flag technical debt: trade off to the design and/or code base say in flavor of preserving backward compatibility must be subject to careful deliberation
+- Modular design, group related functions together into logical modules, minimize coupling between modules, and keep dependencies unidirectional.

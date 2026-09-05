@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test the linter by running it, unchanged, over the fixture vault (§7.1).
 
-Runs `scraper/lint.py` against `tests/test-llm-wiki/`, captures its
+Runs `wikitools/lint.py` against `tests/test-llm-wiki/`, captures its
 `path: [severity] message` output, and compares each fixture's actual findings
 against the EXPECTED table below. Prints a pass/fail summary and exits non-zero
 on any mismatch.
@@ -17,7 +17,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
-from scraper import lint  # noqa: E402
+from wikitools import lint  # noqa: E402
 
 FIX = Path(__file__).resolve().parent / "test-llm-wiki"
 

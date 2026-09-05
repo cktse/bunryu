@@ -3,7 +3,7 @@
 
 Derives cards from existing note fields by plain code — no AI, no per-card
 authoring. The content page is the single source; `cards.json` is a rebuildable
-build artifact. Reuses the frontmatter/body parsers from `scraper/lint.py`.
+build artifact. Reuses the frontmatter/body parsers from `wikitools/schema.py`.
 
 Vocabulary cards:
   - reading / canto / meaning (MC) / cloze         (see §10.2)
@@ -28,11 +28,11 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
-from scraper import lint  # noqa: E402  (reuse parse_frontmatter / split_body / LINK_RE)
+from wikitools import schema  # noqa: E402  (shared §6 schema primitives)
 
 WIKI = REPO / "llm-wiki"
 CARDS_OUT = REPO / "build" / "cards.json"
-KANJI = lint.KANJI_RE
+KANJI = schema.KANJI_RE
 
 CANTO_START = re.compile(r"（粵[：:]")
 PAREN_INNER = re.compile(r"（[^（）]*）")            # innermost full-width parens
@@ -48,8 +48,8 @@ def load_pages(kind, wiki=WIKI):
     """Parse <wiki>/<kind>/*.md into dicts of {fm, first, sections, body}."""
     out = []
     for p in sorted((Path(wiki) / kind).glob("*.md")):
-        fm, body = lint.parse_frontmatter(p.read_text(encoding="utf-8"))
-        first, sections = lint.split_body(body)
+        fm, body = schema.parse_frontmatter(p.read_text(encoding="utf-8"))
+        first, sections = schema.split_body(body)
         out.append({"path": p, "fm": fm, "first": first,
                     "sections": sections, "body": body})
     return out
@@ -59,8 +59,8 @@ def disp(hw, rd, pos=None):
     """Word display: 改ざん・する（かいざん・する） for a suru-verb,
     改ざん（かいざん） for a plain kanji noun, やがて for pure-kana. The 「・する」
     marker (shared with the page title §6.5.1 and the index §7.2) is derived from
-    part_of_speech via lint.suru_suffix."""
-    suru = lint.suru_suffix(pos)
+    part_of_speech via schema.suru_suffix."""
+    suru = schema.suru_suffix(pos)
     return f"{hw}{suru}（{rd}{suru}）" if KANJI.search(hw or "") else f"{hw}{suru}"
 
 
@@ -79,7 +79,7 @@ def base_card(page, kind):
 def _render_blank(sentence, target_match):
     """Render a sentence: target link -> ＿＿, other links -> their surface text."""
     parts, last = [], 0
-    for m in lint.LINK_RE.finditer(sentence):
+    for m in schema.LINK_RE.finditer(sentence):
         parts.append(sentence[last:m.start()])
         parts.append("＿＿" if m.span() == target_match.span()
                      else m.group(1).split("|")[-1])
@@ -206,8 +206,8 @@ def cloze_cards(articles, vocab_by_headword):
         for sent in SENT_SPLIT.split(honbun):
             if "[[" not in sent:
                 continue
-            for i, m in enumerate(lint.LINK_RE.finditer(sent)):
-                v = vocab_by_headword.get(lint.link_target(m.group(1)))
+            for i, m in enumerate(schema.LINK_RE.finditer(sent)):
+                v = vocab_by_headword.get(schema.link_target(m.group(1)))
                 if not v:
                     continue                             # grammar link or unknown: skip
                 front = _render_blank(sent, m).strip()
@@ -256,7 +256,7 @@ def blank_target(headword):
 def related_cores(sections):
     """Distractor pattern cores from ## 関連 wikilinks."""
     cores = []
-    for inner in lint.LINK_RE.findall(sections.get("関連", "")):
+    for inner in schema.LINK_RE.findall(sections.get("関連", "")):
         core = inner.split("|")[0].replace("～", "").strip()
         if core:
             cores.append(core)
@@ -292,8 +292,8 @@ def grammar_context(grammar, articles):
         honbun = honbun.replace("\n", "")
         aid = art["fm"]["id"]
         for si, sent in enumerate(SENT_SPLIT.split(honbun)):
-            for m in lint.LINK_RE.finditer(sent):
-                if lint.link_target(m.group(1)) == hw:
+            for m in schema.LINK_RE.finditer(sent):
+                if schema.link_target(m.group(1)) == hw:
                     blanked = _render_blank(sent, m).strip()
                     if "＿＿" in blanked:
                         cands.append((blanked, m.group(1).split("|")[-1], f"{aid}::{si}"))

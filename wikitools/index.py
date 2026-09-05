@@ -4,10 +4,10 @@
 Walks the llm-wiki/ tree and rebuilds a single human-browsable map-of-content,
 index.md, at the repo root: every page as a [[wikilink]] with its reading and a
 one-line gloss, grouped into 語彙 / 文法 / 記事 and sorted あいうえお. Stdlib
-only; reuses lint.py's frontmatter reader. It authors nothing — every field is
+only; reuses schema.py's frontmatter reader. It authors nothing — every field is
 read from the pages — so it can be regenerated at will and never drifts.
 
-    python scraper/index.py [LLM_WIKI_ROOT] [OUT]
+    python wikitools/index.py [LLM_WIKI_ROOT] [OUT]
     # defaults: ./llm-wiki  ->  ./index.md
 """
 
@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from scraper import lint  # noqa: E402  (reuse its frontmatter reader / KANJI_RE)
+from wikitools import schema  # noqa: E402  (shared §6 schema primitives)
 
 # frontmatter `type` -> (section heading), in output order
 SECTIONS = (("vocabulary", "語彙"), ("grammar", "文法"), ("article", "記事"))
@@ -27,7 +27,7 @@ POS_BUCKETS = (
     ("副詞", ("adverb",)),
     ("表現", ("expression",)),
 )
-EDIT_NOTE = "直接編集しないでください（`scraper/index.py` が再生成します）"
+EDIT_NOTE = "直接編集しないでください（`wikitools/index.py` が再生成します）"
 
 
 # ---------------------------------------------------------------- extraction
@@ -72,15 +72,15 @@ def reading_suffix(fm):
     A suru-verb appends 「・する」 inside the paren (§7.2)."""
     hw = fm.get("headword", "")
     rd = str(fm.get("reading", "") or "")
-    suru = lint.suru_suffix(fm.get("part_of_speech"))
-    if rd and rd != hw and lint.KANJI_RE.search(hw):
+    suru = schema.suru_suffix(fm.get("part_of_speech"))
+    if rd and rd != hw and schema.KANJI_RE.search(hw):
         return f"（{rd}{suru}）"
     return ""
 
 
 def row(t, fm, sections):
     hw = fm.get("headword", "")
-    surface = f"[[{hw}]]{lint.suru_suffix(fm.get('part_of_speech'))}"
+    surface = f"[[{hw}]]{schema.suru_suffix(fm.get('part_of_speech'))}"
     link = f"{surface}{reading_suffix(fm)}"
     g = gloss_for(t, sections, fm)
     return f"- {link} — {g}" if g else f"- {link}"
@@ -93,13 +93,13 @@ def collect(root):
     items = {k: [] for k, _ in SECTIONS}
     dates, skipped = [], []
     for path in sorted(root.rglob("*.md")):
-        fm, body = lint.parse_frontmatter(path.read_text(encoding="utf-8"))
+        fm, body = schema.parse_frontmatter(path.read_text(encoding="utf-8"))
         t = fm.get("type")
         if t not in items:
             skipped.append(path)              # non-schema / unknown type
             continue
         fm.setdefault("headword", path.stem)  # filename is the headword
-        _, sections = lint.split_body(body)
+        _, sections = schema.split_body(body)
         hw = fm["headword"]
         sort_key = str(fm.get("reading", "") or "") or hw   # articles: by headword
         items[t].append((sort_key, hw, fm, sections))

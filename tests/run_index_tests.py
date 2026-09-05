@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test the index generator against a fixture vault (specs.md §7.2).
 
-Same golden-baseline approach as §7.1: run `scraper/index.py` over the clean
+Same golden-baseline approach as §7.1: run `wikitools/index.py` over the clean
 fixture vault `tests/index-wiki/` and compare its markdown to the committed
 baseline `tests/index-baseline.md`, plus targeted property checks for the rules
 that matter (section order, counts, reading-omission, あいうえお sort, 意味
@@ -9,7 +9,7 @@ paragraph-join, article メモ / tags gloss). Prints a pass/fail summary and exi
 non-zero on any mismatch.
 
     python tests/run_index_tests.py            # from the repo root
-    python scraper/index.py tests/index-wiki tests/index-baseline.md  # regen baseline
+    python wikitools/index.py tests/index-wiki tests/index-baseline.md  # regen baseline
 
 Regenerating the baseline (right-hand command) is the intended way to update
 expectations when the format deliberately changes.
@@ -20,7 +20,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
-from scraper import index  # noqa: E402
+from wikitools import index  # noqa: E402
 
 FIX = Path(__file__).resolve().parent / "index-wiki"
 BASELINE = Path(__file__).resolve().parent / "index-baseline.md"

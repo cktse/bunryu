@@ -177,6 +177,23 @@ def test_cloze_id_survives_reingest(tmp):
     return ok, "reflow + a new marker in the same sentence keep the cloze id (and its schedule)"
 
 
+def test_ab_subheadings_change_no_card(tmp):
+    """A 統合理解 page labels its texts `### A` / `### B` inside 本文 (§6.5.2);
+    those lines are structure, so no card may change when they are added."""
+    from study import cards as cardgen
+    wiki, _ = fresh(tmp, "ab")
+    before = cardgen.build(wiki)[0]
+    art = wiki / "articles" / "裁判員のもやもや.md"
+    t = art.read_text(encoding="utf-8")
+    t = t.replace("## 本文\n", "## 本文\n### A\n", 1)
+    head, _, rest = t.partition("\n\n")                  # label the 2nd paragraph B
+    art.write_text(head + "\n\n### B\n" + rest, encoding="utf-8")
+    after = cardgen.build(wiki)[0]
+    fronts = [c.get("front", "") for c in after]
+    ok = (after == before and not any(f.lstrip().startswith("#") for f in fronts))
+    return ok, "### A / ### B labels are stripped before sentence splitting"
+
+
 def test_force_resets(tmp):
     wiki, deck = fresh(tmp, "force")
     run(wiki, deck)
@@ -216,7 +233,8 @@ def test_regen_select(_tmp):
 
 
 CASES = [test_create, test_idempotent, test_carry_over, test_drop_reported,
-         test_added_starts_fresh, test_cloze_id_survives_reingest, test_force_resets,
+         test_added_starts_fresh, test_cloze_id_survives_reingest,
+         test_ab_subheadings_change_no_card, test_force_resets,
          test_wiki_requires_flashcards, test_legacy_manifest, test_regen_select]
 
 

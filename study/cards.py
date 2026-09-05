@@ -38,6 +38,7 @@ KANJI = schema.KANJI_RE
 CANTO_START = re.compile(r"（粵[：:]")
 PAREN_INNER = re.compile(r"（[^（）]*）")            # innermost full-width parens
 SENT_SPLIT = re.compile(r"(?<=。)")
+SUBHEADING = re.compile(r"(?m)^#{3,}\s.*$")      # `### A` labels in 本文 (§6.5.2)
 EXAMPLE_HEAD = re.compile(r"(?m)^(?=\d+\.\s)")
 
 VOCAB_TYPES = ("reading", "canto", "meaning", "cloze")
@@ -75,6 +76,18 @@ def base_card(page, kind):
         "level": fm.get("level"),
         "tags": fm.get("tags", []),
     }
+
+
+def honbun_text(sections):
+    """An article's `## 本文` as one unbroken line, ready for sentence splitting.
+
+    Drops the `###` sub-headings a 統合理解 A/B page uses to label its texts —
+    they are structure, not prose (§6.5.2) — then undoes the §6.5.2 word-wrap.
+    """
+    body = sections.get("本文")
+    if not body:
+        return ""
+    return SUBHEADING.sub("", body).replace("\n", "")
 
 
 def span_key(blanked):
@@ -210,10 +223,9 @@ def cloze_cards(articles, vocab_by_headword):
     """Blank a [[dict|surface]] span in an article sentence; answer = dict-form."""
     cards = []
     for art in articles:
-        honbun = art["sections"].get("本文")
+        honbun = honbun_text(art["sections"])
         if not honbun:
             continue
-        honbun = honbun.replace("\n", "")                # undo body word-wrap (§6.5.2)
         aid = art["fm"]["id"]
         for sent in SENT_SPLIT.split(honbun):
             if "[[" not in sent:
@@ -298,10 +310,9 @@ def grammar_context(grammar, articles):
     hw = grammar["fm"]["headword"]
     cands = []
     for art in articles:
-        honbun = art["sections"].get("本文")
+        honbun = honbun_text(art["sections"])
         if not honbun:
             continue
-        honbun = honbun.replace("\n", "")
         aid = art["fm"]["id"]
         for sent in SENT_SPLIT.split(honbun):
             for m in schema.LINK_RE.finditer(sent):

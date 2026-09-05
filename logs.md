@@ -762,3 +762,82 @@ avoiding it means carrying a per-item ordinal on every card.
 `regen.py` → 14 resynced / 199 unchanged / 0 schedules dropped; `--check` 0
 drifted; second run 0 resynced / 213 unchanged; `index.md` and `progress.json`
 untouched.
+
+## 2026-09-05 — Spec: title fallback + 統合理解 A/B article shape (§6.4, §6.5.2, §8.2)
+
+Not an ingest. Two gaps surfaced by `analyze article raw/性を語る.md` (the analysis
+itself wrote nothing, §8.4).
+- **§6.4 / §8.2 step 1 — no `##` heading now has a rule.** A source that opens
+  straight into its text (exam passages, a 統合理解 pair labelled only `A`/`B`)
+  falls back to the **raw filename stem** for `headword` and page filename, with
+  the fallback noted in the page's `## メモ`. A `##` heading, when present, still
+  wins. This had already been handled ad hoc twice
+  (地域をまわって考えたこと, and 性を語る would have been the third).
+- **§6.5.2 — multi-text passages stay on one page.** 統合理解 A/B sources keep
+  both texts in a single article page under `###` sub-headings using the source's
+  own labels; the comparison is the reading task, so splitting them would lose it.
+  `word_count` spans both; `## 語釈` and `## 注目語彙・文法` stay single lists whose
+  entries name their text (「A第1段落」).
+- **Code consequence of that decision, fixed with it:** `## 本文` is joined into
+  one line before sentence splitting, so a `### A` label would have been glued
+  onto the first sentence of each text and corrupted the first cloze/gcloze card
+  per section. New `cards.py: honbun_text()` strips `###` lines first and is now
+  the single reader of 本文 for both `cloze_cards` and `grammar_context`.
+- **New test** `ab_subheadings_change_no_card` (regen suite 10 → **11 cases**):
+  inserting `### A` / `### B` into a fixture article must leave the built card set
+  **byte-identical** and no card front may start with `#`.
+
+**Verified:** lint 31/31, index 14/14, cards 58, scheduler 24/24, regen 11/11;
+`regen.py` → 783 cards, `index.md` unchanged, flashcards 0 resynced / 213
+unchanged (the fix is a no-op on today's vault, which has no A/B pages yet).
+
+## 2026-09-05 — Ingest 性を語る（統合理解 A/B）/c embedded quizzes
+
+`ingest article raw/性を語る.md` (§8). First page to use both rules added earlier
+today: the filename title fallback (§6.4) and the multi-text A/B layout (§6.5.2).
+14 marked items — 13 new headwords plus one deliberate near-duplicate.
+- **New article `llm-wiki/articles/性を語る.md`** — A and B kept on **one page**
+  under `### A` / `### B` inside `## 本文` (§6.5.2), each text re-wrapped per
+  §6.5.2; 原文A注1–4 and B注1–2 folded into `## 語釈` with their text labels
+  (（原文A注1）/（原文B注1）) since both texts number their notes from 1;
+  注目語彙・文法 is one list per type whose entries name the text (「A第1段落」).
+  The source's `## 統合理解` section (2 `quiz` blocks) copied verbatim.
+  `word_count` 684 computed over both texts with the `###` labels excluded.
+  Title from the **raw filename** — the source has no `##` heading (§6.4);
+  recorded in the page's `## メモ`.
+- **New vocabulary (11)**: `憚る` (godan), `暗黙の了解` (expression), `公然`
+  (na-adj), `悪循環` (noun), `断ち切る` (godan), `快楽` (noun), `溝` (noun),
+  `誠心誠意` (adverb, 四字熟語), `向き合う` (godan, N2), `淡々` (na-adj),
+  `同意` (**suru-verb**, N2).
+- **New grammar (3)**: `～一方で` (N2), `～として` (N2), `～たびに` (N3 — 基本語だが
+  B の反復の軸なので採録).
+- **Updated `暗黙のうちに`** — added a `## 関連` cross-link to the new
+  `暗黙の了解` (§8.2 step 3 "update existing page"; llm-wiki was committed clean,
+  so no §8.3 hand-edit prompt).
+- **Deliberate departure from the analyze recommendation:** §8.4 suggested
+  cross-linking `暗黙の了解` to the existing `暗黙のうちに` instead of creating a
+  page. The marker was kept in the source after that analysis, and the two are
+  distinct lexical items — a noun phrase (the *content* of the understanding) vs
+  an adverbial (the *manner*) — so both pages exist and cross-link each other,
+  each carrying its own 例文. Recorded here as the judgment call it is.
+- **Source markup normalised on the way in** (raw untouched, §8.3): inflected
+  markers linked to dictionary form via alias — `[[憚る|憚られます]]`,
+  `[[向き合う|向き合い]]`; grammar markers widened to the whole pattern surface —
+  `[[～一方で|一方で]]`, `[[～として|として]]`, `[[～たびに|たびに]]`; inline
+  「(注N)」 dropped from 本文 per house convention (they live in 語釈); half-width
+  parentheses normalised to full-width.
+- **Coverage note:** creating `同意` resolves the dangling `[[同意]]` that
+  `合意.md` already carried in its 関連 — the same win `とはいえ` gave
+  `それにしても`.
+- **Verified:** real-vault lint **237 files, 0 error(s), 0 warning(s)**; suites
+  lint 31/31, index 14/14, cards 58, scheduler 24/24, regen 11/11. `regen.py`
+  rebuilt `index.md` (178 語彙 / 50 文法 / 9 記事) and `build/cards.json`
+  (840 cards, +57); flashcards **created 14, resynced 177, unchanged 36, 0
+  schedules dropped**; `--check` 0 drifted. The §6.5.2 `###`-strip verified on
+  real data: **no card front begins with a heading**, and the 14 cards from this
+  article read correctly.
+- **Latent edge found, not fixed (no card affected today):** A's citation line
+  「（『日本の家族と性』…による）」 ends without 「。」, so once another text
+  follows it on the same page, `SENT_SPLIT` glues it onto the next sentence. Here
+  B's first sentence carries no marker, so nothing was polluted. Fix if it bites:
+  split `## 本文` on paragraph breaks before splitting on 「。」.

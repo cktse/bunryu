@@ -272,6 +272,12 @@ Notes:
   is authoritative for the headword/filename; the raw filename is recorded only
   in `source`. E.g. `raw/読み取る.md` whose heading is `## 記事の裏側`
   produces `llm-wiki/articles/記事の裏側.md` with `headword: 記事の裏側`.
+- **No `##` heading → fall back to the raw filename stem.** Some curated sources
+  carry no title at all: an exam-style passage that opens straight into the text,
+  or a 統合理解 pair whose only headings are its text labels. The **raw filename
+  stem** then becomes both `headword` and page filename, and the page's `## メモ`
+  records that the title came from the filename, so the provenance stays visible.
+  A `##` heading, when present, always wins.
 - An article carries no `## 意味`/`## 例文` sections; it uses the article body
   layout in §6.5.2.
 
@@ -371,6 +377,19 @@ re-wrap the Japanese text so that:
 3. **Preserve paragraph breaks.** Blank-line paragraph breaks present in the raw
    source are meaningful and are kept: one blank line between paragraphs, matching
    the source's paragraph structure.
+
+**Multi-text passages (統合理解 A/B).** A source may carry **two or more short
+texts set against each other** — the JLPT 統合理解 format. They stay in **one
+article page**: the comparison between them *is* the reading task, and splitting
+them across pages would lose it. Inside `## 本文`, each text takes an `###`
+sub-heading using the source's own labels (`### A`, `### B`); wrapping, wikilinks
+and paragraph breaks are unchanged within each. `word_count` covers the texts
+together, and `## 語釈` / `## 注目語彙・文法` remain single lists for the whole
+page, each entry naming the text it came from (e.g. 「A第1段落」).
+
+Those `###` lines are **structure, not prose**: the §10.2 generators drop them
+before splitting `## 本文` into sentences, so no card front can begin with a
+heading and adding them changes no card.
 
 ```markdown
 ## 本文
@@ -698,7 +717,8 @@ A curated source file in `raw/`:
 1. **Read** the source markdown from the given path. The **essay title is the
    source's top `##` heading** (`[[...]]` markup stripped); it becomes the
    article `headword` and article filename (§6.4), which **may differ from the
-   raw source filename**.
+   raw source filename**. A source with **no `##` heading** falls back to the raw
+   filename stem, noted in the page's `## メモ` (§6.4).
 2. **Extract** every `[[...]]` marker as an item of interest. **Markers are
    type-agnostic** — a `[[...]]` may enclose either vocabulary or grammar.
 3. For each marked item:

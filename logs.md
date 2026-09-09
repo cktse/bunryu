@@ -841,3 +841,221 @@ today: the filename title fallback (§6.4) and the multi-text A/B layout (§6.5.
   follows it on the same page, `SENT_SPLIT` glues it onto the next sentence. Here
   B's first sentence carries no marker, so nothing was polluted. Fix if it bites:
   split `## 本文` on paragraph breaks before splitting on 「。」.
+
+## 2026-09-05 — Ingest 理想の上司（児玉光雄）/c embedded quizzes
+
+`ingest article raw/理想の上司.md` (§8). 14 marked items, **all new headwords**;
+the source arrived with both defects flagged at analyze time already fixed by the
+curator (closing ``` fence, ruby artifacts).
+- **New article `llm-wiki/articles/理想の上司.md`** — 本文 re-wrapped per §6.5.2,
+  原文注1–9 folded into `## 語釈`, 注目語彙・文法 split 語彙/文法, and the source's
+  `## 主張理解` (4 `quiz` blocks) copied verbatim. `word_count` 1123. Title from
+  the **raw filename** — no `##` heading in the source (§6.4), noted in `## メモ`.
+- **New vocabulary (10)**: `調教` (**suru-verb**), `せいぜい` (adverb), `低迷`
+  (**suru-verb**), `漏らす` (godan), `ほのめかす` (godan), `闘志` (noun), `衰える`
+  (ichidan), `ことあるごとに` (expression), `口が裂けても` (expression), `希薄`
+  (na-adj).
+- **New grammar (4)**: `たとえ～ても`, `～さえ～ば`, `～わけがない`,
+  `～にもかかわらず` (all N2).
+- **Updated `～わけではない` and `～わけでもない`** — each gained a `## 関連` link to
+  the new `～わけがない`, completing the わけ family with the distinction spelled
+  out (可能性の全否定 vs 部分否定). llm-wiki was committed clean, so no §8.3
+  hand-edit prompt.
+- **Source markup normalised on the way in** (raw untouched, §8.3): inflected
+  markers aliased to dictionary form — `[[低迷|低迷したら]]`, `[[漏らす|漏らした]]`,
+  `[[ほのめかす|ほのめかしている]]`, `[[衰える|衰えていた]]`; grammar markers widened
+  to the pattern headword — `[[たとえ～ても|たとえ最下位になっても]]`,
+  `[[～さえ～ば|さえ我慢すれば]]`, `[[～わけがない|わけがない]]`,
+  `[[～にもかかわらず|にもかかわらず]]`; half-width `!` normalised to `！`.
+- **Not linked, deliberately:** 第1段落「ロープを**断ち切って**逃げようと」 is an
+  unmarked occurrence of the existing `断ち切る` page. Left unlinked — the human's
+  `[[…]]` markers define the item set (§8.1) — but it is a free depth win if the
+  curator wants to mark it on a later pass.
+
+### Bug fixed in the same change: paragraph breaks now end a sentence
+
+The `希薄` cloze card came out as 「なぜなら周りが笑うからですよ」野村阪神の失敗は…＿＿さ
+— the preceding quotation bled into it, because `## 本文` was joined into one line
+before splitting on 「。」 and that paragraph ends in 「」」, not 「。」. This was the
+latent edge logged with the 性を語る ingest; it has now bitten real content.
+- **`cards.py`**: `honbun_text()` → **`honbun_sentences()`**, which splits `## 本文`
+  on paragraph breaks **first**, undoes the §6.5.2 wrap within each paragraph, then
+  splits on 「。」. Still strips `###` labels (§6.5.2). Both `cloze_cards` and
+  `grammar_context` consume it.
+- **7 cards repaired across 3 articles** — 2 in this ingest (`希薄`,
+  `～にもかかわらず`) plus **5 pre-existing, previously unnoticed**: 3 in 性を語る and
+  2 in 哲学の目的, where a 「（中略）」 line had been bleeding into the following
+  sentence. 2 further `gmc` cards kept their id but picked up the corrected context.
+- **New test** `paragraph_break_ends_sentence` (regen suite 11 → **12 cases**):
+  inserting a paragraph that ends in 「」」 before a card-bearing paragraph must not
+  appear in any card front. The §10.7 fixture never covered this, which is why the
+  cards baseline stayed green through the bug — `--update` produced no diff.
+
+**Verified:** real-vault lint **252 files, 0 error(s), 0 warning(s)**; suites lint
+31/31, index 14/14, cards 58, scheduler 24/24, regen 12/12. `regen.py` rebuilt
+`index.md` (188 語彙 / 54 文法 / 10 記事) and `build/cards.json` (887 cards, +47);
+flashcards created 14 then resynced 7 for the fix, **0 schedules dropped**;
+`--check` 0 drifted.
+
+## 2026-09-05 — Re-ingest そば屋の先生（raw/ならう.md）: two unlinked 文法 fixed
+
+`ingest article raw/ならう.md` re-run (§8.3 idempotent). Not new content — it closes
+a gap found by the coverage-pass experiment run against this article.
+- **Defect:** the source's `## 新しい文法` note section lists four patterns
+  (〜途端・〜ならまだしも・〜からには・〜ものの). Two of them carry **no inline
+  `[[…]]` marker**, so the original ingest created their pages (both
+  `source: raw/ならう.md`) and listed them under `## 注目語彙・文法`, but never
+  wikilinked their occurrences in `## 本文`. Audit before the fix: 46 inline
+  markers → 46 links, but **48 listed vs 46 linked**.
+- **Fix:** linked the two occurrences in the article body —
+  `[[～ならまだしも|ならまだしも]]` (第1段落「小声での独り言ならまだしも」) and
+  `[[～ものの|ものの]]` (第2段落「頭を下げたものの」). Audit after: 48 listed / 48
+  linked, clean. `raw/` untouched (§8.3); llm-wiki was committed clean, so no
+  hand-edit prompt.
+- **No page updates needed** — both grammar pages already carried this article's
+  sentence as 例文 #1, so there was nothing to enrich; the gap was purely the body
+  links.
+- **Card effect (+2, and 2 improved):** new article-context gcloze for
+  `～ものの` and `～ならまだしも`; and both patterns' **gmc** cards switched their
+  stem from the page's paraphrased 例文 to the authentic article sentence, since
+  `grammar_context` yields article spans before 例文 spans (§10.2 — article spans
+  are the reliable ones). 887 → 889 cards.
+- **Watch item (not a bug):** the article sentence behind `～ものの`'s gmc is long
+  (~70 chars), where the 例文 stem was ~28. Article-first preference is correct for
+  span reliability, but it can produce unwieldy MC stems for the daily email
+  (§10.8.6 length budget). Worth revisiting if the email starts feeling long.
+- **Verified:** real-vault lint 252 files / 0 errors / 0 warnings; suites lint
+  31/31, index 14/14, cards 58, scheduler 24/24, regen 12/12. `regen.py` → 889
+  cards, `index.md` unchanged in shape (188 語彙 / 54 文法 / 10 記事); flashcards
+  **resynced 2, unchanged 239, 0 schedules dropped**; `--check` 0 drifted.
+
+**Method note.** This defect was invisible to every existing check: the linter only
+verifies that links *resolve*, and nothing compares 注目語彙・文法 against 本文. The
+`listed ⊄ linked` audit used here is cheap, deterministic, and worth adding as a
+§7 lint rule for article pages when the §8.4 restructure lands — it would have
+caught this at ingest time without any LLM pass.
+
+## 2026-09-05 — Spec: §8.4 restructured into coverage pass + deterministic lookup
+
+Not an ingest. Records the design decided after two measured experiments (§11.1).
+- **§8.4 is now two passes with opposite objectives.** An **exhaustive, unbudgeted
+  coverage pass** (every N1-scope lemma, paragraph by paragraph, with the surface
+  as written) feeds a **deterministic vault lookup**; only the *not-covered*
+  remainder goes to the budgeted Tier A/B curation pass. The old single budgeted
+  extraction structurally could not find common words already in the vault — they
+  are never Tier-A candidates, so nothing ever checked them (this is how
+  `断ち切る` reached ingest unlinked).
+- **The matching contract is specified, because two thirds of it is non-obvious:**
+  exact → **NFKC + `〜`(U+301C)/`～`(U+FF5E) folding** → **`reading` index**.
+  Normalisation is mandatory: grammar headwords carry a tilde, so exact-only
+  matching scores **zero on grammar** while looking like "no grammar here". The
+  reading index is what catches かたわら→`傍ら`, にらむ→`睨む`, which normalisation
+  cannot reach; those matches are flagged lower-confidence (readings are unique
+  vault-wide today, but 遭う/会う-type homophones will collide).
+- **Per-paragraph enumeration is a requirement, not a technique** — long-list
+  enumeration degrades toward the end, and chunking yields the location field.
+- **Surface verification** — a quoted surface absent from the source is a
+  hallucinated lemma and is dropped. Exact substring check, no morphology.
+- **Non-determinism is stated and scoped:** the pass is LLM judgment, belongs to
+  the prompt layer only, is never part of `regen.py`, and cannot carry an
+  exact-match baseline. Only the step-4 lookup is deterministic and testable.
+- **Marking stays with the human curator** (step 10). A confirmed already-covered
+  item is marked in `raw/` like any other and flows through §8.2 unchanged — ingest
+  needs no special case.
+- **§8.2 step 3 tightened:** for an item whose page already exists, the body
+  wikilink *is* the enhancement (it mints a fresh cloze context, §10.2). Copying an
+  例文 from the new article onto the existing page is deferred, with the conditions
+  it would need recorded in §11.2.
+- **§11.1** records why vault→text matching and a bundled morphological dictionary
+  were rejected, with the measured numbers (24 hits/17% precision naive; 4/4 after
+  boundary rules but blind to 13 verbs; 60/60 recall and 155/155 verified surfaces
+  for the LLM pass across two articles, one run blind).
+- **§11.2** gains two entries: article pages have no `注目語彙・文法 ⊆ 本文` check
+  (the defect class fixed in そば屋の先生 — worth a §7 lint rule), and the deferred
+  例文-enrichment with its four preconditions.
+
+Docs only — no code touched. Structure verified: heading set and code-fence count
+unchanged vs HEAD; §8.4 steps renumbered 1–10 with no stale cross-references.
+
+## 2026-09-09 — Lint rule: 注目語彙・文法 ⊆ 本文 + re-ingest of 3 articles
+
+Completes the audit proposed after the そば屋の先生 fix (log 2026-09-05).
+- **New §7 lint rule** in `check_article_body`: every item listed in an article's
+  `## 注目語彙・文法` must be wikilinked in `## 本文`. Link *resolution* could never
+  catch this — the link resolves fine, it is simply absent from the body — yet the
+  omission silently costs that item its cloze card from its own source article.
+- **New negative fixture** `articles/neg-chuumoku-unlinked.md` + `EXPECTED` entry;
+  lint suite 31 → **32 cases**.
+- **Audit over all 10 articles:** 11 offenders in 3 files, **all grammar**, and all
+  11 verified to occur in the body text. Cause is uniform: each source has a
+  `## 新しい文法` note section whose patterns were never inline-marked, so earlier
+  ingests built the pages and listed them but linked only what was marked inline.
+  Vocabulary is always marked inline, which is why none appeared. Reverse direction
+  (linked-but-not-listed) was clean everywhere: 0.
+- **Re-ingested** 初めての雪 (1), 裁判員のもやもや (5), 記事の裏側 (5) — body links
+  only, no page edits; split patterns linked across their whole span, e.g.
+  `[[到底～ない|到底公平だと言えない]]`, `[[～といい～といい|新聞といいテレビといい]]`,
+  and `[[～を余儀なくされる|を余儀なくされ]]` (pattern only, the noun stays outside
+  the blank).
+- **Verified:** lint 32/32, vault 252 files 0/0; `regen.py` → **900 cards (+11)**,
+  flashcards created 1 / resynced 10 / 0 schedules dropped.
+- **Method note:** my first occurrence check reported `～を余儀なくされる` as absent
+  because I matched the dictionary form against 「辞任を余儀なくされ」 — the very
+  inflection problem the §8.4 redesign addresses, in the ad-hoc script written to
+  hunt for it. Re-checked with a tolerant tail; 11/11 present.
+
+## 2026-09-09 — Bug: daily launchd email failing since the §10.4 resync work
+
+**Symptom.** `com.bunryu.dailyquiz` exited 1 every morning; `launchctl list` showed
+last status 1 and `~/Library/Logs/bunryu-dailyquiz.log` had a repeating
+`AttributeError: module 'study.obsidian_cards' has no attribute 'MANIFEST'`.
+Not an environment fault — the plist, interpreter path and cwd were all fine.
+
+**Root cause — mine, three layers deep.** Rewriting `obsidian_cards.py` for the
+schedule-preserving resync replaced the module constant `MANIFEST` with
+`INDEX_NAME` (the path became per-deck for `--flashcards`), but
+`scheduler.scan_fsrs` still read `obs.MANIFEST`. Behind that sat a second break:
+`scan_fsrs` also did `json.loads(...).items()` on the manifest, expecting the
+**legacy flat** `{item_id: NNNN}`, while the file is now
+`{"seq": …, "cards": …}` — so fixing the AttributeError alone would have traded it
+for a `TypeError`. And third, the block→card-id join still matched by **content**,
+which fails precisely when a card was reworded — the case the resync exists to
+survive, and contrary to §10.1 as since rewritten.
+
+**Why every suite stayed green.** `run_scheduler_tests` passes `manifest_path`
+explicitly *and* writes a legacy-format fixture, so neither the default-path branch
+nor the current on-disk shape was ever exercised; `regen.py` never calls
+`scan_fsrs`; and **nothing ran `email_quiz.py` at all**. The failure lived exactly
+in the seam no test crossed.
+
+**Fix.**
+- `obsidian_cards.manifest_path(flash=FLASH)` — one place composes the sidecar
+  path; `main()` uses it too.
+- `scan_fsrs` now calls `obs.load_manifest()` (which migrates the legacy form),
+  reads `["seq"]`, and joins blocks→ids by the **recorded card order**, falling
+  back to content matching only when a note has no recorded order.
+- **§10.8.8 gap closed while here:** the send now rebuilds `build/cards.json` on
+  start, ordered *after* the `--once-daily` guard, as the spec describes. It never
+  did — a page hand-edited without a re-ingest would have quizzed from a stale bank.
+
+**Tests (the real deliverable).**
+- `run_scheduler_tests`: new case covering the **current manifest shape** through
+  the **default path**, with a deliberately *reworded* card so content matching
+  cannot pass it. 24 → **26 checks**.
+- **New `tests/run_email_tests.py`** (8 checks): runs the CLI as a subprocess the
+  way launchd does — `--list`, then a `--out` preview exercising the whole
+  selection path — and asserts the CSS machinery is present, the reveal is
+  rendered, and `progress.json` is untouched. Stops short of `--send`.
+- **Negative control:** reverting `scan_fsrs` to `obs.MANIFEST` makes the scheduler
+  suite crash with the production error and the email suite fail 2/5; restored,
+  both green. The guards demonstrably catch the original bug.
+
+**Verified:** lint 32/32, index 14/14, cards 58, scheduler 26/26, regen 12/12,
+email 8/8; vault 252 files 0/0. The exact launchd command (pyenv 3.14.3 + repo cwd)
+now builds a 5-question email for 「地域をまわって考えたこと」. **No mail was sent** —
+today's runs all failed before recording exposure, so the day is still unsent and
+the next 07:00 trigger (or a manual kickstart) will deliver it.
+
+**Spec:** §7 + §7.1 gain the new lint rule; §11.2 drops the gap it closes;
+§10.8.7 marks scheduler integration and the daily send done and documents the smoke
+tests; §12 moves both to "done so far".

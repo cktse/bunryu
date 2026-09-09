@@ -90,13 +90,17 @@ def _blocks(note_text):
 def scan_fsrs(cards, flash_dir=None, manifest_path=None):
     """{card_id: fsrs_dict} read-only from flashcards/*.md.
 
-    Joins via .card-index.json (item_id→NNNN) and aligns blocks→card ids by
-    **content match** (reusing obsidian_cards.card_block/canonical), not position."""
-    flash_dir = flash_dir or obs.FLASH
-    manifest_path = manifest_path or obs.MANIFEST
-    if not manifest_path.exists():
+    Joins via `.card-index.json`: `seq` maps item_id→NNNN, and `cards` records
+    each note's card ids **in written order**, which is how blocks align to ids
+    (§10.1, §10.4). Content matching is the fallback for a note with no recorded
+    order — it fails exactly when a card was reworded, which is the case the
+    recorded order exists to survive."""
+    flash_dir = Path(flash_dir) if flash_dir else obs.FLASH
+    mpath = Path(manifest_path) if manifest_path else obs.manifest_path(flash_dir)
+    if not mpath.exists():
         return {}
-    seq = json.loads(manifest_path.read_text(encoding="utf-8"))   # item_id -> NNNN
+    manifest = obs.load_manifest(mpath)      # migrates the legacy flat form
+    seq, order = manifest["seq"], manifest["cards"]
     by_item = {}
     for c in cards:
         by_item.setdefault(c["item_id"], []).append(c)
@@ -109,17 +113,19 @@ def scan_fsrs(cards, flash_dir=None, manifest_path=None):
         p = flash_dir / f"card-{cs[0]['kind']}-{int(n):04d}.md"
         if not p.exists():
             continue
+        recorded = order.get(p.name)
         match = {}
         for c in cs:
             try:
                 match[obs.canonical(obs.card_block(c))] = c["id"]
             except Exception:
                 pass   # a card lacking render fields just won't match; skip it
-        for block in _blocks(p.read_text(encoding="utf-8")):
+        for i, block in enumerate(_blocks(p.read_text(encoding="utf-8"))):
             m = obs.SR_COMMENT.search(block)
             if not m:
                 continue
-            cid = match.get(obs.canonical(block))
+            cid = (recorded[i] if recorded and i < len(recorded)
+                   else match.get(obs.canonical(block)))
             fsrs = parse_sr(m.group(0))
             if cid and fsrs:
                 out[cid] = fsrs

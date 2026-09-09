@@ -114,8 +114,34 @@ def test_scan_join():
         note = obs.note_text([c]).rstrip() + "\n" + sr + "\n"
         (flash / "card-vocab-0001.md").write_text(note, encoding="utf-8")
         got = s.scan_fsrs([c], flash_dir=flash, manifest_path=flash / ".card-index.json")
-    check("scan_fsrs joins block→card id by content",
+    check("scan_fsrs joins block→card id by content (legacy flat manifest)",
           "vocab-z::meaning" in got and abs(got["vocab-z::meaning"]["stability"] - 3.0) < 1e-9)
+
+
+def test_scan_current_manifest_and_default_path():
+    """The shape `obsidian_cards` actually writes today — `{"seq":…,"cards":…}` —
+    joined by the recorded card order, and reached through the module's own
+    `manifest_path()` default rather than an explicit argument. Both are what the
+    daily send uses, and neither was covered before (the launchd break of
+    2026-09-09)."""
+    c = {"id": "vocab-z::meaning", "item_id": "vocab-z", "type": "meaning",
+         "kind": "vocab", "level": "N1", "headword": "改ざん", "reading": "かいざん",
+         "front": "改ざん（かいざん）", "choices": ["書き換え", "捏造", "偽造", "改良"],
+         "answer_index": 0, "back": "書き換え", "tags": ["A"]}
+    sr = "<!--SR:!fsrs,2026-07-16T00:00:00.000Z,0,7.5,4.0,1,1,0,2,2026-07-10T00:00:00.000Z-->"
+    with tempfile.TemporaryDirectory() as d:
+        flash = Path(d)
+        obs.save_manifest(obs.manifest_path(flash),
+                          {"seq": {"vocab-z": 1},
+                           "cards": {"card-vocab-0001.md": ["vocab-z::meaning"]}})
+        # a *reworded* card: content matching would fail, the recorded order must not
+        note = obs.note_text([c]).rstrip().replace("改良", "改訂") + "\n" + sr + "\n"
+        (flash / "card-vocab-0001.md").write_text(note, encoding="utf-8")
+        got = s.scan_fsrs([c], flash_dir=flash)          # manifest_path defaults
+    check("scan_fsrs reads the current manifest shape via manifest_path()",
+          "vocab-z::meaning" in got)
+    check("scan_fsrs joins a reworded card by recorded order",
+          got.get("vocab-z::meaning", {}).get("stability") == 7.5)
 
 
 # ---------------------------------------------------------------- atomic write
@@ -178,6 +204,7 @@ def main():
     test_recompute_idempotent()
     test_parse_sr()
     test_scan_join()
+    test_scan_current_manifest_and_default_path()
     test_atomic_write()
     for ok, name in RESULTS:
         print(f"{'PASS' if ok else 'FAIL'}  {name}")

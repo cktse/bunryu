@@ -571,6 +571,11 @@ for the rules themselves.
     examples, each example carrying a `（粵）`/`（英）` line (§6.5.1).
   - **article:** body has a `## 本文`; every `[[wikilink]]` in the body /
     `## 注目語彙・文法` resolves to an existing page (unresolved = warning; §6.5).
+  - **article: every `## 注目語彙・文法` entry is linked in `## 本文`.** The list
+    describes what appears in the body (§6.5.2), so a listed-but-unlinked item is
+    an error — and a silent one, since it costs that item its cloze card from its
+    own source article (§10.2). Resolution alone cannot catch it: the link
+    resolves fine, it is simply absent from the body.
   - No `[[wikilink]]` contains a line break, anywhere (§6.5) — a hard error.
 - **CLI: `lint-all`** — walks `llm-wiki/` (the human-curated `raw/` tree is a
   sibling and is never linted), prints each finding as `path: message`, and exits
@@ -598,7 +603,8 @@ linter runs exactly as in production, just pointed at a different root.
   `headword`-not-する (noun/suru-verb); each enum; `id` uniqueness; `# title` line
   (incl. the suru-verb 「・する」 title); `## 意味`/`## 例文` presence; ≥2
   examples; `（粵）`/`（英）` line; article `## 本文`; wikilink resolution;
-  split-wikilink; code-span exclusion; malformed-YAML frontmatter.
+  split-wikilink; code-span exclusion; malformed-YAML frontmatter;
+  注目語彙・文法-listed-but-not-linked.
   - Keep each negative file valid in every respect **except** the one rule under
     test, so exactly the expected finding fires.
   - `id`-uniqueness (a cross-file rule) needs a **pair** of fixtures sharing an
@@ -732,8 +738,13 @@ A curated source file in `raw/`:
      is inflected (§8.3); link the surface form in the article body via an
      Obsidian alias, `[[dictionary-form|surface-form]]`.
    - **Create** a new page under `llm-wiki/{vocabulary|grammar}/{headword}.md`
-     following the §6 schema, *or* **update** the existing page (matched by
-     `id`/headword) — e.g. add this article to its examples/related links.
+     following the §6 schema, *or*, when the page already exists (matched by
+     `id`/headword), **leave it alone and let the body wikilink do the work**:
+     the link gives the item a fresh cloze context from this article (§10.2),
+     which is the depth §8.4 aims at. Adding an 例文 *copied from the new article*
+     to an existing page is deliberately **deferred** — it duplicates text the
+     article already holds and nothing would detect the copy going stale (§11.2).
+     Cross-links in `## 関連` are always fair game.
    - Populate the body Japanese-first per §2.1, using any linked note sections
      from the source for nuance.
 4. **Create the article page** under `llm-wiki/articles/{title}.md` (title = the
@@ -788,18 +799,47 @@ N1-appropriate items — i.e. decide what to mark `[[...]]` before running
 `ingest article`. It **modifies no file** (neither `raw/` nor `llm-wiki/`);
 results go to the Claude Code conversation for manual review.
 
+It runs as **two passes with opposite objectives** — an exhaustive *coverage*
+pass that finds what the vault already holds, then a budgeted *curation* pass
+that proposes what is worth adding. Conflating them is what lets a common word
+already in the vault slip through unnoticed: it is never a Tier-A candidate, so a
+budgeted extraction never lists it, so nothing ever checks it against the vault.
+
 1. **Read** the source markdown (per §8.2 step-1) and analyze **only the main
    article body** — ignore the embedded `## 読解問題` quiz blocks and any note
    sections.
-2. **Extract N1-scope items**, split into two tiers:
+2. **Coverage pass — exhaustive, unbudgeted.** Enumerate **every** N1-scope lemma
+   in the body with no teaching-value filter, **paragraph by paragraph**. The
+   chunking is a requirement, not a technique: long-list enumeration degrades
+   toward the end, and per-paragraph work also yields the location field. Record
+   for each: the **dictionary / base-form lemma**, the **surface exactly as
+   written**, and the paragraph.
+3. **Verify every surface.** A quoted surface that does not appear literally in
+   the source is a hallucinated lemma and is dropped. An exact substring check —
+   no morphology, no stemming.
+4. **Vault lookup — deterministic.** Match each lemma against the vault's
+   headwords, in this order:
+   1. **exact** headword;
+   2. **normalised** — NFKC, plus folding `〜` (U+301C) and `～` (U+FF5E) to one
+      form. **Mandatory, not a nicety:** grammar headwords carry a tilde and the
+      two code points differ, so exact-only matching scores **zero on grammar**
+      while looking like "this article has no grammar";
+   3. **reading** — a kana lemma against pages' `reading` (かたわら → `傍ら`,
+      にらむ → `睨む`), which no amount of normalisation reaches. Flag these as
+      **lower confidence**: vault readings are unique today, but homophones
+      (遭う/会う) will collide eventually.
+
+   The result splits into **already covered** and **not covered**.
+5. **Curation pass — budgeted, over the not-covered only.** Split into two tiers:
    - **Tier A** — frequently used, broadly applicable items: the recommended set.
    - **Tier B** — in N1 scope but more niche / lower-yield: a bounded optional
      overflow.
-3. **Quality over quantity.** Exclude trivial / sub-N1 items. Rule of thumb for a
+
+   **Quality over quantity.** Exclude trivial / sub-N1 items. Rule of thumb for a
    ~600-word article (scale with length and density): **Tier A ≈ 5–10 vocabulary
    and 3–5 grammar**, plus **Tier B ≤ ~5 more** in total. The 5–10 / 3–5 budget
    is the Tier A headline — Tier B must not be used to exceed it.
-4. **Per-item fields.** Report each suggested item with a fixed, actionable set:
+6. **Per-item fields.** Report each suggested item with a fixed, actionable set:
    - **dictionary / base-form headword** (§8.3) — not the inflected surface;
    - **reading**;
    - **type** — vocabulary or grammar;
@@ -807,19 +847,13 @@ results go to the Claude Code conversation for manual review.
      `（粵：…）` where it aids comprehension;
    - **location** in the article (paragraph / quoted phrase);
    - **tier** (A / B);
-   - **coverage flag** — see step 5.
-5. **Cross-check existing `llm-wiki/` coverage.** Resolve each item to its
-   **dictionary / base form** and check whether a page already exists — matching
-   on the base form, **not** the surface (e.g. 愚か**さ** → `愚か`,
-   汚染**する** → `汚染`). Report coverage as one of:
-   - **new headword** → the article widens coverage (breadth);
-   - **existing headword** → ingest will *enhance* that page by adding this
-     article as a fresh example / context (depth), per §8.2 step-3 — a positive,
-     not a redundancy;
-   - **near-duplicate / variant** of an existing page → recommend a **cross-link**
-     rather than a new page (data-minimization tenet), e.g. `あまりに～すぎる`
-     alongside an existing `あまりにも`.
-6. **Reconcile with any pre-existing `[[...]]` markers.** If the source already
+   - **coverage flag** — falls out of step 4, no separate check.
+7. **Near-duplicates are a judgment call, not a string match.** Where a proposed
+   item is a **variant** of an existing page, recommend a **cross-link** rather
+   than a new page (data-minimization tenet) — e.g. `あまりに～すぎる` alongside an
+   existing `あまりにも`. This stays with the analysis, not the lookup: a
+   code-side substring detector was tried and rejected as noise (§11.1).
+8. **Reconcile with any pre-existing `[[...]]` markers.** If the source already
    carries markers (§8.2 step-2), report the **three-way diff** against the
    auto-identified set:
    - **both** (AI ∩ human) → high-confidence keep;
@@ -827,17 +861,31 @@ results go to the Claude Code conversation for manual review.
    - **human-only** → items to double-check (possibly below N1 / niche).
 
    When the source has no markers yet (the common analyze-first case), this
-   reduces to the plain suggestion list from steps 2–5.
-7. **Overall evaluation & recommendation.** Assess the article's N1 suitability
-   (writing style, register, difficulty, thematic value), then give an explicit
-   **recommendation**: the proposed final set to mark, and a go / no-go on
-   ingestion (weighing how much it adds vs. duplicates existing coverage).
-8. **Report only — no writes, no log.** The analysis changes nothing, so — unlike
-   ingest, whose §8.2 step 8 writes to `logs.md` — **nothing is logged**. §2.1's
-   Japanese-first rule binds the per-item glosses (step 4); the surrounding report
-   is meta scaffolding *about* study, not course content, so it is written in
-   whatever language is clearest. Handoff: the user marks `[[...]]` in the source,
-   then runs `ingest article` (§8.1–8.3).
+   reduces to the plain suggestion list from steps 2–7.
+9. **Report three lists, then evaluate.**
+   - **already covered** — vault entries occurring in this article, worth marking
+     so ingest links them in `## 本文` and the item gains a second context;
+   - **not covered** — the Tier A / Tier B proposals;
+   - **near-duplicates** — cross-link recommendations.
+
+   Then assess N1 suitability (writing style, register, difficulty, thematic
+   value) and give an explicit **recommendation**: the proposed final set to mark,
+   and a go / no-go on ingestion.
+10. **Report only — no writes, no log, and the marking decision stays with the
+    curator.** The analysis proposes; nothing is auto-marked, and no file changes,
+    so — unlike ingest, whose §8.2 step 8 writes to `logs.md` — **nothing is
+    logged**. §2.1's Japanese-first rule binds the per-item glosses (step 6); the
+    surrounding report is meta scaffolding *about* study, not course content, so
+    it is written in whatever language is clearest. Handoff: the user marks
+    `[[...]]` in the source, then runs `ingest article` (§8.1–8.3) — a confirmed
+    already-covered item is marked like any other and needs no special case there.
+
+**This pass is inherently non-deterministic** — it is LLM judgment, and two runs
+may differ. That is acceptable because its output is a proposal to a human, but it
+means the pass belongs in the prompt-driven layer only: it is never part of
+`regen.py` (§10.3) and cannot carry an exact-match baseline the way `cards.json`
+and `index.md` do (§10.7, §7.2). Only the step-4 lookup is deterministic, and that
+part is fixture-testable.
 
 ## 9. Content Scraper (web seeding)
 
@@ -1488,11 +1536,20 @@ llm-wiki/**  ──cards.py──▶  build/cards.json    (§10.3; the question 
   `--out` (preview HTML, default `build/daily-quiz.html`, gitignored), `--send`.
   Subject carries the date. Verified byte-identical question output to the approved
   prototype.
-- **In progress — scheduler integration (§10.1):** selection moves from the
-  initial "most-MC-cards, id-sorted" default to the scheduler's
+- **Done — scheduler integration (§10.1):** selection is the scheduler's
   least-recently-served article + top-N-by-urgency, with `record_delivery`
   updating exposure after a send (`--send`). `--article` still overrides.
-- **Next:** the daily send scheduler (10.8.8), then the Phase-2 companion capture
+- **Done — daily send (§10.8.8):** the LaunchAgent is installed and running, and
+  the send **rebuilds `build/cards.json` on start**, ordered after the
+  `--once-daily` guard.
+- **Smoke-tested (`tests/run_email_tests.py`).** The CLI is run as a subprocess
+  exactly as launchd runs it — `--list`, then a `--out` preview that exercises the
+  whole selection path (`recompute` + `scan_fsrs` + `select`) and asserts the
+  CSS-only machinery is present and the reveal is rendered — stopping short of
+  `--send`, so no mail leaves the machine and `progress.json` is untouched. This
+  exists because nothing exercised `email_quiz.py` before, and a cross-module
+  reference broken elsewhere failed silently every morning until the log was read.
+- **Next:** the Phase-2 companion capture
   surface (10.8.3).
 
 **10.8.8 Daily scheduling (macOS `launchd`)**
@@ -1669,6 +1726,23 @@ the code no longer shows the paths not taken.
   byte-identical. The cost is one pinned dependency (`requirements.txt`), shipped
   as a compiled wheel — the no-compiled-languages tenet governs *our* code, not
   our dependencies. *(Reuse-libraries; test-driven; flag-tech-debt.)*
+- **Finding existing entries in a new article: match text→vault, not vault→text.**
+  The `analyze` coverage check began as eyeballing, which misses what the analyst
+  never thought to look for (`断ち切る` reached ingest unlinked that way). The
+  obvious fix — scan the vault's headwords against the article text — was
+  prototyped and **measured**: naive stem matching scored **24 hits, 4 true (17%
+  precision)**, every false one from a truncated verb stem or single-character
+  headword (保つ→保証, 境→環境). Boundary rules (stem ≥2 chars followed by
+  okurigana; exact ≥2 chars) fixed precision to **4/4** but went blind to 13
+  common verbs, and closing *that* gap is what a bundled morphological dictionary
+  (~100–250 MB, a compiled dependency, version-pinned for reproducibility) would
+  have bought. Rejected in favour of **inverting the direction**: the LLM
+  enumerates lemmas from the text — segmentation and inflection are exactly what
+  it is good at — and code does exact lookup, which it is perfect at. Measured over
+  two articles: **60/60 recall** of curator marks (one run blind, with markers
+  stripped), **155/155 surfaces verified**, and 3 real finds — one known miss plus
+  two grammar points listed but never linked in そば屋の先生. Cost: no dependency,
+  no stemming rules, no dictionary. *(Reuse; keep-it-simple; test-driven.)*
 - **Regeneration: idempotent driver, not Make/mtime.** Drift (stale `index.md`,
   `cards.json`, flashcards after ingests) prompted considering a **Make**- or
   **mtime-dependency** build graph ("rebuild iff upstream newer"). Rejected for
@@ -1700,6 +1774,12 @@ Beyond the roadmap (§10.6), these are the smaller known gaps in the current bui
 - **FSRS parser is version-coupled.** It reads the current plugin's inline field
   layout; a plugin format change would silently drop to "no FSRS data" (safe, but
   degraded) until the parser is updated (§10.1).
+- **例文 enrichment from a second article is deferred (§8.2 step 3).** Quoting a
+  new article's sentence onto an existing page would duplicate text the article
+  already holds, and nothing detects the copy going stale when the article is
+  re-ingested. If taken up, it needs: origin annotation (「（[[記事名]]より）」), a
+  lint rule verifying the quote still occurs in that article's 本文, upsert keyed
+  by (item, article) for §8.3 idempotency, and a per-page example cap.
 - **Note block order follows the card id.** A note's blocks are ordered by
   (card type, id), so a content-hashed cloze id (§10.4) can move a block within
   its note when that sentence is edited. Cosmetic only — the SR plugin schedules
@@ -1732,19 +1812,20 @@ Beyond the roadmap (§10.6), these are the smaller known gaps in the current bui
   **schedule-preserving** flashcard resync in `obsidian_cards.py`, plus
   **content-derived cloze ids** (`span_key`) so a re-ingest no longer costs those
   cards their history; `tests/run_regen_tests.py` covers both.
+- Card scheduler (§10.1, §10.9): `study/scheduler.py` — exposure tracking,
+  read-only FSRS scan, urgency scoring, atomic sanity-checked writes, test suite;
+  `email_quiz.py` selection wired to it.
+- Daily send (§10.8.8): `launchd` LaunchAgent (07:00 + RunAtLoad catch-up) with
+  the `--once-daily` guard, installed and running; card bank rebuilt per send.
+- Article-page link audit as a §7 lint rule (注目語彙・文法 ⊆ 本文) + the §8.4
+  coverage-pass redesign it came from (§11.1).
 
 **Near-term:**
-1. **Card scheduler (§10.1, §10.9)** — `study/scheduler.py`: exposure tracking +
-   read-only FSRS scan + urgency scoring, with atomic sanity-checked writes to
-   `progress/progress.json` and its test suite. Wire `email_quiz.py` selection to
-   least-recently-served article + top-N-by-urgency, and `record_delivery` on send.
-2. **Daily send scheduler** — `launchd` LaunchAgent (07:00, RunAtLoad catch-up) +
-   `email_quiz.py --once-daily` idempotent guard (§10.8.8).
-3. Select and document the **web seeding source** (§9); implement the first source.
+1. Select and document the **web seeding source** (§9); implement the first source.
 
 **After that:**
-5. **Phase-2 answer capture** — companion surface writing quiz results to
+2. **Phase-2 answer capture** — companion surface writing quiz results to
    `progress.json` (§10.8.3, open question §11).
-6. CLI trainer + progress-persisted quizzing over `progress.json` (§10.1, §10.6).
-7. Roadmap items (§10.6): AI-enriched ingest, remaining article card types,
+3. CLI trainer + progress-persisted quizzing over `progress.json` (§10.1, §10.6).
+4. Roadmap items (§10.6): AI-enriched ingest, remaining article card types,
    web dashboard, audio / TTS.

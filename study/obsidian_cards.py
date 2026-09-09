@@ -114,6 +114,15 @@ def read_schedules(text, recorded_ids, current_ids):
 
 
 # ---------------------------------------------------------------- manifest
+def manifest_path(flash=FLASH):
+    """Where a deck keeps its sidecar (`item_id → NNNN` + per-note card order).
+
+    The one place that composes the path, so consumers — `scheduler.scan_fsrs`
+    included — never rebuild it from parts (§10.4).
+    """
+    return Path(flash) / INDEX_NAME
+
+
 def load_manifest(path):
     """Return {"seq": {item_id: NNNN}, "cards": {note_name: [card_id, …]}}.
 
@@ -178,7 +187,7 @@ def main(argv=None):
     flash = Path(args.flashcards) if args.flashcards else FLASH
     groups, n_vocab, n_gram, n_art = group_by_item(args.wiki)
     flash.mkdir(parents=True, exist_ok=True)
-    manifest = load_manifest(flash / INDEX_NAME)
+    manifest = load_manifest(manifest_path(flash))
     seq = assign_sequences(manifest, groups)
 
     def path_for(iid):
@@ -230,7 +239,7 @@ def main(argv=None):
         p.write_text(text, encoding="utf-8")
         resynced += 1
 
-    save_manifest(flash / INDEX_NAME, manifest)
+    save_manifest(manifest_path(flash), manifest)
 
     print(f"\nobsidian_cards: {n_vocab} vocab + {n_gram} grammar items → {flash.name}/")
     print(f"  created {created}, resynced {resynced}, unchanged {unchanged}, reset {reset}")

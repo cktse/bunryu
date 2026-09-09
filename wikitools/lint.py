@@ -112,6 +112,16 @@ def check_article_body(sections, body, valid_targets):
         tgt = link_target(inner)
         if tgt not in valid_targets:
             out.append((WARN, f"unresolved wikilink [[{tgt}]]"))
+    # `## 注目語彙・文法` lists what appears in `## 本文` (§6.5.2), so every entry
+    # must be linked there — an unlinked one silently costs its item a cloze card
+    # from its own source article (§10.2).
+    honbun = {link_target(i)
+              for i in LINK_RE.findall(strip_code(sections.get("本文", "")))}
+    listed = {link_target(i)
+              for i in LINK_RE.findall(strip_code(sections.get("注目語彙・文法", "")))}
+    for tgt in sorted(listed - honbun):
+        out.append((ERROR, f"`## 注目語彙・文法` lists [[{tgt}]] but `## 本文` "
+                           f"never links it"))
     return out
 
 

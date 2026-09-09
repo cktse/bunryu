@@ -255,11 +255,9 @@ def main(argv=None):
     ap.add_argument("--list", action="store_true", help="list articles and MC counts, then exit")
     args = ap.parse_args(argv)
 
-    cards = load_cards()
-    arts = article_names()
-    counts = mc_counts(cards, arts)
-
     if args.list:
+        cards = load_cards()
+        counts = mc_counts(cards, article_names())
         for a in sorted(counts):
             m, g = counts[a]
             print(f"  {a}\t(meaning {m}, gmc {g}, total {m + g})")
@@ -275,6 +273,16 @@ def main(argv=None):
         if any(a.get("last_served") == today.isoformat() for a in served):
             print(f"--once-daily: already sent today ({today.isoformat()}); nothing to do.")
             return 0
+
+    # Fresh card bank before reading it (§10.8.8): a page hand-edited without a
+    # re-ingest would otherwise leave build/cards.json stale and the quiz wrong.
+    # Ordered *after* the guard so an already-sent day skips the rebuild too;
+    # cards.py is deterministic and cheap, so this is free insurance.
+    cardgen.main([])
+
+    cards = load_cards()
+    arts = article_names()
+    counts = mc_counts(cards, arts)
 
     # Scheduler: refresh urgency (exposure + read-only FSRS), then select the
     # least-recently-served article and its top-N cards by urgency (§10.1).

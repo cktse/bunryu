@@ -61,6 +61,7 @@ EXPECTED = {
     "articles/neg-missing-honbun.md": (E, "missing `## 本文`"),
     "articles/neg-unresolved.md": (W, "unresolved wikilink"),
     "articles/neg-word-count.md": (E, "`word_count` not an int"),
+    "articles/neg-chuumoku-unlinked.md": (E, "never links it"),
 }
 
 LINE_RE = re.compile(r"^test-llm-wiki/(?P<path>.+\.md): \[(?P<sev>[EW])\] (?P<msg>.*)$")

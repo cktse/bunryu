@@ -194,6 +194,22 @@ def test_ab_subheadings_change_no_card(tmp):
     return ok, "### A / ### B labels are stripped before sentence splitting"
 
 
+def test_paragraph_break_ends_sentence(tmp):
+    """A paragraph that does not end in 「。」 — a quotation, a citation line, the
+    last line of text A — must not bleed into the next paragraph's card (§6.5.2)."""
+    from study import cards as cardgen
+    wiki, _ = fresh(tmp, "para")
+    art = wiki / "articles" / "裁判員のもやもや.md"
+    head, _, rest = art.read_text(encoding="utf-8").partition("## 本文\n")
+    paras = rest.split("\n\n")
+    i = next(n for n, p in enumerate(paras) if n > 0 and "[[" in p)   # a paragraph with a card
+    paras.insert(i, "「これは句点で終わらない引用です」")             # ends in 」, not 。
+    art.write_text(head + "## 本文\n" + "\n\n".join(paras), encoding="utf-8")
+    fronts = [c.get("front", "") for c in cardgen.build(wiki)[0]]
+    bleed = [f for f in fronts if "句点で終わらない引用" in f]
+    return not bleed, "a paragraph not ending in 。 does not bleed into the next card"
+
+
 def test_force_resets(tmp):
     wiki, deck = fresh(tmp, "force")
     run(wiki, deck)
@@ -234,7 +250,8 @@ def test_regen_select(_tmp):
 
 CASES = [test_create, test_idempotent, test_carry_over, test_drop_reported,
          test_added_starts_fresh, test_cloze_id_survives_reingest,
-         test_ab_subheadings_change_no_card, test_force_resets,
+         test_ab_subheadings_change_no_card, test_paragraph_break_ends_sentence,
+         test_force_resets,
          test_wiki_requires_flashcards, test_legacy_manifest, test_regen_select]
 
 

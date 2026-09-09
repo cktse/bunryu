@@ -39,6 +39,7 @@ CANTO_START = re.compile(r"（粵[：:]")
 PAREN_INNER = re.compile(r"（[^（）]*）")            # innermost full-width parens
 SENT_SPLIT = re.compile(r"(?<=。)")
 SUBHEADING = re.compile(r"(?m)^#{3,}\s.*$")      # `### A` labels in 本文 (§6.5.2)
+PARA_SPLIT = re.compile(r"\n\s*\n")              # paragraph break = sentence break
 EXAMPLE_HEAD = re.compile(r"(?m)^(?=\d+\.\s)")
 
 VOCAB_TYPES = ("reading", "canto", "meaning", "cloze")
@@ -78,16 +79,23 @@ def base_card(page, kind):
     }
 
 
-def honbun_text(sections):
-    """An article's `## 本文` as one unbroken line, ready for sentence splitting.
+def honbun_sentences(sections):
+    """The sentences of an article's `## 本文`, split paragraph by paragraph.
 
-    Drops the `###` sub-headings a 統合理解 A/B page uses to label its texts —
-    they are structure, not prose (§6.5.2) — then undoes the §6.5.2 word-wrap.
+    A **paragraph break is a sentence boundary** even when the paragraph does not
+    end in 「。」 — a closing quotation 「…ですよ」, a citation line, the last line
+    of text A on a 統合理解 page — so no card front can straddle two paragraphs.
+    Within a paragraph the §6.5.2 word-wrap is undone, and the `###` sub-headings
+    of a multi-text page are dropped first (§6.5.2): they are structure, not prose.
     """
     body = sections.get("本文")
     if not body:
-        return ""
-    return SUBHEADING.sub("", body).replace("\n", "")
+        return []
+    out = []
+    for para in PARA_SPLIT.split(SUBHEADING.sub("", body)):
+        para = para.replace("\n", "")
+        out += [s for s in SENT_SPLIT.split(para) if s.strip()]
+    return out
 
 
 def span_key(blanked):
@@ -223,11 +231,8 @@ def cloze_cards(articles, vocab_by_headword):
     """Blank a [[dict|surface]] span in an article sentence; answer = dict-form."""
     cards = []
     for art in articles:
-        honbun = honbun_text(art["sections"])
-        if not honbun:
-            continue
         aid = art["fm"]["id"]
-        for sent in SENT_SPLIT.split(honbun):
+        for sent in honbun_sentences(art["sections"]):
             if "[[" not in sent:
                 continue
             for m in schema.LINK_RE.finditer(sent):
@@ -310,11 +315,8 @@ def grammar_context(grammar, articles):
     hw = grammar["fm"]["headword"]
     cands = []
     for art in articles:
-        honbun = honbun_text(art["sections"])
-        if not honbun:
-            continue
         aid = art["fm"]["id"]
-        for sent in SENT_SPLIT.split(honbun):
+        for sent in honbun_sentences(art["sections"]):
             for m in schema.LINK_RE.finditer(sent):
                 if schema.link_target(m.group(1)) == hw:
                     blanked = _render_blank(sent, m).strip()

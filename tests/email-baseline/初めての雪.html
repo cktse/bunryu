@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>今日の復習クイズ</title>
+<style>
+body{margin:0;padding:0;background:#eceff1;
+ font-family:-apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;
+ -webkit-text-size-adjust:100%;}
+.wrap{max-width:600px;margin:0 auto;background:#fff;counter-reset:score;}
+.hd{background:#1f6feb;color:#fff;padding:20px 22px;}
+.hd h1{margin:0;font-size:19px;font-weight:700;}
+.hd p{margin:6px 0 0;font-size:13px;opacity:.9;}
+.body{padding:8px 22px 24px;}
+.q{border-top:1px solid #eee;padding:18px 0 6px;}
+.qn{font-size:12px;color:#1f6feb;font-weight:700;letter-spacing:.05em;}
+.qt{font-size:16px;font-weight:600;margin:4px 0 12px;line-height:1.5;}
+/* hide the actual inputs; the label is the tap target */
+.opt,.sub{position:absolute;left:-9999px;opacity:0;}
+.lbl{display:block;border:1.5px solid #d0d7de;border-radius:10px;
+ padding:11px 14px;margin:7px 0;font-size:15px;line-height:1.45;color:#24292f;}
+.opt:checked+.lbl{border-color:#1f6feb;background:#eaf2ff;}
+/* one feedback box per question, hidden until 答え合わせ */
+.fb{display:none;margin:8px 0 4px;padding:12px 14px;border-radius:10px;
+ background:#f6f8fa;font-size:14px;line-height:1.6;}
+.v{font-weight:700;} .v-ok{color:#1a7f37;} .v-no{color:#cf222e;}
+.v-ok,.v-no{display:none;}
+.expl{margin-top:6px;}
+.expl .imi{color:#57606a;margin-top:4px;}
+.expl .rei{margin:6px 0 0;padding-left:18px;}
+.expl .rc{color:#8a94a6;font-size:13px;margin:1px 0 4px;}
+.subbtn{display:block;text-align:center;background:#1f6feb;color:#fff;
+ font-size:16px;font-weight:700;padding:14px;border-radius:10px;margin:22px 0 6px;}
+.score{display:none;text-align:center;font-size:20px;font-weight:800;
+ color:#1f6feb;padding:10px 0 4px;}
+.num::before{content:counter(score);}
+.foot{color:#8b949e;font-size:12px;text-align:center;padding:14px 0 4px;line-height:1.6;}
+/* ===== after 答え合わせ is tapped ===== */
+#sub:checked~.body .q .fb{display:block;}
+#sub:checked~.body .score{display:block;}
+/* mark the correct choice, and tint any wrong pick */
+#sub:checked~.body .correct+.lbl{border-color:#1a7f37;background:#e6f4ea;}
+#sub:checked~.body .correct+.lbl::after{content:' ✓';color:#1a7f37;font-weight:700;}
+#sub:checked~.body .wrong:checked+.lbl{border-color:#cf222e;background:#ffebe9;}
+#sub:checked~.body .wrong:checked+.lbl::after{content:' ✕';color:#cf222e;font-weight:700;}
+/* single box: verdict resolves by correctness; explanation always shows */
+#sub:checked~.body .correct:checked~.fb{background:#e6f4ea;}
+#sub:checked~.body .wrong:checked~.fb{background:#fff5f5;}
+#sub:checked~.body .correct:checked~.fb .v-ok{display:inline;}
+#sub:checked~.body .wrong:checked~.fb .v-no{display:inline;}
+/* score: count each correctly-answered question */
+#sub:checked~.body .correct:checked+.lbl{counter-increment:score;}
+</style></head>
+<body>
+<div class="wrap">
+ <input class="sub" type="checkbox" id="sub">
+ <div class="hd"><h1>今日の復習クイズ</h1>
+   <p>「初めての雪」より　全2問　—　選んで下の「答え合わせ」を押してください</p></div>
+ <div class="body">
+<div class="q"><div class="qn">問 1　語彙</div>
+<div class="qt">ヒューヒュー</div>
+<input class="opt wrong" type="radio" name="q1" id="q1o0"><label class="lbl" for="q1o0">時間がたって、そのうちにある状態・結果になるさま</label>
+<input class="opt wrong" type="radio" name="q1" id="q1o1"><label class="lbl" for="q1o1">気持ちや物事がはっきりせず、心に引っかかりが残るさま</label>
+<input class="opt correct" type="radio" name="q1" id="q1o2"><label class="lbl" for="q1o2">風が細く鋭く吹き抜ける音を表す</label>
+<input class="opt wrong" type="radio" name="q1" id="q1o3"><label class="lbl" for="q1o3">争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">風が細く鋭く吹き抜ける音を表す。すきま風や寒風などの音。（粵：（風）呼呼聲、<br>咻咻咁吹。）</div><ol class="rei"><li>ヒューヒューと、空が泣いてでもいるような日が続いた。<div class="rc">（粵）成日都呼呼聲，好似個天喺度喊咁。</div></li><li>すきま風がヒューヒュー入ってくる。<div class="rc">（粵）罅隙有風呼呼聲咁入嚟。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 2　文型</div>
+<div class="qt">ついインターネット＿＿答えを得ようとしてきた。</div>
+<input class="opt wrong" type="radio" name="q2" id="q2o0"><label class="lbl" for="q2o0">末に</label>
+<input class="opt wrong" type="radio" name="q2" id="q2o1"><label class="lbl" for="q2o1">によって</label>
+<input class="opt wrong" type="radio" name="q2" id="q2o2"><label class="lbl" for="q2o2">を通じて</label>
+<input class="opt correct" type="radio" name="q2" id="q2o3"><label class="lbl" for="q2o3">を通して</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">①手段・媒介として「～を通じて」。②ある期間・範囲の間ずっと。本文は①。<br>（粵：①透過、藉住 ②整個…期間。）</div><ol class="rei"><li>ついインターネットを通して答えを得ようとしてきた。<div class="rc">（粵）我一直都係透過互聯網去搵答案。</div></li><li>一年を通して温暖な地域だ。<div class="rc">（粵）成年到頭都溫暖嘅地區。</div></li></ol></div></div>
+</div>
+ <label class="subbtn" for="sub">答え合わせ　✓</label>
+ <div class="score">スコア　<span class="num"></span> / 2</div>
+ <p class="foot">採点・解説はすべてこのメール内（Apple Mail）で表示されます。<br>
+   回答は保存されません（フェーズ1・自己採点）。</p>
+ </div>
+</div>
+</body></html>

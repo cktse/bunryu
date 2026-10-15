@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>今日の復習クイズ</title>
+<style>
+body{margin:0;padding:0;background:#eceff1;
+ font-family:-apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;
+ -webkit-text-size-adjust:100%;}
+.wrap{max-width:600px;margin:0 auto;background:#fff;counter-reset:score;}
+.hd{background:#1f6feb;color:#fff;padding:20px 22px;}
+.hd h1{margin:0;font-size:19px;font-weight:700;}
+.hd p{margin:6px 0 0;font-size:13px;opacity:.9;}
+.body{padding:8px 22px 24px;}
+.q{border-top:1px solid #eee;padding:18px 0 6px;}
+.qn{font-size:12px;color:#1f6feb;font-weight:700;letter-spacing:.05em;}
+.qt{font-size:16px;font-weight:600;margin:4px 0 12px;line-height:1.5;}
+/* hide the actual inputs; the label is the tap target */
+.opt,.sub{position:absolute;left:-9999px;opacity:0;}
+.lbl{display:block;border:1.5px solid #d0d7de;border-radius:10px;
+ padding:11px 14px;margin:7px 0;font-size:15px;line-height:1.45;color:#24292f;}
+.opt:checked+.lbl{border-color:#1f6feb;background:#eaf2ff;}
+/* one feedback box per question, hidden until 答え合わせ */
+.fb{display:none;margin:8px 0 4px;padding:12px 14px;border-radius:10px;
+ background:#f6f8fa;font-size:14px;line-height:1.6;}
+.v{font-weight:700;} .v-ok{color:#1a7f37;} .v-no{color:#cf222e;}
+.v-ok,.v-no{display:none;}
+.expl{margin-top:6px;}
+.expl .imi{color:#57606a;margin-top:4px;}
+.expl .rei{margin:6px 0 0;padding-left:18px;}
+.expl .rc{color:#8a94a6;font-size:13px;margin:1px 0 4px;}
+.subbtn{display:block;text-align:center;background:#1f6feb;color:#fff;
+ font-size:16px;font-weight:700;padding:14px;border-radius:10px;margin:22px 0 6px;}
+.score{display:none;text-align:center;font-size:20px;font-weight:800;
+ color:#1f6feb;padding:10px 0 4px;}
+.num::before{content:counter(score);}
+.foot{color:#8b949e;font-size:12px;text-align:center;padding:14px 0 4px;line-height:1.6;}
+/* ===== after 答え合わせ is tapped ===== */
+#sub:checked~.body .q .fb{display:block;}
+#sub:checked~.body .score{display:block;}
+/* mark the correct choice, and tint any wrong pick */
+#sub:checked~.body .correct+.lbl{border-color:#1a7f37;background:#e6f4ea;}
+#sub:checked~.body .correct+.lbl::after{content:' ✓';color:#1a7f37;font-weight:700;}
+#sub:checked~.body .wrong:checked+.lbl{border-color:#cf222e;background:#ffebe9;}
+#sub:checked~.body .wrong:checked+.lbl::after{content:' ✕';color:#cf222e;font-weight:700;}
+/* single box: verdict resolves by correctness; explanation always shows */
+#sub:checked~.body .correct:checked~.fb{background:#e6f4ea;}
+#sub:checked~.body .wrong:checked~.fb{background:#fff5f5;}
+#sub:checked~.body .correct:checked~.fb .v-ok{display:inline;}
+#sub:checked~.body .wrong:checked~.fb .v-no{display:inline;}
+/* score: count each correctly-answered question */
+#sub:checked~.body .correct:checked+.lbl{counter-increment:score;}
+</style></head>
+<body>
+<div class="wrap">
+ <input class="sub" type="checkbox" id="sub">
+ <div class="hd"><h1>今日の復習クイズ</h1>
+   <p>「裁判員のもやもや」より　全10問　—　選んで下の「答え合わせ」を押してください</p></div>
+ <div class="body">
+<div class="q"><div class="qn">問 1　語彙</div>
+<div class="qt">導入・する（どうにゅう・する）</div>
+<input class="opt wrong" type="radio" name="q1" id="q1o0"><label class="lbl" for="q1o0">二つのものの間に物を入れて押さえる</label>
+<input class="opt wrong" type="radio" name="q1" id="q1o1"><label class="lbl" for="q1o1">物事の成り行きや人の運命などを思いのままに動かす、また大きく影響を与えること</label>
+<input class="opt wrong" type="radio" name="q1" id="q1o2"><label class="lbl" for="q1o2">わざと、ある目的をもってするさま</label>
+<input class="opt correct" type="radio" name="q1" id="q1o3"><label class="lbl" for="q1o3">新しい制度・方法・設備などを、外から取り入れて用いること</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">新しい制度・方法・設備などを、外から取り入れて用いること。（粵：引入、引進。）</div><ol class="rei"><li>「裁判員制度」の導入が決まった。<div class="rc">（粵）決定咗引入「陪審員制度」。</div></li><li>工場に最新の設備を導入する。<div class="rc">（粵）喺工廠引入最新嘅設備。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 2　語彙</div>
+<div class="qt">意図的（いとてき）</div>
+<input class="opt wrong" type="radio" name="q2" id="q2o0"><label class="lbl" for="q2o0">形・表情や、事実・考えなどを正しくない状態に曲げる</label>
+<input class="opt correct" type="radio" name="q2" id="q2o1"><label class="lbl" for="q2o1">わざと、ある目的をもってするさま</label>
+<input class="opt wrong" type="radio" name="q2" id="q2o2"><label class="lbl" for="q2o2">争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと</label>
+<input class="opt wrong" type="radio" name="q2" id="q2o3"><label class="lbl" for="q2o3">風が細く鋭く吹き抜ける音を表す</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">わざと、ある目的をもってするさま。（粵：故意、有心。）⇔ 無意識・偶発的</div><ol class="rei"><li>利益を優先するために意図的に常識をゆがめる。<div class="rc">（粵）為咗利益行先，故意扭曲常識。</div></li><li>意図的にミスを見逃したわけではない。<div class="rc">（粵）並唔係故意放過個錯誤。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 3　語彙</div>
+<div class="qt">もやもや</div>
+<input class="opt correct" type="radio" name="q3" id="q3o0"><label class="lbl" for="q3o0">気持ちや物事がはっきりせず、心に引っかかりが残るさま</label>
+<input class="opt wrong" type="radio" name="q3" id="q3o1"><label class="lbl" for="q3o1">風が細く鋭く吹き抜ける音を表す</label>
+<input class="opt wrong" type="radio" name="q3" id="q3o2"><label class="lbl" for="q3o2">時間がたって、そのうちにある状態・結果になるさま</label>
+<input class="opt wrong" type="radio" name="q3" id="q3o3"><label class="lbl" for="q3o3">争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">気持ちや物事がはっきりせず、心に引っかかりが残るさま。煙や霧が立ちこめる様子<br>から。名詞的にも「〜が残る」の形で使う。（粵：心煩、鬱結、諗唔通。）</div><ol class="rei"><li>一般の人たちが感じたもやもやは、その不安に根差していた。<div class="rc">（粵）普通人心入面嗰種鬱結，係源於嗰份唔安。</div></li><li>原因が分からず、もやもやした気分が続く。<div class="rc">（粵）搞唔清原因，個心一直鬱鬱悶悶。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 4　語彙</div>
+<div class="qt">裁判（さいばん）</div>
+<input class="opt wrong" type="radio" name="q4" id="q4o0"><label class="lbl" for="q4o0">気持ちや物事がはっきりせず、心に引っかかりが残るさま</label>
+<input class="opt wrong" type="radio" name="q4" id="q4o1"><label class="lbl" for="q4o1">二つのものの間に物を入れて押さえる</label>
+<input class="opt wrong" type="radio" name="q4" id="q4o2"><label class="lbl" for="q4o2">形・表情や、事実・考えなどを正しくない状態に曲げる</label>
+<input class="opt correct" type="radio" name="q4" id="q4o3"><label class="lbl" for="q4o3">争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと。また、その<br>手続き。（粵：審判、打官司。）</div><ol class="rei"><li>その事件は今も裁判で争われている。<div class="rc">（粵）嗰宗案件而家仲喺度打緊官司。</div></li><li>長い裁判の末、無罪が言い渡された。<div class="rc">（粵）經過漫長嘅審訊之後，判咗無罪。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 5　語彙</div>
+<div class="qt">左右・する（さゆう・する）</div>
+<input class="opt wrong" type="radio" name="q5" id="q5o0"><label class="lbl" for="q5o0">形・表情や、事実・考えなどを正しくない状態に曲げる</label>
+<input class="opt wrong" type="radio" name="q5" id="q5o1"><label class="lbl" for="q5o1">新しい制度・方法・設備などを、外から取り入れて用いること</label>
+<input class="opt wrong" type="radio" name="q5" id="q5o2"><label class="lbl" for="q5o2">争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと</label>
+<input class="opt correct" type="radio" name="q5" id="q5o3"><label class="lbl" for="q5o3">物事の成り行きや人の運命などを思いのままに動かす、また大きく影響を与えること</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">物事の成り行きや人の運命などを思いのままに動かす、また大きく影響を与えること。<br>（粵：左右、支配、影響大局。）</div><ol class="rei"><li>他人の一生を左右する判断を迫られる。<div class="rc">（粵）被迫要作出一個左右人哋一世嘅判斷。</div></li><li>その日の天候が作物の出来を左右する。<div class="rc">（粵）嗰日嘅天氣會左右農作物嘅收成。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 6　語彙</div>
+<div class="qt">やがて</div>
+<input class="opt wrong" type="radio" name="q6" id="q6o0"><label class="lbl" for="q6o0">気持ちや物事がはっきりせず、心に引っかかりが残るさま</label>
+<input class="opt wrong" type="radio" name="q6" id="q6o1"><label class="lbl" for="q6o1">風が細く鋭く吹き抜ける音を表す</label>
+<input class="opt wrong" type="radio" name="q6" id="q6o2"><label class="lbl" for="q6o2">争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと</label>
+<input class="opt correct" type="radio" name="q6" id="q6o3"><label class="lbl" for="q6o3">時間がたって、そのうちにある状態・結果になるさま</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">時間がたって、そのうちにある状態・結果になるさま。「間もなく」「そのうち」に<br>近いが、少し時間の経過を含む。（粵：不久之後、漸漸。）</div><ol class="rei"><li>人々はそれをまじまじと見直し、やがて眉を曇らせた。<div class="rc">（粵）大家再三打量之後，漸漸皺起眉頭。</div></li><li>努力を続ければ、やがて報われるだろう。<div class="rc">（粵）只要繼續努力，遲早都會有回報。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 7　語彙</div>
+<div class="qt">ゆがめる</div>
+<input class="opt wrong" type="radio" name="q7" id="q7o0"><label class="lbl" for="q7o0">新しい制度・方法・設備などを、外から取り入れて用いること</label>
+<input class="opt correct" type="radio" name="q7" id="q7o1"><label class="lbl" for="q7o1">形・表情や、事実・考えなどを正しくない状態に曲げる</label>
+<input class="opt wrong" type="radio" name="q7" id="q7o2"><label class="lbl" for="q7o2">風が細く鋭く吹き抜ける音を表す</label>
+<input class="opt wrong" type="radio" name="q7" id="q7o3"><label class="lbl" for="q7o3">争いごとや罪の有無について、裁判所が法律に基づいて判断を下すこと</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">形・表情や、事実・考えなどを正しくない状態に曲げる。他動詞。自動詞は「ゆがむ」。<br>（粵：扭曲、歪曲。）</div><ol class="rei"><li>無意識のうちに「日常感覚と常識」がゆがめられるときもあった。<div class="rc">（粵）有時喺不知不覺間，「日常感覺同常識」都會被扭曲。</div></li><li>事実をゆがめて伝えてはならない。<div class="rc">（粵）唔可以歪曲事實嚟傳達。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 8　文型</div>
+<div class="qt">裁判員制度が始まる＿＿、多くの人が不安を感じた。</div>
+<input class="opt wrong" type="radio" name="q8" id="q8o0"><label class="lbl" for="q8o0">にあたり</label>
+<input class="opt wrong" type="radio" name="q8" id="q8o1"><label class="lbl" for="q8o1">に当たって</label>
+<input class="opt correct" type="radio" name="q8" id="q8o2"><label class="lbl" for="q8o2">に際して</label>
+<input class="opt wrong" type="radio" name="q8" id="q8o3"><label class="lbl" for="q8o3">に即して</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">「～のとき・～に当たって」の意。特別な場面や重要な機会に先立って、またはその<br>時に、という改まった言い方。（粵：喺～嘅時候、值此～之際。）</div><ol class="rei"><li>裁判員制度が始まるに際して、多くの人が不安を感じた。<div class="rc">（粵）喺陪審員制度開始嗰陣，好多人都感到唔安。</div></li><li>開会に際して、一言ごあいさつ申し上げます。<div class="rc">（粵）值此開會之際，容我講幾句致辭。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 9　文型</div>
+<div class="qt">裁かれる側＿＿、たまったものではない。</div>
+<input class="opt correct" type="radio" name="q9" id="q9o0"><label class="lbl" for="q9o0">にしてみれば</label>
+<input class="opt wrong" type="radio" name="q9" id="q9o1"><label class="lbl" for="q9o1">の身になって</label>
+<input class="opt wrong" type="radio" name="q9" id="q9o2"><label class="lbl" for="q9o2">としては</label>
+<input class="opt wrong" type="radio" name="q9" id="q9o3"><label class="lbl" for="q9o3">に際して</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">「～の立場から考えると」の意。ある人の側に立って、その人ならではの見方・感じ方<br>を述べる。話し手以外の視点に立つことが多い。（粵：企喺～嘅角度嚟睇。）</div><ol class="rei"><li>裁かれる側にしてみれば、たまったものではない。<div class="rc">（粵）企喺被審判嗰一方嚟睇，實在頂唔順。</div></li><li>親にしてみれば、子どもはいくつになっても心配な存在だ。<div class="rc">（粵）企喺父母嘅角度，仔女幾大都好令人擔心。</div></li></ol></div></div>
+</div>
+<div class="q"><div class="qn">問 10　文型</div>
+<div class="qt">取り決めが守られるよう見張ることも、守らない者には申し合わせ＿＿処分を与えることも必要なことだ。</div>
+<input class="opt wrong" type="radio" name="q10" id="q10o0"><label class="lbl" for="q10o0">に基づいて</label>
+<input class="opt wrong" type="radio" name="q10" id="q10o1"><label class="lbl" for="q10o1">に沿って</label>
+<input class="opt correct" type="radio" name="q10" id="q10o2"><label class="lbl" for="q10o2">に即して</label>
+<input class="opt wrong" type="radio" name="q10" id="q10o3"><label class="lbl" for="q10o3">にしてみれば</label>
+<div class="fb"><span class="v v-ok">✓ 正解！</span><span class="v v-no">✕ 復習：</span><div class="expl"><div class="imi">「～に従って」「～にぴったり合わせて」の意。事実・規則・基準などから外れないよう<br>に、それに合わせて物事を行うことを表す。（粵：按照、依照、切合。）</div><ol class="rei"><li>守らない者には、申し合わせに即して処分を与える。<div class="rc">（粵）對唔守規矩嘅人，就按照約定嚟處分。</div></li><li>現実に即した対策を立てる必要がある。<div class="rc">（粵）有必要制定切合實際情況嘅對策。</div></li></ol></div></div>
+</div>
+ <label class="subbtn" for="sub">答え合わせ　✓</label>
+ <div class="score">スコア　<span class="num"></span> / 10</div>
+ <p class="foot">採点・解説はすべてこのメール内（Apple Mail）で表示されます。<br>
+   回答は保存されません（フェーズ1・自己採点）。</p>
+ </div>
+</div>
+</body></html>

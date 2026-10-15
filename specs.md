@@ -1,15 +1,16 @@
 # JLPT N1 Exam Prep Assistant — Specification
 
-> Status: **Draft v0.8** · Last updated: 2026-09-05
+> Status: **Draft v0.9** · Last updated: 2026-10-15
 > See [CLAUDE.md](bunryu/CLAUDE.md) for the high-level overview and ground rules.
 
 ## 1. Purpose
 
 A personal assistant to prepare a single user for the **JLPT N1** exam. It
 maintains an LLM-maintained wiki (the "LLM-wiki") of grammar, vocabulary, and
-reading passages, tracks the user's progress, and (later) sends a daily quiz by
-email. Everything is stored as human-readable markdown so the content database
-doubles as an Obsidian vault.
+reading passages, tracks the user's progress, and sends a daily quiz by email.
+A separate, experimental source (§13) has an LLM write an original daily N1
+practice lesson. Everything is stored as human-readable markdown so the content
+database doubles as an Obsidian vault.
 
 ## 2. Design Principles (from CLAUDE.md)
 
@@ -30,6 +31,11 @@ doubles as an Obsidian vault.
   credentials live outside the tree in a gitignored file (§10.8.5).
 - **Flag technical debt.** Trade-offs — especially backward-compatibility hacks —
   are surfaced for deliberate review, not absorbed silently.
+- **Isolate experiments.** Experimental features are prototyped apart from live
+  ones — **separate data and state**. Code may be shared **only where automated
+  tests guard the live path** (e.g. the golden email tests, §10.8.7, guard the
+  quiz renderer the daily lessons reuse, §13.8). Integrating an experiment into
+  the live path later is a deliberate, reviewed step (§13.1, §13.10).
 
 ### 2.1 Language policy (important)
 
@@ -55,6 +61,9 @@ This policy applies to all generated/ingested content bodies (`## 意味`,
    - **Manual article ingestion** — the `ingest article` workflow (§8), driven
      by Claude Code over hand-curated source articles in `raw/`.
    - **Web scraper** — automated seeding from an external N1 site (§9).
+   - **LLM-generated daily lessons** (experimental, §13) — an original themed
+     article + 5 MC questions per day, kept **segregated** from the LLM-wiki in
+     `lessons/` and published to email and Obsidian. Phase 1 only (§13.2).
 3. **Content linting** (§7).
 4. **Progress tracker & scheduling** (§10.1).
 5. **Learning aids** — deterministic vocabulary & grammar flashcards reviewed via
@@ -106,6 +115,13 @@ roadmap). Per CLAUDE.md, the schema and its initial seeding come first.
 directly — **not** `progress.json`; progress-persisted quizzing closes that loop
 in the deferred Phase 2 (§10.8.3).
 
+A third source, **LLM-generated daily lessons (§13)**, sits *beside* this
+pipeline rather than feeding it: it writes to its own `lessons/` folder, never to
+`llm-wiki/`, and (in Phase 1) publishes through its own email and its own
+Obsidian notes without touching `cards.json`, the scheduler, `progress.json`, or
+`flashcards/`. For the MVP it is **deliberately isolated** from the curated path
+(§13.1) so rapid prototyping can never break a live feature.
+
 ## 5. Repository Layout
 
 ```
@@ -124,6 +140,11 @@ bunryu/
 │   │   └── 改ざん.md
 │   └── articles/             # one markdown file per ingested essay (named after title)
 │       └── 裁判員のもやもや.md
+├── lessons/                  # LLM-GENERATED daily lessons (§13; committed — not regenerable)
+│   ├── 2026-10-15.md         # one lesson per day: 5 ```quiz questions, references its article
+│   ├── articles/             # the LLM-written article each lesson is built on (§6.4-shaped)
+│   │   └── 働き方の余白.md
+│   └── state.json            # the lesson process's OWN delivery state (§13.8) — not progress.json
 ├── flashcards/               # generated Obsidian SR notes: card-{vocab,grammar}-NNNN.md + .card-index.json (§10.4; committed)
 ├── progress/
 │   └── progress.json         # card-keyed exposure history + derived urgency (§10.1; committed, atomic writes)
@@ -141,13 +162,24 @@ bunryu/
 │   ├── obsidian_cards.py     # render cards → flashcards/ Obsidian SR notes (§10.4)
 │   ├── cli.py                # card viewer (MVP); interactive trainer deferred (§10.4)
 │   ├── email_quiz.py         # daily CSS-interactive quiz email over build/cards.json + pages (§10.8)
+│   ├── quiz_mail.py          # (planned, §13.8) CSS-only quiz renderer + SMTP send, extracted from email_quiz.py; shared with lessongen
 │   ├── scheduler.py          # exposure + urgency scoring + read-only FSRS scan → push selection (§10.1)
 │   ├── secrets.template.json # dummy-value placeholder for secrets.json (§10.8.5; committed)
 │   ├── secrets.json          # real credentials grouped by service, e.g. "smtp" (§10.8.5; gitignored)
 │   ├── launchd/              # LaunchAgent plist template for the daily send (§10.8.8)
 │   └── prototypes/           # throwaway email-quiz prototype (§10.8.7); not a build dependency
+├── lessongen/                # (planned, §13.11) the §13 MVP's own package — own data/state; reuses study/ code tests guard
+│   ├── cli.py                #   generate / lint / email / daily
+│   ├── model.py              #   lesson+article md ⇄ question model; the shared code checks (§13.6)
+│   ├── pipeline.py           #   plan → article → questions over the LLM seam (§13.5)
+│   ├── llm.py                #   thin LLM client seam (real SDK / test fake)
+│   ├── email.py              #   lesson email: an adapter over the shared study/quiz_mail.py (§13.8)
+│   ├── prompts/              #   prompt templates, markdown (§13.5)
+│   ├── launchd/              #   its own LaunchAgent plist (§13.8)
+│   └── requirements.txt      #   its own deps (LLM SDK) — the root requirements.txt is untouched
 ├── tests/                    # run_lint_tests.py + test-llm-wiki/ (§7.1);
-│                             #   run_cards_tests.py + cards-wiki/ + cards-baseline.json (§10.7)
+│                             #   run_cards_tests.py + cards-wiki/ + cards-baseline.json (§10.7);
+│                             #   run_email_tests.py + email-baseline/ (golden emails over cards-wiki/, §10.8.7)
 └── requirements.txt          # the one runtime dependency: py-yaml12 (§7); all else is stdlib
 ```
 
@@ -167,8 +199,10 @@ because Obsidian shows it in the sidebar.
 produced and whether it is regenerable* — the axis that decides placement and
 git-tracking:
 
-- **Authored source** (committed): `raw/` (human), `llm-wiki/` (AI), `wikitools·study·
-  tests/` (code), the docs, `secrets.template.json`.
+- **Authored source** (committed): `raw/` (human), `llm-wiki/` (AI), `lessons/`
+  (AI, ungrounded — §13.9), `wikitools·study·tests/` (code), the docs,
+  `secrets.template.json`. `lessons/` is authored, not derived: re-running the LLM
+  gives different output, so it can never live in `build/`.
 - **Code-maintained state — precious, non-regenerable** (committed): `flashcards/`
   (FSRS review schedules) and `progress/progress.json` (exposure history). Losing
   these loses real history, so writes are careful (append-only §10.4; atomic §10.1).
@@ -926,7 +960,10 @@ Two settled decisions:
   the single source of truth and `cards.json` a rebuildable build artifact, so
   every future ingest is covered automatically. (AI-authored, *non-deterministic*
   card material is a **future** enhancement captured **inside the note at ingest
-  time**, which keeps generation deterministic — §10.6.)
+  time**, which keeps generation deterministic — §10.6.) The LLM-generated daily
+  lessons (§13) are a deliberate, **segregated** exception: their LLM step runs
+  daily, but its output is persisted and everything downstream of the file stays
+  deterministic; in Phase 1 they do not feed `cards.json` at all.
 - **Cards live in a separate `flashcards/` folder, never inside content pages.**
   This preserves the raw → llm-wiki → progress separation and keeps content pages
   lint-clean and freely regeneratable. The **near-term review channel is the
@@ -1549,6 +1586,26 @@ llm-wiki/**  ──cards.py──▶  build/cards.json    (§10.3; the question 
   `--send`, so no mail leaves the machine and `progress.json` is untouched. This
   exists because nothing exercised `email_quiz.py` before, and a cross-module
   reference broken elsewhere failed silently every morning until the log was read.
+- **Golden + transport tests (same runner).** Added before any email code is
+  shared with the daily lessons (§13.8), so the live email is guarded by more than
+  a smoke test:
+  - **Golden render:** the renderer (`build_html` → `render_q` → `reveal`) runs
+    over the fixture wiki `tests/cards-wiki/` — every fixture article's MC cards
+    in display order, at a pinned date — and each email must be **byte-identical**
+    to its committed baseline in `tests/email-baseline/`. `--update` rewrites the
+    baselines for an intended change, and the run fails on a missing or stale
+    baseline file.
+  - **Render invariants** that hold whatever the baseline says, so an `--update`
+    cannot bless a broken email: exactly one correct choice per question; score
+    denominator = question count; one feedback box per question; no raw
+    `[[wikilinks]]`.
+  - **Transport, against a fake SMTP server:** `load_smtp` hard-fails on a missing
+    file, section or password and fills the documented defaults; `send_email`
+    (ports 465 and 587) does the right handshake + login, sets headers from the
+    secrets, builds `multipart/alternative` with text + HTML parts, and the HTML —
+    `<style>` included — arrives **verbatim** (the property §10.8.5 depends on).
+  - Each check was confirmed to catch a deliberately injected regression (a CSS
+    tweak, two correct choices, a dropped 例文, a mangled `<style>`).
 - **Next:** the Phase-2 companion capture
   surface (10.8.3).
 
@@ -1670,6 +1727,15 @@ gating alongside the lint and cards suites.
   daily full-file recompute is protected by **atomic, sanity-checked writes**
   (temp → validate → `os.replace`) plus tests (§10.9), rather than a second file.
   FSRS is never copied (*data-minimization*, §2).
+- **LLM-generated daily lessons** (§13) — an experimental third source: one
+  LLM-written article + 5 MC questions per day, **markdown as the store**
+  (`lessons/`, quizblock syntax, JSON only at the LLM boundary), staged
+  validation (code checks + LLM review + blind solver), published to Obsidian and
+  a separate email. The MVP (Phase 1) is **isolated** from the curated path — own
+  data root, state file, package and tests; live code is shared only behind tests
+  (the email renderer, extracted into `study/quiz_mail.py`). Re-use is
+  archive-only for now; flashcards (c) then scheduler re-serving (b) come at a
+  later integration phase.
 
 ### 11.1 How key decisions evolved
 
@@ -1757,6 +1823,47 @@ the code no longer shows the paths not taken.
   even the one stateful artifact is safe to rebuild anytime (§10.3–10.4). Incremental
   rebuilds, if ever needed, would use a **content-hash manifest**, never mtime.
   *(Keep-it-simple; reuse; data-lineage.)*
+- **Generated questions: JSON store vs markdown store (§13.4).** The case for
+  JSON was consistency with the curated route, where questions end up in
+  `cards.json`. But `cards.json` is a *derived*, gitignored file rebuilt from the
+  markdown every morning — the curated route is really "markdown source → derived
+  JSON". LLM output cannot be regenerated, so it can never live in `build/`, and
+  putting it in `cards.json` would get it wiped by the next `regen.py`. The real
+  choice was therefore the format of a *committed* source. JSON offered parser-free
+  loading and exact metadata; markdown offered the course-content-in-markdown
+  tenet, readable long passages, an Obsidian channel needing no code (quizblock is
+  already installed and used by curated articles), and in-place editing. **The
+  deciding factor: bad answer keys will be fixed by hand in Obsidian** — so the
+  markdown file is the store, and JSON is used only as the wire format with the
+  LLM. *(Markdown everywhere; data-minimization.)*
+- **Lesson shape: disjoint questions vs one article (§13.3).** Chose a single
+  LLM-written article per lesson, with all questions drawn from it: shared context
+  aids retention, coherent prose comes out more natural than isolated test
+  sentences, and reading answers can be checked against the text. Accepted costs:
+  one weak article spoils the whole lesson (mitigated by validating the article
+  before any question is written), and forcing targets into the essay (capped at
+  3–4). Phased by how risky each 問題 type is for an LLM to author. A **Phase 0**
+  (LLM questions over the curated articles, calibrated against their real
+  quizzes) was considered as a de-risking step and skipped in favour of going
+  straight to the MVP.
+- **Isolation for the MVP (§13.1).** The first design shared infrastructure with
+  the curated path (delivery state in `progress.json`, a renderer extracted out of
+  `email_quiz.py`, modules under `study/`). Reversed in favour of a **fully
+  isolated** MVP — own data root and state file, own package, read-only import of
+  `wikitools.schema` only — so rapid prototyping cannot break a live feature, at
+  the price of a forked email renderer. Then **relaxed** (now a §2 principle,
+  *isolate experiments*): data and state stay separate, but **code may be shared
+  where automated tests guard the live path**, since tests mitigate most of the
+  risk the fork was avoiding. So the renderer is **extracted** into
+  `study/quiz_mail.py` rather than forked — after first adding golden + transport
+  tests for the live email (§10.8.7). Two state files remain, flagged as debt for
+  the integration phase (§13.10). *(Modular design; test-driven; flag-tech-debt.)*
+- **A runtime LLM step vs the deterministic tenet (§13.1).** §10 keeps card
+  generation 100 % deterministic, with AI confined to ingest time. Daily lessons
+  break that on purpose, but **quarantine** the non-determinism: the LLM runs only
+  at generation, its output is persisted, and everything downstream (channels,
+  lint, tests with a fake LLM) is deterministic over the file — the same shape as
+  ingest. *(Test-driven; flag-tech-debt.)*
 
 ### 11.2 Known gaps & smaller opportunities
 
@@ -1793,6 +1900,12 @@ Beyond the roadmap (§10.6), these are the smaller known gaps in the current bui
 2. **Phase-2 answer capture (§10.8.3).** What is the companion surface that records
    quiz results back to `progress.json` — a tiny local page, a CLI re-entry, or a
    mailto/deep-link? Constrained by the fact that CSS-only email cannot post data.
+3. **Success criteria for the daily-lesson experiment (§13.12).** Proposed: after
+   ~4 weeks, the `#要確認` rate per question type, how many flagged questions had
+   passed the blind solver, and a keep-it-on call. To be confirmed.
+4. **Dangling target links in lessons (§13.4).** Targets are always `[[linked]]`
+   (keeps coverage lint-able and promotion ingest-compatible); those absent from
+   the vault stay unresolved in Obsidian. Revisit if they prove noisy.
 
 ## 12. Next Steps
 
@@ -1821,11 +1934,491 @@ Beyond the roadmap (§10.6), these are the smaller known gaps in the current bui
   coverage-pass redesign it came from (§11.1).
 
 **Near-term:**
-1. Select and document the **web seeding source** (§9); implement the first source.
+1. Build the **daily-lesson MVP (§13, Phase 1)** as an isolated `lessongen/`
+   package:
+   1. ~~golden + transport tests for the live email~~ — **done** (§10.8.7);
+   2. extract `study/quiz_mail.py` from `email_quiz.py` — a pure refactor, the
+      golden baselines byte-identical (§13.8);
+   3. verify the quizblock/transclusion assumptions (§13.4);
+   4. `lessongen/model.py` + its fixture tests, the pipeline over a fake LLM, the
+      lesson email, and the LaunchAgent.
+2. Select and document the **web seeding source** (§9); implement the first source.
 
 **After that:**
-2. **Phase-2 answer capture** — companion surface writing quiz results to
+3. **Phase-2 answer capture** — companion surface writing quiz results to
    `progress.json` (§10.8.3, open question §11).
-3. CLI trainer + progress-persisted quizzing over `progress.json` (§10.1, §10.6).
-4. Roadmap items (§10.6): AI-enriched ingest, remaining article card types,
+4. CLI trainer + progress-persisted quizzing over `progress.json` (§10.1, §10.6).
+5. Roadmap items (§10.6): AI-enriched ingest, remaining article card types,
    web dashboard, audio / TTS.
+
+## 13. LLM-Generated Daily Lessons (experimental third source)
+
+> Status: **designed, not built** — the MVP is Phase 1 (§13.2). Design reviewed
+> 2026-10-12 → 10-15; the rationale for the key choices is in §11.1.
+
+A third content source beside manual curation (§8) and the web scraper (§9): each
+day an LLM writes **one original JLPT N1 practice lesson** — a short themed
+article plus **5 multiple-choice questions** drawn from it — which is persisted
+for re-use and published to two channels: an **email** and an **Obsidian note**.
+
+### 13.1 Thesis & ground rules
+
+- **Breadth and exam format, not retention.** Curated content (§8 → §10) is
+  grounded in sources the user chose and is where retention (FSRS, urgency) lives.
+  Lessons add what curation cannot: items outside the vault, and N1 問題 formats the
+  card types do not cover (読解 above all). Retention integration comes later
+  (§13.10).
+- **One article per lesson.** All questions are drawn from a single LLM-written
+  article. The shared context aids the learner's retention and grounds the LLM:
+  coherent prose reads more naturally than isolated test sentences, and reading
+  answers can be checked against the text. It mirrors the curated email's
+  one-article-per-email rule (§10.8.1).
+- **Isolated MVP — the core rule.** The MVP is built **independent of the curated
+  path** — separate data and state, shared code only behind tests — so rapid
+  prototyping can never break a live feature:
+  - **Data:** everything lives under `lessons/`, including the process's own
+    delivery state (`lessons/state.json`). It never writes to `raw/`, `llm-wiki/`,
+    `flashcards/`, `progress/`, `build/`, `index.md`, or `logs.md`.
+  - **Code:** its own top-level package `lessongen/`, with its own
+    `requirements.txt`, prompts, LaunchAgent and log. Per the *isolate
+    experiments* principle (§2), it **may share live code only where automated
+    tests guard the live path**: it reuses `wikitools.schema` (frontmatter parser,
+    `LINK_RE`) and the CSS quiz renderer + SMTP send, which are **extracted** from
+    `email_quiz.py` into `study/quiz_mail.py` (§13.8) behind the golden email
+    tests (§10.8.7). Any other change to live code needs the same: a test guarding
+    the live behaviour **first**, then the change.
+  - **Tests:** its own runner and fixtures; every existing suite must still pass
+    unchanged — the email golden baselines in particular stay byte-identical
+    through the extraction.
+  - **Shared, read-only:** the vault, the quizblock plugin, and `secrets.json`
+    (the `smtp` key is read; a new `anthropic` key is added).
+  - Integration with the curated path is a **later, separately reviewed phase**
+    (§13.10).
+- **Non-determinism is quarantined.** The LLM runs only at generation time; its
+  output is persisted; every downstream step (Obsidian, email, lint, tests) is
+  deterministic over the saved file — the same shape as ingest (the LLM writes
+  markdown, code consumes it). A deliberate exception to §10's "100 %
+  deterministic" rule (§11.1).
+- **Markdown is the store, and the file is authoritative.** A bad question is
+  fixed by editing it in Obsidian; every channel reads the file at run time, so
+  the fix propagates (copies already emailed cannot be recalled). JSON is used
+  only as the wire format with the LLM (§13.5).
+- **Visibly AI-generated.** Both channels label lessons 「AI生成・未検証」.
+
+### 13.2 Phases
+
+| Phase | Scope |
+|---|---|
+| **1 — MVP** (this spec) | A new article each day + 5 questions of low/medium-risk types (§13.3); staged validation (§13.6); Obsidian + email channels; re-use = **archive only**. |
+| 2 | **Article re-use:** later lessons revisit an older article with new question types (文章の文法 in-passage cloze, 主張理解) — spaced exposure to the same context, and shorter emails on revisit days. Harder types (言い換え類義, 文の組み立て) once the Phase-1 flag rate shows validation works. |
+| 3 | 統合理解 A/B (the §6.5.2 multi-text shape) and 長文. |
+| Integration (after Phase 1, in this order) | **(c)** generated questions → SR flashcards; then **(b)** the scheduler re-serves them by email, using (c)'s FSRS data — the same order the curated route grew in (§13.10). |
+
+A "Phase 0" — LLM questions over the existing curated articles, calibrated against
+their real quizzes — was considered and skipped (§11.1).
+
+### 13.3 Lesson shape (Phase 1)
+
+- **Article:** 論説/随筆 genre; ~500–600 displayed characters (`--article-chars`,
+  to be iterated); ≥3 paragraphs; built around **3–4 N1 target items** chosen in
+  the plan step (§13.5). No real people, quotes, or statistics.
+- **5 questions**, default slot mix (configurable; to be iterated after the MVP):
+
+| # | Type | Drawn from | Risk |
+|---|---|---|---|
+| 1 | 漢字読み | a kanji word in an article sentence | low |
+| 2 | 文脈規定 (or 下線部の意味) | a target vocab item, in a **new** sentence (下線部の意味: in an article sentence) | medium |
+| 3 | 文法形式の判断 | a target grammar item, in a **new** sentence | medium |
+| 4 | 内容理解（部分） | one paragraph (第N段落) | low |
+| 5 | 内容理解（全体） | the whole article (筆者の考え) | low |
+
+- **Leakage is a design choice.** New-sentence questions test *transfer* (what
+  言語知識 actually tests); in-context questions test inference from the article.
+  The mix keeps both.
+- **Phase-1 allowed types:** 漢字読み, 文脈規定, 下線部の意味, 文法形式の判断,
+  内容理解. Enforced by the plan check (§13.6) — this list is how phases gate types.
+
+**Risk ranking of N1 問題 types for LLM authoring** (drives the phasing): *low* —
+漢字読み, 内容理解; *medium* — 文法形式の判断, 文脈規定, 文章の文法, 主張理解; *high* —
+言い換え類義 (near-synonyms are often both defensible), 用法 (three plausible-but-wrong
+usages are hard to write), 文の組み立て (★ orderings are often non-unique); *high
+(format)* — 統合理解, 長文, 情報検索.
+
+### 13.4 Storage & file formats
+
+Two files per lesson, both **committed** (authored, not regenerable — §5 data
+tiers):
+
+- **`lessons/articles/<title>.md`** — the article, **shaped like a §6.4 article
+  page** (frontmatter + `## 本文` / `## 語釈` / `## 注目語彙・文法` / `## メモ`),
+  with `[[lemma|surface]]` markers on the targets exactly as `raw/` uses them. The
+  same shape means `wikitools.schema` parses it, and a future promotion into the
+  curated wiki is just the existing ingest (§13.9).
+- **`lessons/YYYY-MM-DD.md`** — the lesson: frontmatter, the article transcluded
+  by reference (`![[<title>#本文]]`, no copy), and the questions as ```` ```quiz ````
+  blocks — the quizblock syntax curated articles already use (§8.2 step 5).
+
+The lesson **references** its article by key (`article:`) and never copies its
+text (data minimization). In Phase 2 several lessons may reference one article.
+
+Example article — `lessons/articles/働き方の余白.md`:
+
+~~~markdown
+---
+id: genart-20261015
+type: article
+headword: 働き方の余白
+level: N1
+word_count: 560
+tags: [generated, 労働, 論説]
+source: generated:2026-10-15
+created: 2026-10-15
+focus: false
+---
+
+## 本文
+効率を追い求める社会では、長時間労働を[[～を余儀なくされる|余儀なくされる]]人も
+少なくない。…（本文が続く）…
+
+## 注目語彙・文法
+- [[懸念]] — 第1段落。
+- [[～を余儀なくされる]] — 第1段落。
+~~~
+
+Example lesson — `lessons/2026-10-15.md`:
+
+~~~markdown
+---
+type: lesson
+date: 2026-10-15
+article: "[[働き方の余白]]"
+level: N1
+phase: 1
+next_ordinal: 6
+generated:
+  model: <model id>
+  at: 2026-10-15T07:00:12+08:00
+  retries: {plan: 0, article: 1, questions: 2}
+  solver_agreement: 5/5
+  dropped: []
+  warnings: []
+---
+
+> AI生成・未検証。誤りに気づいたら、その問題の下に `#要確認` と書く。
+
+## 本文
+![[働き方の余白#本文]]
+
+## 問題
+
+### 問1 · 漢字読み
+<!-- id: gen-20261015-1 -->
+```quiz
+**1** 「将来への**懸念**が広がっている。」の下線部の読み方として最もよいものはどれか。
+
+[ ] けんえん
+[c] けねん
+[ ] けんねん
+[ ] かいねん
+
+※ 懸念（けねん）：気にかかって不安に思うこと。
+```
+
+### 問2 · 文脈規定 · [[懸念]]
+<!-- id: gen-20261015-2 -->
+```quiz
+…
+```
+
+### 問4 · 内容理解（部分）
+<!-- id: gen-20261015-4 -->
+```quiz
+**4** 第2段落で筆者が最も言いたいことは何か。
+…
+※「余白こそが新しい発想を生む」とあるから3が正解。
+```
+#要確認 選択肢2も正解になりうる
+~~~
+
+Rules:
+
+- **Identity is the `<!-- id: … -->` line**, written once at generation and never
+  changed or reused (`next_ordinal` mints the next one). The `問N` labels and
+  `**N**` are cosmetic; renderers number questions by order. Reordering or
+  editing a question by hand keeps its id — which is what (c)'s FSRS history will
+  key on (cf. the durable cloze ids, §10.4).
+- **Metadata heading** `### 問N · <type>[ · [[target]]]`: the type from the allowed
+  enum; the target present for item-based types.
+- **Explanation** = the `※` lines inside the block, Japanese-first (§2.1); an
+  optional （粵） line.
+- **Evidence:** for 内容理解 and 下線部の意味, the `※` explanation must quote at least
+  one 「…」 span that occurs **verbatim** in the article's `## 本文` (surface text,
+  wikilinks resolved). That is the curated quizzes' existing ※「…」 convention,
+  made machine-checkable (§13.6).
+- **Flag:** a `#要確認` line (an optional note may follow) anywhere in a
+  question's section marks it as bad: it is excluded from every future re-use
+  (§13.10) and counted as the experiment's quality signal (§13.12). As an
+  Obsidian tag it is searchable.
+- **Generation record** (`generated:` frontmatter): facts about how the lesson was
+  made — model, time, retries, solver agreement, drops, warnings. This is content
+  provenance, not delivery state, so it belongs with the content; it lets flags
+  be compared against what validation passed (§13.12).
+- **Target links:** targets keep `[[...]]` even when absent from the vault.
+  Obsidian resolves those that match an `llm-wiki/` page — a free, cosmetic,
+  read-only connection that no code depends on; unresolved ones mean "not in the
+  curated vault". Revisit if dangling links prove noisy (§11, open).
+
+**Verify at implementation, before fixing the format:** quizblock renders inline
+bold inside a block and ignores the heading / `<!-- id -->` lines outside it; and
+`![[note#本文]]` transclusion renders in iOS Obsidian.
+
+### 13.5 Generation pipeline
+
+```
+history: lessons/*.md (past themes + targets)
+        │
+        ▼
+ 1. PLAN       LLM → JSON {theme, title, genre, targets[3–4], slots[5]}   ─▶ code checks
+        │
+        ▼
+ 2. ARTICLE    LLM → JSON {title, paragraphs[], markers[]}               ─▶ code checks + LLM review
+        │
+        ▼
+ 3. QUESTIONS  LLM → JSON [5 × {type, target, stem, choices[4], answer, explanation, evidence}]
+        │                                                               ─▶ code checks + blind solver (per question)
+        ▼
+ 4. RENDER     code: shuffle choices (seeded by id) → article .md + lesson .md (atomic write)
+```
+
+- **Structured JSON at the LLM boundary** (schema/tool-defined output) — far more
+  reliable than asking the LLM to emit quizblock syntax. It is validated, then
+  rendered deterministically to markdown; the JSON is transient and only the
+  markdown is kept.
+- **Each step is validated before the next runs** (§13.6). A failing step is
+  retried with its failure reasons fed back (a repair prompt).
+- **Avoid-list from history, not a ledger.** Past themes and target headwords are
+  read from the existing `lessons/` files (frontmatter + target headings) — no
+  separate store to drift (data minimization). They go into the plan prompt;
+  exact repeats are also rejected by code.
+- **Blind planner (MVP).** The planner reads neither `llm-wiki/` nor progress,
+  which keeps the MVP isolated and the experiment unconfounded. Vault-aware
+  targeting (focus items, gap-filling) is a later option.
+- **Prompts** are markdown templates in `lessongen/prompts/` (plan, article,
+  article review, questions, solve), editable without code changes.
+- **Shuffling choices is code's job,** done after validation and seeded by the
+  question id: reproducible, and it removes LLMs' answer-position bias.
+- **LLM access:** the Anthropic API via its official SDK (a dependency in
+  `lessongen/requirements.txt`), with the key in `study/secrets.json` under a new
+  `anthropic` key (the §10.8.5 pattern: mandatory file, no env fallback). The
+  model id is a CLI option with a default (`--model`). Roughly 8–10 calls per
+  lesson (plan, article, review, questions, 5 solves), plus retries.
+
+### 13.6 Validation
+
+Rule of thumb: **anything code can check, code checks**; the LLM judges only what
+needs judgment; the user's `#要確認` flags catch the rest.
+
+**Step 1 — Plan.** Code: schema (required fields; 3–4 targets; 5 slots; each slot
+type in the phase's allowed list); the theme/title and every target headword are
+absent from history (exact match); the title is not already a file in
+`lessons/articles/`. No LLM check — a plan is cheap to regenerate and its errors
+surface downstream.
+
+**Step 2 — Article.**
+- Code:
+  - displayed length within the `--article-chars` range; ≥3 paragraphs; a title;
+  - every planned target present as a marker; unplanned markers within a small
+    allowance;
+  - no `[[link]]` split across lines (the §6.5 rule, via `wikitools.schema`);
+  - a *warning* (not a failure) on Latin letters, `%`, or digit-heavy runs — a
+    cheap signal of invented statistics.
+- LLM review (fresh context, rubric in → pass/fail + reasons out): natural
+  Japanese (would a native editor accept it?); genre and N1 reading difficulty;
+  each target used correctly and naturally, including the surface really being a
+  form of its lemma; no real people, quotes or statistics; internally consistent.
+  Caveat: a same-model reviewer shares the generator's blind spots — it catches
+  gross errors, not subtle ones. A different reviewer model is the escalation if
+  the flags show misses.
+
+**Step 3 — Questions.**
+- Code, every question: exactly 4 non-empty choices, unique after normalisation
+  (whitespace and punctuation stripped); exactly one answer; a Japanese
+  explanation; type and target match the plan slot; the stem is not identical to
+  any past stem; a *warning* if the correct choice is markedly the longest (a known
+  LLM bias).
+- Code, per type:
+
+  | Type | Check |
+  |---|---|
+  | 漢字読み | the marked word is in the stem and contains kanji; all choices are kana only |
+  | 文脈規定 / 文法形式の判断 | exactly one blank （　）; for new-sentence slots the stem is **not** a verbatim article sentence |
+  | 下線部の意味 / 内容理解 | the **evidence span** (a verbatim 「…」 from `## 本文`) exists in the article; any 第N段落 ≤ the paragraph count |
+
+- LLM **blind solver**, per question, in a fresh context: given the article, stem
+  and choices (no key, no explanation), it picks an answer **and** judges, for each
+  other choice, whether it is also defensible. The question passes only if the
+  solver picks the key **and** finds no other defensible choice. This catches
+  wrong keys and two-right-answer questions — the main failure mode. Each
+  question is solved independently.
+
+**On failure.** Each step has a retry budget (default 2) with the reasons fed
+back, and only the failing questions are regenerated. If the article still fails,
+there is **no lesson today** (logged; the next launchd trigger retries). A question
+that still fails is dropped; the lesson is published if at least
+`--min-questions` (default 4) remain, and the drop is recorded in
+`generated.dropped`.
+
+**One rule set, two callers.** The step-3 code checks run on a parsed question
+model; `lessongen lint` runs the **same functions** on questions parsed back from
+the markdown, so hand edits are held to the same rules and the logic lives in one
+place. Lint re-checks evidence spans against the *current* article, so editing an
+article flags any reading question it no longer supports. Channels skip, with a
+warning, a question that fails lint rather than failing the whole lesson.
+
+**Not validated (accepted risk, left to the flags):** subtle nuance errors in
+explanations; fine-grained level calibration of targets; （粵） gloss quality.
+
+### 13.7 Idempotency & regeneration
+
+- `generate` for a date whose lesson exists is a **no-op** (exit 0). The default
+  date is today (local); `--date` serves tests and manual backfill.
+- **Atomic writes:** both files go temp → validate (parse + lint) → `os.replace`
+  (the §10.1 pattern), so a crash never leaves half a lesson.
+- **`--force`** regenerates the whole lesson (article + questions). Guards:
+  - it refuses if either file has **uncommitted git changes** — the hand-edit
+    principle of §8.3, but refusing rather than prompting because it may run
+    non-interactively;
+  - it refuses once the lesson has been **emailed**, unless `--allow-sent`
+    (otherwise the archive silently diverges from the inbox).
+
+  Git is the undo. In Phase 2, an article referenced by another lesson is never
+  regenerated — only this lesson's questions are.
+- **`--replace <id>`** regenerates one question (same slot type and target) under
+  a **new id** (from `next_ordinal`). It is allowed after sending — it is the
+  common fix for a flagged question, like a hand edit — and the git-dirty guard
+  applies.
+
+### 13.8 Delivery channels
+
+**Obsidian.** The lesson file *is* the channel: quizblock renders the questions
+interactively and the article is transcluded. No code and no build step; lessons
+are browsable by date under `lessons/`.
+
+**Email.** A separate daily email (subject 「【AI模試】YYYY-MM-DD <title>」),
+independent of the curated quiz email (§10.8): the article first, then the
+questions, with the same pure-CSS self-grading mechanics (§10.8.2) and SMTP
+transport (§10.8.5). The reveal is each question's own `※` explanation (there is
+no wiki page to look up), and the email is labelled 「AI生成・未検証」. The length
+target is the §10.8.6 budget; iterate via `--article-chars`. Results are not
+captured (the same CSS-only limit, §10.8.3).
+
+**Shared renderer — `study/quiz_mail.py`.** The CSS, the document shell and the
+generic question block (stem, choices, correct index, explanation HTML), plus
+`load_smtp` / `send_email`, are **extracted** from `email_quiz.py` into one module
+both emails use; each email keeps only its own adapter (the curated one builds
+explanations from wiki pages, the lesson one from `※` lines) and its own title and
+footer. Order of work: the golden email tests (§10.8.7) exist first; the
+extraction is a pure refactor that must leave every curated baseline
+**byte-identical** and the transport tests green; only then does `lessongen`
+import it. A deliberate visual divergence later (e.g. a lesson header colour) is a
+parameter of the shared renderer, not a copy.
+
+**Delivery state — `lessons/state.json`** (the process's own file; committed):
+`{"sent": {"2026-10-15": "2026-10-15T07:00:31+08:00"}}`, written only after a
+successful send, atomically. It is **not** kept in `progress.json` (isolation,
+§13.1). No per-question exposure is recorded — a question's lesson date already
+is its exposure (data minimization).
+
+**Daily run.** Its own LaunchAgent (`lessongen/launchd/com.bunryu.dailylesson.plist`,
+own log file), with the same trigger pattern as §10.8.8 (07:00 + `RunAtLoad`),
+running `lessongen daily` = `generate` (idempotent) then `email --send
+--once-daily` (the guard reads `state.json`). A generation failure means no send
+and a non-zero exit, retried on the next trigger; the curated email is unaffected
+either way.
+
+### 13.9 Relationship to curated content
+
+- **Segregated storage and code** (§13.1). `lessons/` is LLM-written *without* a
+  human-chosen source, unlike `llm-wiki/` (LLM-written from curated `raw/`).
+  Keeping them apart keeps provenance obvious and leaves `lint-all`, `index.py`
+  and `cards.py` untouched.
+- **No writes into the curated wiki, ever.** The generator never creates or edits
+  `llm-wiki/` pages: ungrounded content would contaminate it and create
+  duplicates.
+- **Promotion (later, manual).** A good generated article is already §6.4-shaped
+  with `raw/`-style markers, so promoting it means: copy it into `raw/` (a human
+  decision), record its provenance (`source: generated:…`), and run the existing
+  `ingest article` (§8). No new tooling.
+
+### 13.10 Forward compatibility & known debt
+
+Phase 1 builds **archive-only** re-use; the roadmap is **(c)** SR flashcards,
+then **(b)** scheduler re-serving by email. These are built in now, because
+retrofitting them would mean migrating old lesson files:
+
+1. a stable per-question **id** (§13.4);
+2. **type + target** metadata — (c) groups and filters by them; (b) uses them for
+   urgency and dedupe;
+3. a **self-contained explanation** (the flashcard back);
+4. **`#要確認` = exclude from re-use**, honoured by every future consumer.
+
+Expected scope of (c): vocab/kanji/grammar types only. Reading questions make poor
+SR cards and stay archive-only; the type field filters them out.
+
+**Debt, flagged deliberately** (CLAUDE.md: *flag technical debt*):
+- **Shared renderer, coupled release.** `study/quiz_mail.py` serves both emails,
+  so a renderer change for the lessons can alter the live email; the golden tests
+  catch that, and an intended change to the curated email means a reviewed
+  `--update` of its baselines. (Chosen over forking — no duplication — once the
+  *isolate experiments* principle allowed test-guarded sharing, §11.1.)
+- **Two delivery-state files** (`progress.json` and `lessons/state.json`): merge,
+  or keep separate deliberately, at integration — (b) needs a single scheduler
+  view.
+- **Third-party format dependency:** the question format relies on the quizblock
+  plugin's syntax; a change there would need a lesson migration.
+- **Dangling target links** (§13.4).
+
+### 13.11 Module layout & CLI (planned)
+
+`lessongen/` — dependency direction `wikitools` ← `study` ← `lessongen` ← `tests`:
+it imports `wikitools.schema` and `study.quiz_mail` (both test-guarded, §13.1);
+nothing in `wikitools/` or `study/` imports it.
+
+| Module | Responsibility |
+|---|---|
+| `model.py` | parse/render lesson + article markdown ⇄ question model; the §13.6 code checks, shared by the pipeline and lint. No LLM. |
+| `llm.py` | thin seam `complete_json(prompt, schema) -> dict`: the real implementation (SDK) and a fake (canned responses) for tests. |
+| `pipeline.py` | plan → article → questions → render; retries, repair prompts, drops. |
+| `email.py` | lesson email: the lesson adapter (article block, `※` explanations, 【AI模試】 header/footer) over `study.quiz_mail`; send via its `send_email`. |
+| `cli.py` | `generate [--date] [--force [--allow-sent]] [--replace ID]`, `lint [PATH…]`, `email [--out] [--send] [--once-daily]`, `daily`; plus `--model`, `--article-chars`, `--min-questions`, and `--lessons` (data root, default `lessons/`). |
+
+`--lessons` decouples the data root from the code, so tests run against a fixture
+root and can never write into the real `lessons/` (cf. the `--wiki` /
+`--flashcards` guard, §10.4).
+
+### 13.12 Tests & success criteria
+
+Tests — a stdlib runner `tests/run_lesson_tests.py` with fixtures under
+`tests/lessons-fixtures/`; **never touches the network**:
+- **Code checks:** positive and negative fixtures for every §13.6 rule (3 choices,
+  duplicate choices, two answers, missing evidence, evidence absent from the
+  article, a verbatim-leak stem, the Latin/digit warning, …).
+- **Render/parse baseline:** fixture LLM JSON → article + lesson markdown,
+  compared byte-for-byte with a committed baseline; `parse(render(x))`
+  round-trips.
+- **Pipeline with a fake LLM:** the happy path; solver disagrees → only that
+  question is regenerated; retry budget exhausted → question dropped, or no lesson
+  below `--min-questions`; article failure → no files written.
+- **Idempotency:** a re-run is a no-op; `--force` regenerates; `--force` after
+  sending is refused without `--allow-sent`; a git-dirty file is refused;
+  `--replace` mints a new id.
+- **Email smoke test:** an `email --out` preview asserts the CSS machinery and the
+  explanations render (as `run_email_tests.py` does).
+- **Isolation:** all existing suites pass unchanged; in particular the curated
+  email's golden baselines stay byte-identical through the `quiz_mail.py`
+  extraction (§13.8).
+
+**Success criteria** (a proposal — open, §11): after ~4 weeks, (1) the `#要確認`
+rate per question type; (2) how many flagged questions had passed the blind
+solver (validator effectiveness); (3) the subjective call — keep it on? All of it
+comes from lesson frontmatter + flags; no extra tracking.
